@@ -15,7 +15,7 @@ or external API at runtime.
 
 **One HTML file. No installation. Runs locally in your browser.**
 
-1. **[Download `Dummy-Data-Lab-v1.55.html`](Dummy-Data-Lab-v1.55.html?raw=1).**
+1. **[Download `Dummy-Data-Lab-v1.55.html`](https://github.com/timliu724/dummy-data-lab/releases/download/v1.55/Dummy-Data-Lab-v1.55.html).**
 2. Open it in a current Chrome or Edge browser.
 3. Load a CSV, TSV, or TXT file—or paste cells from a spreadsheet—and start
    working locally. The application does not upload your data.
