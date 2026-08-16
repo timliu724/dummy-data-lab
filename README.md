@@ -11,6 +11,22 @@ Current release: **V1.55**. The user-facing application is one standalone HTML
 file. It needs no Python environment, package installation, account, server, CDN,
 or external API at runtime.
 
+## Quick start — no installation
+
+**One HTML file. No installation. Runs locally in your browser.**
+
+1. **[Download `Dummy-Data-Lab-v1.55.html`](Dummy-Data-Lab-v1.55.html?raw=1).**
+2. Open it in a current Chrome or Edge browser.
+3. Load a CSV, TSV, or TXT file—or paste cells from a spreadsheet—and start
+   working locally. The application does not upload your data.
+
+Use only source data you are authorised to process, and review generated output
+before sharing it.
+
+**Normal users:** use the standalone HTML above. **Developers:** see [`src/`](src/),
+[`scripts/`](scripts/), and [Development](#development) for the maintainable source
+and build workflow.
+
 ## What it does
 
 Dummy Data Lab supports two workflows.
@@ -61,19 +77,6 @@ visible evidence:
   what could not be evaluated.
 - **Linked datasets:** generate and validate related tables, then export them
   together.
-
-## Quick start
-
-1. Download **Dummy-Data-Lab-v1.55.html** from GitHub Releases.
-2. Open the file locally in a current Chrome or Edge browser.
-3. Select a CSV/TXT/TSV file or paste cells copied from Excel, then choose
-   **Analyse locally**.
-4. Review the recommended column actions, output row count, and business-pattern
-   level.
-5. Generate, inspect the preview and quality report, then download the result.
-
-Use only source data you are authorised to process, and review the generated
-output before sharing it.
 
 ## Protection modes
 
