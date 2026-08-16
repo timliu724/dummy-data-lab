@@ -1,0 +1,657 @@
+{
+  "format": "dummy-data-generation-config",
+  "schemaVersion": 3,
+  "appVersion": "V1.55",
+  "workflowKind": "SCRATCH",
+  "requestedRowCount": 200,
+  "mode": "SAFE_TEST_DATA",
+  "businessFidelity": "BALANCED",
+  "businessFidelitySettings": {
+    "preserveRowOrder": false,
+    "preserveGroupRuns": true,
+    "preserveStableMappings": true,
+    "preserveCodeShape": true,
+    "preserveRelationships": true,
+    "preserveNumericRelationships": true,
+    "preserveNullPositions": true
+  },
+  "templateId": null,
+  "generatedColumns": [
+    {
+      "id": "people-person-id",
+      "name": "person_id",
+      "origin": "GENERATED",
+      "enabled": true,
+      "position": 0,
+      "sourceColumnIndex": null,
+      "sourceColumnName": null,
+      "detectedType": null,
+      "generatorType": "sequence",
+      "blockId": null,
+      "blockLabel": null,
+      "settings": {
+        "nullRate": 0,
+        "unique": true,
+        "prefix": "PER-",
+        "start": 1,
+        "width": 6
+      }
+    },
+    {
+      "id": "people-full-name",
+      "name": "full_name",
+      "origin": "GENERATED",
+      "enabled": true,
+      "position": 1,
+      "sourceColumnIndex": null,
+      "sourceColumnName": null,
+      "detectedType": null,
+      "generatorType": "person-name",
+      "blockId": null,
+      "blockLabel": null,
+      "settings": {
+        "nullRate": 0,
+        "unique": false
+      }
+    },
+    {
+      "id": "people-email",
+      "name": "email",
+      "origin": "GENERATED",
+      "enabled": true,
+      "position": 2,
+      "sourceColumnIndex": null,
+      "sourceColumnName": null,
+      "detectedType": null,
+      "generatorType": "email",
+      "blockId": null,
+      "blockLabel": null,
+      "settings": {
+        "nullRate": 0,
+        "unique": true
+      }
+    },
+    {
+      "id": "people-joined-date",
+      "name": "joined_date",
+      "origin": "GENERATED",
+      "enabled": true,
+      "position": 3,
+      "sourceColumnIndex": null,
+      "sourceColumnName": null,
+      "detectedType": null,
+      "generatorType": "date",
+      "blockId": null,
+      "blockLabel": null,
+      "settings": {
+        "nullRate": 0,
+        "unique": false,
+        "startDate": "2024-01-01",
+        "endDate": "2025-12-31"
+      }
+    },
+    {
+      "id": "people-segment",
+      "name": "customer_segment",
+      "origin": "GENERATED",
+      "enabled": true,
+      "position": 4,
+      "sourceColumnIndex": null,
+      "sourceColumnName": null,
+      "detectedType": null,
+      "generatorType": "category",
+      "blockId": null,
+      "blockLabel": null,
+      "settings": {
+        "nullRate": 0,
+        "unique": false,
+        "values": [
+          "Standard",
+          "Plus",
+          "Business"
+        ],
+        "weights": [
+          65,
+          25,
+          10
+        ]
+      }
+    }
+  ],
+  "generatedColumnSequence": 5,
+  "source": {
+    "headers": [],
+    "policies": [],
+    "relationships": []
+  },
+  "scratch": {
+    "structure": "MULTI",
+    "activeTableId": "scenario-people",
+    "tableSequence": 4,
+    "templateBlockSequence": 0,
+    "tables": [
+      {
+        "id": "scenario-people",
+        "name": "People",
+        "columns": [
+          {
+            "id": "people-person-id",
+            "name": "person_id",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 0,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "sequence",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": true,
+              "prefix": "PER-",
+              "start": 1,
+              "width": 6
+            }
+          },
+          {
+            "id": "people-full-name",
+            "name": "full_name",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 1,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "person-name",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": false
+            }
+          },
+          {
+            "id": "people-email",
+            "name": "email",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 2,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "email",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": true
+            }
+          },
+          {
+            "id": "people-joined-date",
+            "name": "joined_date",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 3,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "date",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": false,
+              "startDate": "2024-01-01",
+              "endDate": "2025-12-31"
+            }
+          },
+          {
+            "id": "people-segment",
+            "name": "customer_segment",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 4,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "category",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": false,
+              "values": [
+                "Standard",
+                "Plus",
+                "Business"
+              ],
+              "weights": [
+                65,
+                25,
+                10
+              ]
+            }
+          }
+        ],
+        "rowCount": null,
+        "primaryKeyColumnId": "people-person-id"
+      },
+      {
+        "id": "scenario-products",
+        "name": "Products",
+        "columns": [
+          {
+            "id": "products-product-id",
+            "name": "product_id",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 0,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "sequence",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": true,
+              "prefix": "PRD-",
+              "start": 1,
+              "width": 5
+            }
+          },
+          {
+            "id": "products-name",
+            "name": "product_name",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 1,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "template",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": false,
+              "sourceColumnId": "products-product-id",
+              "sourceColumnName": "product_id",
+              "prefix": "Product ",
+              "suffix": ""
+            }
+          },
+          {
+            "id": "products-category",
+            "name": "category",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 2,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "category",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": false,
+              "values": [
+                "Home",
+                "Office",
+                "Outdoor",
+                "Technology"
+              ],
+              "weights": [
+                30,
+                25,
+                20,
+                25
+              ]
+            }
+          },
+          {
+            "id": "products-price",
+            "name": "price",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 3,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "decimal",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": false,
+              "minimum": 5,
+              "maximum": 999,
+              "decimals": 2
+            }
+          }
+        ],
+        "rowCount": 50,
+        "primaryKeyColumnId": "products-product-id"
+      },
+      {
+        "id": "scenario-orders",
+        "name": "Orders",
+        "columns": [
+          {
+            "id": "orders-order-id",
+            "name": "order_id",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 0,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "sequence",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": true,
+              "prefix": "ORD-",
+              "start": 1,
+              "width": 7
+            }
+          },
+          {
+            "id": "orders-person-id",
+            "name": "person_id",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 1,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "foreign-key",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": false,
+              "targetTableId": "scenario-people",
+              "targetColumnId": "people-person-id",
+              "targetTableName": "People",
+              "targetColumnName": "person_id",
+              "cardinalityMode": "DRIVER",
+              "minimumPerParent": 0,
+              "maximumPerParent": 5
+            }
+          },
+          {
+            "id": "orders-product-id",
+            "name": "product_id",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 2,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "foreign-key",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": false,
+              "targetTableId": "scenario-products",
+              "targetColumnId": "products-product-id",
+              "targetTableName": "Products",
+              "targetColumnName": "product_id",
+              "cardinalityMode": "SAMPLE",
+              "minimumPerParent": 0,
+              "maximumPerParent": 5
+            }
+          },
+          {
+            "id": "orders-segment",
+            "name": "customer_segment",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 3,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "lookup-foreign",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": false,
+              "foreignKeyColumnId": "orders-person-id",
+              "targetTableId": "scenario-people",
+              "targetColumnId": "people-segment",
+              "targetTableName": "People",
+              "targetColumnName": "customer_segment"
+            }
+          },
+          {
+            "id": "orders-date",
+            "name": "order_date",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 4,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "date-after-foreign",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": false,
+              "foreignKeyColumnId": "orders-person-id",
+              "targetTableId": "scenario-people",
+              "targetColumnId": "people-joined-date",
+              "targetTableName": "People",
+              "targetColumnName": "joined_date",
+              "minimumDays": 0,
+              "maximumDays": 365
+            }
+          },
+          {
+            "id": "orders-status",
+            "name": "status",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 5,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "category",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": false,
+              "values": [
+                "Pending",
+                "Paid",
+                "Shipped",
+                "Cancelled"
+              ],
+              "weights": [
+                20,
+                45,
+                30,
+                5
+              ]
+            }
+          },
+          {
+            "id": "orders-quantity",
+            "name": "quantity",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 6,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "integer",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": false,
+              "minimum": 1,
+              "maximum": 8
+            }
+          },
+          {
+            "id": "orders-unit-price",
+            "name": "unit_price",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 7,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "lookup-foreign",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": false,
+              "foreignKeyColumnId": "orders-product-id",
+              "targetTableId": "scenario-products",
+              "targetColumnId": "products-price",
+              "targetTableName": "Products",
+              "targetColumnName": "price"
+            }
+          }
+        ],
+        "rowCount": null,
+        "primaryKeyColumnId": "orders-order-id"
+      },
+      {
+        "id": "scenario-appointments",
+        "name": "Appointments",
+        "columns": [
+          {
+            "id": "appointments-id",
+            "name": "appointment_id",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 0,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "sequence",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": true,
+              "prefix": "APT-",
+              "start": 1,
+              "width": 6
+            }
+          },
+          {
+            "id": "appointments-person-id",
+            "name": "person_id",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 1,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "foreign-key",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": false,
+              "targetTableId": "scenario-people",
+              "targetColumnId": "people-person-id",
+              "targetTableName": "People",
+              "targetColumnName": "person_id",
+              "cardinalityMode": "DRIVER",
+              "minimumPerParent": 0,
+              "maximumPerParent": 3
+            }
+          },
+          {
+            "id": "appointments-date",
+            "name": "appointment_date",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 2,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "date-after-foreign",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": false,
+              "foreignKeyColumnId": "appointments-person-id",
+              "targetTableId": "scenario-people",
+              "targetColumnId": "people-joined-date",
+              "targetTableName": "People",
+              "targetColumnName": "joined_date",
+              "minimumDays": 1,
+              "maximumDays": 730
+            }
+          },
+          {
+            "id": "appointments-follow-up",
+            "name": "follow_up_date",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 3,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "date-after",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": false,
+              "sourceColumnId": "appointments-date",
+              "sourceColumnName": "appointment_date",
+              "minimumDays": 7,
+              "maximumDays": 30
+            }
+          },
+          {
+            "id": "appointments-status",
+            "name": "status",
+            "origin": "GENERATED",
+            "enabled": true,
+            "position": 4,
+            "sourceColumnIndex": null,
+            "sourceColumnName": null,
+            "detectedType": null,
+            "generatorType": "category",
+            "blockId": null,
+            "blockLabel": null,
+            "settings": {
+              "nullRate": 0,
+              "unique": false,
+              "values": [
+                "Booked",
+                "Completed",
+                "Cancelled"
+              ],
+              "weights": [
+                45,
+                45,
+                10
+              ]
+            }
+          }
+        ],
+        "rowCount": null,
+        "primaryKeyColumnId": "appointments-id"
+      }
+    ]
+  }
+}

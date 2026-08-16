@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' blob:; connect-src 'none'; img-src 'self' data:; style-src 'self'; script-src 'self'; font-src 'self'">
+  <title>Dummy Data Lab</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body data-interface-mode="BASIC" data-workflow-kind="TRANSFORM" data-scratch-structure="SINGLE" data-basic-step="INPUT">
+  <header class="masthead">
+    <a class="brand" href="#top" aria-label="Dummy Data Lab home">
+      <span class="brand__mark">D/D</span>
+      <span>Dummy Data Lab</span>
+    </a>
+    <ul class="masthead__highlights" aria-label="Product advantages">
+      <li>Transform or generate</li>
+      <li>Field-by-field control</li>
+      <li>Edge-case coverage</li>
+      <li>Linked datasets</li>
+    </ul>
+    <div class="masthead__tools">
+      <span id="app-version" class="version-badge" title="Current product version">V1.48</span>
+      <div class="view-mode-switch" role="group" aria-label="Interface mode">
+        <button type="button" data-interface-mode="BASIC" aria-pressed="true">Basic</button>
+        <button type="button" data-interface-mode="ADVANCED" aria-pressed="false">Advanced</button>
+      </div>
+      <div class="local-badge" aria-label="Local-only processing; no upload"><span aria-hidden="true"></span><span class="local-badge__label" aria-hidden="true">Local utility · No upload</span></div>
+    </div>
+  </header>
+
+  <main id="top" class="shell">
+    <section class="hero" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">STRUCTURE IN · TEST DATA OUT</p>
+        <h1 id="page-title">Make the small dataset your program actually needs.</h1>
+      </div>
+      <div class="hero__copy" aria-label="Available workflows">
+        <p><strong>Transform</strong><span>Turn a CSV, TXT, TSV, or Excel paste into a small protected test dataset—locally.</span></p>
+        <p><strong>Generate</strong><span>Build one table or linked tables from templates and custom rules—locally.</span></p>
+      </div>
+    </section>
+
+    <section id="basic-journey" class="basic-journey basic-only" aria-labelledby="basic-journey-title">
+      <div class="basic-journey__intro">
+        <p class="eyebrow">BASIC GUIDE</p>
+        <h2 id="basic-journey-title">One decision at a time</h2>
+        <p id="basic-step-guidance">Add a source table. Your review settings will appear after local analysis.</p>
+      </div>
+      <ol aria-label="Basic workflow progress">
+        <li>
+          <button type="button" data-basic-step-target="INPUT" aria-current="step">
+            <span>1</span><span><strong id="basic-step-one-label">Add source</strong><small>Start here</small></span>
+          </button>
+        </li>
+        <li>
+          <button type="button" data-basic-step-target="REVIEW" disabled>
+            <span>2</span><span><strong>Review &amp; generate</strong><small>Available after step 1</small></span>
+          </button>
+        </li>
+        <li>
+          <button type="button" data-basic-step-target="RESULT" disabled>
+            <span>3</span><span><strong>Validate &amp; download</strong><small>Available after generation</small></span>
+          </button>
+        </li>
+      </ol>
+    </section>
+
+    <div id="messages" class="messages" aria-live="polite"></div>
+
+    <div id="recovery-bar" class="recovery-bar" aria-label="Draft and recovery controls">
+      <span><strong>Safe draft</strong><small id="recovery-status" role="status">Undo works in this page; general settings and fictional schemas auto-save in this tab. Source rows are never stored.</small></span>
+      <div>
+        <button id="undo-config" class="button button--compact" type="button" disabled>Undo last change</button>
+        <button id="clear-work" class="button button--compact button--danger" type="button">Start over</button>
+      </div>
+    </div>
+
+    <div class="setup-grid">
+    <section class="stage stage--input" aria-labelledby="input-title">
+      <div class="stage__rail"><span>1</span><small>INPUT</small></div>
+      <div class="stage__body">
+        <div class="input-workflow-bar">
+          <div class="source-mode-switch" role="group" aria-label="Starting point">
+            <button type="button" data-workflow-kind="TRANSFORM" aria-pressed="true">Transform a table</button>
+            <button type="button" data-workflow-kind="SCRATCH" aria-pressed="false">Generate from scratch</button>
+          </div>
+        </div>
+        <div class="section-heading transform-only">
+          <div><p class="eyebrow">SOURCE</p><h2 id="input-title">Choose or paste a table</h2></div>
+          <p>Your source stays in this tab—never uploaded or saved.</p>
+        </div>
+        <div class="input-grid transform-only">
+          <label class="file-drop" for="file-input">
+            <span class="file-drop__icon" aria-hidden="true">↥</span>
+            <strong>Select CSV, TXT, or TSV</strong>
+            <small id="file-name">No file selected</small>
+            <input id="file-input" type="file" accept=".csv,.txt,.tsv,text/csv,text/plain,text/tab-separated-values">
+          </label>
+          <label class="paste-field">
+            <span>Or paste cells copied from Excel</span>
+            <textarea id="paste-input" rows="5" spellcheck="false" placeholder="customer_id&#9;status&#9;start_date&#10;CU-001&#9;Open&#9;2026-01-10"></textarea>
+          </label>
+        </div>
+        <div class="control-strip transform-only">
+          <details id="input-options" class="input-options">
+            <summary>Input options <small>Auto-detect works for most tables</small></summary>
+            <div class="input-option-controls">
+              <label>Delimiter
+                <select id="delimiter-mode">
+                  <option value="auto">Auto-detect</option><option value="tab">Tab</option><option value="comma">Comma</option>
+                  <option value="semicolon">Semicolon</option><option value="pipe">Pipe</option><option value="custom">Custom</option>
+                </select>
+              </label>
+              <label id="custom-delimiter-wrap" hidden>Custom character<input id="custom-delimiter" maxlength="1" size="3"></label>
+              <label>Header row
+                <select id="header-mode"><option value="auto">Auto-detect</option><option value="yes">Yes</option><option value="no">No</option></select>
+              </label>
+              <label class="recognition-allowlist advanced-only">Ignore known test identifiers
+                <textarea id="recognition-allowlist" rows="3" spellcheck="false" placeholder="One exact value per line"></textarea>
+                <small>Ignored during AU identifier detection and kept only for this analysis.</small>
+              </label>
+            </div>
+          </details>
+          <button id="analyse-button" class="button button--primary" type="button">Analyse locally</button>
+        </div>
+        <div id="parse-summary" class="metric-grid transform-only" aria-label="Parse summary"></div>
+        <div class="scratch-only scratch-start">
+          <div class="section-heading">
+            <div><p class="eyebrow">START FRESH</p><h2>Choose how to start</h2></div>
+            <p>Build everything locally from the fields you choose.</p>
+          </div>
+          <div class="scratch-structure-picker" aria-label="Scratch data structure">
+            <button type="button" data-scratch-structure="SINGLE" aria-pressed="true"><strong>One table</strong><small>Build one CSV</small></button>
+            <button type="button" data-scratch-structure="MULTI" aria-pressed="false"><strong>Related tables <span class="advanced-entry-tag basic-only">Advanced</span></strong><small>Build linked tables with keys and rules</small></button>
+          </div>
+          <button id="load-connected-scenario" class="connected-scenario-card" type="button">
+            <span><strong>Connected commerce &amp; appointments</strong><small>People + Products + Orders + Appointments, already linked</small></span>
+            <b>Build 4-table project →</b>
+          </button>
+          <div id="template-picker" class="template-picker" aria-label="Dataset templates"></div>
+          <div id="template-selection-summary" class="scratch-template-summary scratch-only" hidden aria-live="polite">
+            <span id="template-selection-text"></span>
+            <button id="review-generated-columns" class="button button--compact" type="button">Review columns ↓</button>
+          </div>
+          <div id="dataset-workspace" class="dataset-workspace multi-scratch-only">
+            <div class="dataset-workspace__heading">
+              <div><span class="heading-with-help"><strong>Project tables</strong><button class="info-tooltip" type="button" data-static-tooltip aria-label="About table keys and links" aria-describedby="tip-table-links" aria-expanded="false"><span class="info-tooltip__trigger" aria-hidden="true">i</span><span id="tip-table-links" class="info-tooltip__content" role="tooltip">A primary key uniquely identifies each parent row. A foreign key stores that parent key in a related table, so generated records stay connected across exported files.</span></button></span><small class="basic-only">The tables stay linked automatically. Select one to review its fields.</small><small class="advanced-only">Template blocks and field edits apply to the selected table.</small></div>
+              <button id="add-dataset-table" class="button button--compact advanced-only" type="button">+ Add table</button>
+            </div>
+            <div id="dataset-table-tabs" class="dataset-table-tabs" role="tablist" aria-label="Project tables"></div>
+            <div id="basic-dataset-rule-summary" class="basic-dataset-rule-summary basic-only"></div>
+            <div class="dataset-table-settings advanced-only">
+              <label>Selected table name<input id="dataset-table-name" maxlength="50"></label>
+              <button id="delete-dataset-table" class="button button--compact button--danger" type="button">Delete table</button>
+            </div>
+            <div class="dataset-key-settings advanced-only">
+              <label>Primary key<select id="dataset-primary-key"><option value="">Not selected</option></select></label>
+              <label>Link to table<select id="dataset-foreign-target"><option value="">Choose a table with a primary key</option></select></label>
+              <button id="add-foreign-key" class="button button--compact" type="button" disabled>+ Add foreign key</button>
+              <small id="dataset-key-summary">Select a stable unique column as this table's primary key.</small>
+              <div id="dataset-cardinality-rules" class="dataset-cardinality-rules"></div>
+              <div class="cross-table-rule-builder">
+                <strong>New linked field</strong>
+                <label>Using foreign key<select id="cross-rule-foreign-key"><option value="">Choose link</option></select></label>
+                <label>Parent field<select id="cross-rule-parent-column"><option value="">Choose parent field</option></select></label>
+                <label>Rule<select id="cross-rule-kind"><option value="lookup-foreign">Copy parent value</option><option value="date-after-foreign">Date after parent date</option></select></label>
+                <label>New field name<input id="cross-rule-name" maxlength="80" placeholder="linked_value"></label>
+                <label class="cross-date-setting">Min days<input id="cross-rule-min-days" type="number" min="0" max="36500" value="1"></label>
+                <label class="cross-date-setting">Max days<input id="cross-rule-max-days" type="number" min="0" max="36500" value="30"></label>
+                <button id="add-cross-rule" class="button button--compact" type="button" disabled>+ Add linked field</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stage stage--plan" aria-labelledby="settings-title">
+      <div class="stage__rail"><span>2</span><small>PLAN</small></div>
+      <div class="stage__body">
+        <div class="section-heading">
+          <div><p class="eyebrow">OUTPUT</p><h2 id="settings-title"><span class="transform-only">Set the protection and size</span><span class="scratch-only">Choose the output size</span></h2></div>
+          <p><span class="transform-only">Input size does not control output size.</span><span class="scratch-only">Choose a preset or enter an exact row count.</span></p>
+        </div>
+        <div class="settings-grid">
+          <fieldset class="option-card">
+            <legend>Output rows</legend>
+            <div class="preset-row">
+              <label><input type="radio" name="row-count" value="50"><span>50</span></label>
+              <label><input type="radio" name="row-count" value="100"><span>100</span></label>
+              <label><input type="radio" name="row-count" value="200" checked><span>200</span></label>
+              <label><input type="radio" name="row-count" value="500"><span>500</span></label>
+              <label><input type="radio" name="row-count" value="1000"><span>1000</span></label>
+              <div class="custom-row-choice">
+                <label><input type="radio" name="row-count" value="custom"><span>Custom</span></label>
+                <div class="custom-count"><label for="custom-row-count">Exact rows</label><input id="custom-row-count" type="number" min="1" step="1" value="200" disabled></div>
+              </div>
+              <button id="same-as-input-rows" class="button button--compact" type="button" disabled>Same as input</button>
+            </div>
+            <small id="same-as-input-note" class="custom-count-note">Analyse a table to detect its data-row count.</small>
+          </fieldset>
+          <div class="option-card protection-mode-card advanced-only transform-only"><span class="option-card-label"><label for="mode-select">Protection mode</label><button class="info-tooltip" type="button" data-static-tooltip aria-label="About protection modes" aria-describedby="tip-protection-modes" aria-expanded="false"><span class="info-tooltip__trigger" aria-hidden="true">i</span><span id="tip-protection-modes" class="info-tooltip__content" role="tooltip">Safe Test Data protects identifiers and keeps useful test patterns. ID Only changes identifiers but can leave other source values intact. Both are pseudonymisation workflows, not proof that a person cannot be re-identified.</span></button></span>
+            <select id="mode-select">
+              <option value="SAFE_TEST_DATA" selected>Safe Test Data — recommended</option>
+              <option value="ID_ONLY">ID Only — pseudonymised</option>
+            </select>
+            <small id="mode-boundary">Protects identifiers while preserving useful patterns. Not an anonymisation guarantee.</small>
+          </div>
+          <div class="option-card basic-only basic-protection-summary transform-only">
+            <span class="option-card-label">Protection <button class="info-tooltip" type="button" data-static-tooltip aria-label="About Safe Test Data protection" aria-describedby="tip-safe-protection" aria-expanded="false"><span class="info-tooltip__trigger" aria-hidden="true">i</span><span id="tip-safe-protection" class="info-tooltip__content" role="tooltip">Safe Test Data protects identifiers and keeps useful test patterns. It reduces exposure but does not certify anonymisation or eliminate re-identification risk.</span></button></span>
+            <strong id="basic-mode-label">Safe Test Data</strong>
+            <small>Recommended protection is active. Switch to Advanced to change it.</small>
+          </div>
+          <fieldset class="option-card business-fidelity-card transform-only">
+            <legend class="business-fidelity-legend">Business pattern
+              <button class="info-tooltip" type="button" data-static-tooltip aria-label="About the selected business pattern" aria-describedby="business-fidelity-boundary" aria-expanded="false">
+                <span class="info-tooltip__trigger" aria-hidden="true">i</span>
+                <span id="business-fidelity-boundary" class="info-tooltip__content" role="tooltip">Recommended. Preserves repeat mappings, formats, common groups, and confirmed relationships. Evidence-backed candidates stay off until you confirm them. Only High guarantees exact source order.</span>
+              </button>
+            </legend>
+            <div class="business-fidelity-options" role="radiogroup" aria-label="Business pattern match">
+              <label title="Coverage-first mixing with freedom to resize. Row order and consecutive groups may change."><input type="radio" name="business-fidelity" value="FLEXIBLE"><span><span class="fidelity-choice-heading"><strong>Flexible</strong></span><small>More freedom</small></span></label>
+              <label title="Recommended default. Keeps ordered source blocks, stable repeat mappings, formats, blanks, and confirmed rules where safe."><input type="radio" name="business-fidelity" value="BALANCED" checked><span><span class="fidelity-choice-heading"><strong>Balanced</strong></span><small>Recommended default</small></span></label>
+              <label title="Uses the complete source row sequence and source row count. Confirmed relationship rules are also preserved. Highest structural match and disclosure risk."><input type="radio" name="business-fidelity" value="HIGH"><span><span class="fidelity-choice-heading"><strong>High match</strong></span><small>Source structure</small></span></label>
+            </div>
+            <details class="business-fidelity-details advanced-only">
+              <summary>Fine-tune structure matching</summary>
+              <div class="business-fidelity-toggles">
+                <label><input type="checkbox" data-fidelity-setting="preserveRowOrder"> Source row order</label>
+                <label><input type="checkbox" data-fidelity-setting="preserveGroupRuns" checked> Consecutive groups</label>
+                <label><input type="checkbox" data-fidelity-setting="preserveStableMappings" checked> Stable repeat mapping</label>
+                <label><input type="checkbox" data-fidelity-setting="preserveCodeShape" checked> Code and prefix shape</label>
+                <label><input type="checkbox" data-fidelity-setting="preserveRelationships" checked> Confirmed category relationships</label>
+                <label><input type="checkbox" data-fidelity-setting="preserveNumericRelationships" checked> Confirmed numeric relationships</label>
+                <label><input type="checkbox" data-fidelity-setting="preserveNullPositions" checked> Blank positions</label>
+              </div>
+              <small class="fidelity-detail-note">Changing a level resets these switches to that level's defaults. <button class="info-tooltip info-tooltip--below-right" type="button" data-static-tooltip aria-label="About structure matching controls" aria-describedby="tip-structure-controls" aria-expanded="false"><span class="info-tooltip__trigger" aria-hidden="true">i</span><span id="tip-structure-controls" class="info-tooltip__content" role="tooltip">More structure matching can make test data more realistic, but it can also reveal more about the source. Relationship switches apply only to rules you explicitly confirmed; they never confirm a suggestion or silently change a column's Final Action.</span></button></small>
+            </details>
+          </fieldset>
+        </div>
+        <div id="coverage-summary" class="coverage-summary transform-only"></div>
+      </div>
+    </section>
+    </div>
+
+    <section id="generated-columns-workspace" class="stage stage--generated generated-columns" aria-labelledby="generated-columns-title">
+      <div class="stage__rail stage__rail--continuation"><small><span class="transform-only">PLAN · OPTIONAL EXTENSION</span><span class="scratch-only">PLAN · GENERATED COLUMNS</span></small></div>
+      <div class="stage__body">
+          <div class="generated-columns__heading">
+            <div><h3 id="generated-columns-title"><span class="transform-only">Optional generated columns</span><span class="scratch-only">Define the columns to generate</span></h3></div>
+            <div class="generated-columns__actions">
+              <span class="inline-control-with-help advanced-only"><label>Probe rows<select id="probe-row-count"><option value="20">20</option><option value="50">50</option></select></label><button class="info-tooltip" type="button" data-static-tooltip aria-label="About testing rules" aria-describedby="tip-probe-rules" aria-expanded="false"><span class="info-tooltip__trigger" aria-hidden="true">i</span><span id="tip-probe-rules" class="info-tooltip__content" role="tooltip">Test rules generates a temporary 20- or 50-row check so you can inspect dependencies and warnings. It does not replace your chosen export size and it does not create a downloadable final result.</span></button></span>
+              <button id="probe-button" class="button button--compact" type="button" disabled>Test rules</button>
+              <button id="add-generated-column" class="button button--compact" type="button">+ Add column</button>
+              <button id="download-config" class="button button--compact advanced-only" type="button">Save config</button>
+              <label class="button button--compact config-upload advanced-only">Load config<input id="config-file" type="file" accept=".json,application/json"></label>
+              <button id="generated-columns-toggle" class="button button--compact generated-columns__toggle advanced-only transform-only" type="button" aria-expanded="false" aria-controls="generated-columns-panel">Show fields</button>
+            </div>
+          </div>
+          <div id="generated-columns-panel" class="generated-columns__panel">
+            <p class="generated-columns__note"><span class="transform-only">New generated columns appear to the right of the transformed columns.</span><span class="scratch-only">These fields make up the complete generated table.</span></p>
+            <div id="scratch-mode-summary" class="scratch-mode-summary basic-only scratch-only" aria-live="polite"></div>
+            <div class="field-library" aria-labelledby="field-library-title">
+              <div class="field-library__search">
+                <label for="generator-search" id="field-library-title">Quick-add a field</label>
+                <input id="generator-search" type="search" placeholder="Search name, email, date, amount…" autocomplete="off">
+              </div>
+              <div id="generator-catalog" class="generator-catalog" aria-live="polite"></div>
+              <div class="personal-field-sets advanced-only">
+                <label>Personal field set name<input id="personal-set-name" maxlength="60" placeholder="e.g. My customer fields"></label>
+                <button id="save-personal-set" class="button button--compact" type="button">Save current set</button>
+                <label>Saved sets<select id="personal-set-picker"><option value="">No saved sets</option></select></label>
+                <button id="load-personal-set" class="button button--compact" type="button" disabled>Use set</button>
+                <button id="delete-personal-set" class="button button--compact button--danger" type="button" disabled>Delete</button>
+              </div>
+              <small class="basic-only">Basic covers common fields. Advanced adds dependencies, saved field sets, and detailed rules.</small>
+              <small class="advanced-only">Saved field sets contain definitions only—never your data.</small>
+            </div>
+            <div id="generated-column-editor" class="generated-column-editor"></div>
+          </div>
+      </div>
+    </section>
+
+    <section class="stage stage--policy" aria-labelledby="policy-title">
+      <div class="stage__rail"><span>3</span><small>REVIEW</small></div>
+      <div class="stage__body">
+        <div class="section-heading">
+          <div><p class="eyebrow">COLUMN POLICY</p><h2 id="policy-title">Choose the final action</h2></div>
+          <p>Recommendations never override your Final Action. SHIFT also requires an explicit offset.</p>
+        </div>
+        <div class="policy-toolbar" aria-label="Bulk column actions">
+          <div>
+            <button id="keep-all-button" class="button" type="button" disabled>Keep all</button>
+            <button id="apply-recommendations-button" class="button" type="button" disabled>Apply recommendations</button>
+          </div>
+          <p><strong>Keep all preserves source values; it is not anonymisation.</strong> High-risk KEEP values are highlighted for review.</p>
+        </div>
+        <div id="shift-readiness" hidden tabindex="-1"></div>
+        <div id="policy-table" class="table-scroll empty-panel">Analyse a table to see column policies.</div>
+      </div>
+    </section>
+
+    <section class="stage stage--relationships" aria-labelledby="relations-title">
+      <div class="stage__rail"><span class="transform-only">4</span><span class="scratch-only">3</span><small><span class="transform-only">LINKS</span><span class="scratch-only">GENERATE</span></small></div>
+      <div class="stage__body">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow advanced-only transform-only">RELATIONSHIPS</p>
+            <p class="eyebrow basic-only transform-only">GENERATE</p>
+            <p class="eyebrow scratch-only">GENERATE</p>
+            <h2 id="relations-title"><span class="advanced-only transform-only">Confirm connected fields</span><span class="basic-only transform-only">Confirm and generate</span><span class="scratch-only">Confirm and generate</span></h2>
+          </div>
+          <p class="advanced-only transform-only">Evidence-backed candidates start off. Column-name hints are informational. Only confirmed rules affect generation.</p>
+          <p class="basic-only transform-only">Advanced relationship rules remain off unless you enable them.</p>
+          <p class="scratch-only">Test first when tuning ranges, weights, blanks, or uniqueness.</p>
+        </div>
+        <div class="advanced-only relationship-tools">
+          <div id="mapping-group-builder"></div>
+          <div id="shift-group-builder"></div>
+          <div id="relationship-panel" class="relationship-list empty-panel">No analysis yet.</div>
+        </div>
+        <div class="generation-bar">
+          <div id="generation-readiness" class="generation-readiness" role="status" aria-live="polite">
+            <strong>Not ready yet</strong><small>Analyse a source table before generating.</small>
+          </div>
+          <label id="review-confirmation" class="review-confirmation transform-only" hidden>
+            <input id="review-confirm" type="checkbox">
+            <span><strong>I reviewed every item marked Review.</strong><small>Optional acknowledgement. It never locks generation or download.</small></span>
+          </label>
+          <button id="generate-button" class="button button--generate" type="button" aria-describedby="generation-readiness" disabled>Generate dummy data</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="stage stage--preview" aria-labelledby="preview-title">
+      <div class="stage__rail"><span class="transform-only">5</span><span class="scratch-only">4</span><small>EXPORT</small></div>
+      <div class="stage__body">
+        <div class="section-heading">
+          <div><p class="eyebrow">RESULT</p><h2 id="preview-title">Preview and export</h2></div>
+          <p>Preview shows up to 100 rows. Downloads include all generated rows.</p>
+        </div>
+        <div id="preview-controls" class="preview-controls" hidden>
+          <button id="compare-toggle" class="button" type="button" disabled>Compare with source</button>
+          <small id="compare-boundary">Generated values appear above the exact source values. Source values are never downloaded.</small>
+        </div>
+        <div id="generation-validation" hidden></div>
+        <div id="dataset-integrity" class="dataset-integrity multi-scratch-only" hidden></div>
+        <section id="quality-report" class="quality-report" aria-label="Quality and privacy report" hidden></section>
+        <div id="dataset-preview-tabs" class="dataset-preview-tabs multi-scratch-only" hidden aria-label="Generated table previews"></div>
+        <div id="preview-table" class="table-scroll empty-panel">Generated data will appear here.</div>
+        <div class="export-bar">
+          <span class="export-option-with-help"><label><input id="excel-safe" type="checkbox" checked> Spreadsheet formula protection</label><button class="info-tooltip info-tooltip--above-left" type="button" data-static-tooltip aria-label="About spreadsheet formula protection" aria-describedby="tip-spreadsheet-protection" aria-expanded="false"><span class="info-tooltip__trigger" aria-hidden="true">i</span><span id="tip-spreadsheet-protection" class="info-tooltip__content" role="tooltip">When a text cell begins like a spreadsheet formula, the exported file adds a leading apostrophe so Excel or another spreadsheet does not execute it. The apostrophe is an export safety marker, not part of the generated value.</span></button></span>
+          <button id="export-csv" class="button button--csv" type="button" disabled>Download CSV</button>
+          <button id="export-tsv" class="button button--quiet advanced-only" type="button" disabled>TSV (optional)</button>
+          <button id="export-dataset-zip" class="button button--csv multi-scratch-only" type="button" disabled>Download all tables (.zip)</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside id="progress-panel" class="progress-panel" hidden aria-live="polite">
+    <div class="progress-heading"><span data-progress-label>Ready.</span><button id="cancel-button" type="button">Cancel</button></div>
+    <div class="progress-track"><i data-progress-bar></i></div>
+  </aside>
+
+  <footer>No server · No analytics · Pseudonymisation is not anonymisation</footer>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

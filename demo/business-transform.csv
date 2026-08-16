@@ -1,0 +1,241 @@
+ticket_id,entity_ref,service_code,service_name,service_category,fictional_area,routing_bucket,created_date,resolved_date,amount,status,contact_email,optional_reference,notes
+TST-00001,ENTITY-001,SVC-C,Fictional Review,Standard,Fictional Area 1,Route Alpha,2025-10-12,2025-10-14,43.95,Completed,entity001@example.invalid,REF-FIC-013,Example exception path
+TST-00002,ENTITY-002,SVC-B,Imaginary Repair,Standard,Fictional Area 2,Route Alpha,2025-10-23,2025-10-26,62.90,Completed,entity002@example.invalid,REF-FIC-026,Fictional priority case
+TST-00003,ENTITY-003,SVC-A,Example Setup,Standard,Fictional Area 3,Route Alpha,2025-11-03,2025-11-07,81.85,Completed,entity003@example.invalid,REF-FIC-039,Imaginary standard case
+TST-00004,ENTITY-004,SVC-C,Fictional Review,Standard,Fictional Area 4,Route Alpha,2025-11-14,2025-11-19,100.80,Completed,entity004@example.invalid,REF-FIC-052,Synthetic repeat entity
+TST-00005,ENTITY-005,SVC-B,Imaginary Repair,Standard,Fictional Area 5,Route Alpha,2025-11-25,,119.75,Pending,entity005@example.invalid,,Example exception path
+TST-00006,ENTITY-006,SVC-A,Example Setup,Standard,Fictional Area 1,Route Beta,2025-12-06,,138.70,Pending,entity006@example.invalid,REF-FIC-078,
+TST-00007,ENTITY-007,SVC-C,Fictional Review,Standard,Fictional Area 2,Route Beta,2025-12-17,,157.65,Open,entity007@example.invalid,REF-FIC-091,Imaginary standard case
+TST-00008,ENTITY-008,SVC-B,Imaginary Repair,Standard,Fictional Area 3,Route Beta,2025-12-28,,176.60,Open,entity008@example.invalid,REF-FIC-104,Synthetic repeat entity
+TST-00009,ENTITY-009,SVC-A,Example Setup,Standard,Fictional Area 4,Route Beta,2026-01-08,2026-01-18,195.55,Cancelled,entity009@example.invalid,REF-FIC-117,Example exception path
+TST-00010,ENTITY-010,SVC-C,Fictional Review,Standard,Fictional Area 5,Route Beta,2026-01-19,2026-01-30,214.50,Completed,entity010@example.invalid,,Fictional priority case
+TST-00011,ENTITY-011,SVC-B,Imaginary Repair,Standard,Fictional Area 1,Route Gamma,2026-01-30,2026-02-11,233.45,Completed,entity011@example.invalid,REF-FIC-143,Imaginary standard case
+TST-00012,ENTITY-012,SVC-A,Example Setup,Priority,Fictional Area 2,Route Gamma,2026-02-10,2026-02-23,252.40,Completed,entity012@example.invalid,REF-FIC-156,
+TST-00013,ENTITY-013,SVC-C,Fictional Review,Priority,Fictional Area 3,Route Gamma,2026-02-21,2026-03-07,271.35,Completed,entity013@example.invalid,REF-FIC-169,Example exception path
+TST-00014,ENTITY-014,SVC-B,Imaginary Repair,Priority,Fictional Area 4,Route Gamma,2025-10-05,2025-10-06,290.30,Completed,entity014@example.invalid,REF-FIC-182,Fictional priority case
+TST-00015,ENTITY-015,SVC-A,Example Setup,Priority,Fictional Area 5,Route Gamma,2025-10-16,,309.25,Pending,entity015@example.invalid,,Imaginary standard case
+TST-00016,ENTITY-016,SVC-C,Fictional Review,Priority,Fictional Area 1,Route Delta,2025-10-27,,328.20,Pending,entity016@example.invalid,REF-FIC-208,Synthetic repeat entity
+TST-00017,ENTITY-017,SVC-B,Imaginary Repair,Complex,Fictional Area 2,Route Delta,2025-11-07,,347.15,Open,entity017@example.invalid,REF-FIC-221,Example exception path
+TST-00018,ENTITY-018,SVC-A,Example Setup,Complex,Fictional Area 3,Route Delta,2025-11-18,,366.10,Open,entity018@example.invalid,REF-FIC-234,
+TST-00019,ENTITY-019,SVC-C,Fictional Review,Review,Fictional Area 4,Route Delta,2025-11-29,2025-12-05,385.05,Cancelled,entity019@example.invalid,REF-FIC-247,Imaginary standard case
+TST-00020,ENTITY-020,SVC-B,Imaginary Repair,Standard,Fictional Area 5,Route Delta,2025-12-10,2025-12-17,404.00,Completed,entity020@example.invalid,,Synthetic repeat entity
+TST-00021,ENTITY-021,SVC-A,Example Setup,Standard,Fictional Area 1,Route Alpha,2025-12-21,2025-12-29,422.95,Completed,entity021@example.invalid,REF-FIC-273,Example exception path
+TST-00022,ENTITY-022,SVC-C,Fictional Review,Standard,Fictional Area 2,Route Alpha,2026-01-01,2026-01-10,441.90,Completed,entity022@example.invalid,REF-FIC-286,Fictional priority case
+TST-00023,ENTITY-023,SVC-B,Imaginary Repair,Standard,Fictional Area 3,Route Alpha,2026-01-12,2026-01-22,460.85,Completed,entity023@example.invalid,REF-FIC-299,Imaginary standard case
+TST-00024,ENTITY-024,SVC-A,Example Setup,Standard,Fictional Area 4,Route Alpha,2026-01-23,2026-02-03,479.80,Completed,entity024@example.invalid,REF-FIC-312,
+TST-00025,ENTITY-025,SVC-C,Fictional Review,Standard,Fictional Area 5,Route Alpha,2026-02-03,,498.75,Pending,entity025@example.invalid,,Example exception path
+TST-00026,ENTITY-026,SVC-B,Imaginary Repair,Standard,Fictional Area 1,Route Beta,2026-02-14,,517.70,Pending,entity026@example.invalid,REF-FIC-338,Fictional priority case
+TST-00027,ENTITY-027,SVC-A,Example Setup,Standard,Fictional Area 2,Route Beta,2026-02-25,,536.65,Open,entity027@example.invalid,REF-FIC-351,Imaginary standard case
+TST-00028,ENTITY-028,SVC-C,Fictional Review,Standard,Fictional Area 3,Route Beta,2025-10-09,,555.60,Open,entity028@example.invalid,REF-FIC-364,Synthetic repeat entity
+TST-00029,ENTITY-029,SVC-B,Imaginary Repair,Standard,Fictional Area 4,Route Beta,2025-10-20,2025-10-22,574.55,Cancelled,entity029@example.invalid,REF-FIC-377,Example exception path
+TST-00030,ENTITY-030,SVC-A,Example Setup,Standard,Fictional Area 5,Route Beta,2025-10-31,2025-11-03,593.50,Completed,entity030@example.invalid,,
+TST-00031,ENTITY-031,SVC-C,Fictional Review,Standard,Fictional Area 1,Route Gamma,2025-11-11,2025-11-15,612.45,Completed,entity031@example.invalid,REF-FIC-403,Imaginary standard case
+TST-00032,ENTITY-032,SVC-B,Imaginary Repair,Priority,Fictional Area 2,Route Gamma,2025-11-22,2025-11-27,631.40,Completed,entity032@example.invalid,REF-FIC-416,Synthetic repeat entity
+TST-00033,ENTITY-033,SVC-A,Example Setup,Priority,Fictional Area 3,Route Gamma,2025-12-03,2025-12-09,650.35,Completed,entity033@example.invalid,REF-FIC-429,Example exception path
+TST-00034,ENTITY-034,SVC-C,Fictional Review,Priority,Fictional Area 4,Route Gamma,2025-12-14,2025-12-21,669.30,Completed,entity034@example.invalid,REF-FIC-442,Fictional priority case
+TST-00035,ENTITY-035,SVC-B,Imaginary Repair,Priority,Fictional Area 5,Route Gamma,2025-12-25,,688.25,Pending,entity035@example.invalid,,Imaginary standard case
+TST-00036,ENTITY-036,SVC-A,Example Setup,Priority,Fictional Area 1,Route Delta,2026-01-05,,707.20,Pending,entity036@example.invalid,REF-FIC-468,
+TST-00037,ENTITY-037,SVC-C,Fictional Review,Complex,Fictional Area 2,Route Delta,2026-01-16,,726.15,Open,entity037@example.invalid,REF-FIC-481,Example exception path
+TST-00038,ENTITY-038,SVC-B,Imaginary Repair,Complex,Fictional Area 3,Route Delta,2026-01-27,,745.10,Open,entity038@example.invalid,REF-FIC-494,Fictional priority case
+TST-00039,ENTITY-039,SVC-A,Example Setup,Review,Fictional Area 4,Route Delta,2026-02-07,2026-02-19,764.05,Cancelled,entity039@example.invalid,REF-FIC-507,Imaginary standard case
+TST-00040,ENTITY-040,SVC-C,Fictional Review,Standard,Fictional Area 5,Route Delta,2026-02-18,2026-03-03,783.00,Completed,entity040@example.invalid,,Synthetic repeat entity
+TST-00041,ENTITY-041,SVC-B,Imaginary Repair,Standard,Fictional Area 1,Route Alpha,2025-10-02,2025-10-16,801.95,Completed,entity041@example.invalid,REF-FIC-533,Example exception path
+TST-00042,ENTITY-042,SVC-A,Example Setup,Standard,Fictional Area 2,Route Alpha,2025-10-13,2025-10-14,820.90,Completed,entity042@example.invalid,REF-FIC-546,
+TST-00043,ENTITY-043,SVC-C,Fictional Review,Standard,Fictional Area 3,Route Alpha,2025-10-24,2025-10-26,839.85,Completed,entity043@example.invalid,REF-FIC-559,Imaginary standard case
+TST-00044,ENTITY-044,SVC-B,Imaginary Repair,Standard,Fictional Area 4,Route Alpha,2025-11-04,2025-11-07,858.80,Completed,entity044@example.invalid,REF-FIC-572,Synthetic repeat entity
+TST-00045,ENTITY-045,SVC-A,Example Setup,Standard,Fictional Area 5,Route Alpha,2025-11-15,,877.75,Pending,entity045@example.invalid,,Example exception path
+TST-00046,ENTITY-046,SVC-C,Fictional Review,Standard,Fictional Area 1,Route Beta,2025-11-26,,896.70,Pending,entity046@example.invalid,REF-FIC-598,Fictional priority case
+TST-00047,ENTITY-047,SVC-B,Imaginary Repair,Standard,Fictional Area 2,Route Beta,2025-12-07,,915.65,Open,entity047@example.invalid,REF-FIC-611,Imaginary standard case
+TST-00048,ENTITY-048,SVC-A,Example Setup,Standard,Fictional Area 3,Route Beta,2025-12-18,,934.60,Open,entity048@example.invalid,REF-FIC-624,
+TST-00049,ENTITY-049,SVC-C,Fictional Review,Standard,Fictional Area 4,Route Beta,2025-12-29,2026-01-06,953.55,Cancelled,entity049@example.invalid,REF-FIC-637,Example exception path
+TST-00050,ENTITY-050,SVC-B,Imaginary Repair,Standard,Fictional Area 5,Route Beta,2026-01-09,2026-01-18,972.50,Completed,entity050@example.invalid,,Fictional priority case
+TST-00051,ENTITY-051,SVC-A,Example Setup,Standard,Fictional Area 1,Route Gamma,2026-01-20,2026-01-30,991.45,Completed,entity051@example.invalid,REF-FIC-663,Imaginary standard case
+TST-00052,ENTITY-052,SVC-C,Fictional Review,Priority,Fictional Area 2,Route Gamma,2026-01-31,2026-02-11,1010.40,Completed,entity052@example.invalid,REF-FIC-676,Synthetic repeat entity
+TST-00053,ENTITY-053,SVC-B,Imaginary Repair,Priority,Fictional Area 3,Route Gamma,2026-02-11,2026-02-23,1029.35,Completed,entity053@example.invalid,REF-FIC-689,Example exception path
+TST-00054,ENTITY-054,SVC-A,Example Setup,Priority,Fictional Area 4,Route Gamma,2026-02-22,2026-03-07,1048.30,Completed,entity054@example.invalid,REF-FIC-702,
+TST-00055,ENTITY-055,SVC-C,Fictional Review,Priority,Fictional Area 5,Route Gamma,2025-10-06,,1067.25,Pending,entity055@example.invalid,,Imaginary standard case
+TST-00056,ENTITY-056,SVC-B,Imaginary Repair,Priority,Fictional Area 1,Route Delta,2025-10-17,,1086.20,Pending,entity056@example.invalid,REF-FIC-728,Synthetic repeat entity
+TST-00057,ENTITY-057,SVC-A,Example Setup,Complex,Fictional Area 2,Route Delta,2025-10-28,,1105.15,Open,entity057@example.invalid,REF-FIC-741,Example exception path
+TST-00058,ENTITY-058,SVC-C,Fictional Review,Complex,Fictional Area 3,Route Delta,2025-11-08,,1124.10,Open,entity058@example.invalid,REF-FIC-754,Fictional priority case
+TST-00059,ENTITY-059,SVC-B,Imaginary Repair,Review,Fictional Area 4,Route Delta,2025-11-19,2025-11-23,1143.05,Cancelled,entity059@example.invalid,REF-FIC-767,Imaginary standard case
+TST-00060,ENTITY-060,SVC-A,Example Setup,Standard,Fictional Area 5,Route Delta,2025-11-30,2025-12-05,1162.00,Completed,entity060@example.invalid,,
+TST-00061,ENTITY-001,SVC-C,Fictional Review,Standard,Fictional Area 1,Route Alpha,2025-12-11,2025-12-17,1180.95,Completed,entity001@example.invalid,REF-FIC-793,Example exception path
+TST-00062,ENTITY-002,SVC-B,Imaginary Repair,Standard,Fictional Area 2,Route Alpha,2025-12-22,2025-12-29,1199.90,Completed,entity002@example.invalid,REF-FIC-806,Fictional priority case
+TST-00063,ENTITY-003,SVC-A,Example Setup,Standard,Fictional Area 3,Route Alpha,2026-01-02,2026-01-10,1218.85,Completed,entity003@example.invalid,REF-FIC-819,Imaginary standard case
+TST-00064,ENTITY-004,SVC-C,Fictional Review,Standard,Fictional Area 4,Route Alpha,2026-01-13,2026-01-22,37.80,Completed,entity004@example.invalid,REF-FIC-832,Synthetic repeat entity
+TST-00065,ENTITY-005,SVC-B,Imaginary Repair,Standard,Fictional Area 5,Route Alpha,2026-01-24,,56.75,Pending,entity005@example.invalid,,Example exception path
+TST-00066,ENTITY-006,SVC-A,Example Setup,Standard,Fictional Area 1,Route Beta,2026-02-04,,75.70,Pending,entity006@example.invalid,REF-FIC-858,
+TST-00067,ENTITY-007,SVC-C,Fictional Review,Standard,Fictional Area 2,Route Beta,2026-02-15,,94.65,Open,entity007@example.invalid,REF-FIC-871,Imaginary standard case
+TST-00068,ENTITY-008,SVC-B,Imaginary Repair,Standard,Fictional Area 3,Route Beta,2026-02-26,,113.60,Open,entity008@example.invalid,REF-FIC-884,Synthetic repeat entity
+TST-00069,ENTITY-009,SVC-A,Example Setup,Standard,Fictional Area 4,Route Beta,2025-10-10,2025-10-24,132.55,Cancelled,entity009@example.invalid,REF-FIC-897,Example exception path
+TST-00070,ENTITY-010,SVC-C,Fictional Review,Standard,Fictional Area 5,Route Beta,2025-10-21,2025-10-22,151.50,Completed,entity010@example.invalid,,Fictional priority case
+TST-00071,ENTITY-011,SVC-B,Imaginary Repair,Standard,Fictional Area 1,Route Gamma,2025-11-01,2025-11-03,170.45,Completed,entity011@example.invalid,REF-FIC-923,Imaginary standard case
+TST-00072,ENTITY-012,SVC-A,Example Setup,Priority,Fictional Area 2,Route Gamma,2025-11-12,2025-11-15,189.40,Completed,entity012@example.invalid,REF-FIC-936,
+TST-00073,ENTITY-013,SVC-C,Fictional Review,Priority,Fictional Area 3,Route Gamma,2025-11-23,2025-11-27,208.35,Completed,entity013@example.invalid,REF-FIC-949,Example exception path
+TST-00074,ENTITY-014,SVC-B,Imaginary Repair,Priority,Fictional Area 4,Route Gamma,2025-12-04,2025-12-09,227.30,Completed,entity014@example.invalid,REF-FIC-962,Fictional priority case
+TST-00075,ENTITY-015,SVC-A,Example Setup,Priority,Fictional Area 5,Route Gamma,2025-12-15,,246.25,Pending,entity015@example.invalid,,Imaginary standard case
+TST-00076,ENTITY-016,SVC-C,Fictional Review,Priority,Fictional Area 1,Route Delta,2025-12-26,,265.20,Pending,entity016@example.invalid,REF-FIC-988,Synthetic repeat entity
+TST-00077,ENTITY-017,SVC-B,Imaginary Repair,Complex,Fictional Area 2,Route Delta,2026-01-06,,284.15,Open,entity017@example.invalid,REF-FIC-004,Example exception path
+TST-00078,ENTITY-018,SVC-A,Example Setup,Complex,Fictional Area 3,Route Delta,2026-01-17,,303.10,Open,entity018@example.invalid,REF-FIC-017,
+TST-00079,ENTITY-019,SVC-C,Fictional Review,Review,Fictional Area 4,Route Delta,2026-01-28,2026-02-07,322.05,Cancelled,entity019@example.invalid,REF-FIC-030,Imaginary standard case
+TST-00080,ENTITY-020,SVC-B,Imaginary Repair,Standard,Fictional Area 5,Route Delta,2026-02-08,2026-02-19,341.00,Completed,entity020@example.invalid,,Synthetic repeat entity
+TST-00081,ENTITY-021,SVC-A,Example Setup,Standard,Fictional Area 1,Route Alpha,2026-02-19,2026-03-03,359.95,Completed,entity021@example.invalid,REF-FIC-056,Example exception path
+TST-00082,ENTITY-022,SVC-C,Fictional Review,Standard,Fictional Area 2,Route Alpha,2025-10-03,2025-10-16,378.90,Completed,entity022@example.invalid,REF-FIC-069,Fictional priority case
+TST-00083,ENTITY-023,SVC-B,Imaginary Repair,Standard,Fictional Area 3,Route Alpha,2025-10-14,2025-10-28,397.85,Completed,entity023@example.invalid,REF-FIC-082,Imaginary standard case
+TST-00084,ENTITY-024,SVC-A,Example Setup,Standard,Fictional Area 4,Route Alpha,2025-10-25,2025-10-26,416.80,Completed,entity024@example.invalid,REF-FIC-095,
+TST-00085,ENTITY-025,SVC-C,Fictional Review,Standard,Fictional Area 5,Route Alpha,2025-11-05,,435.75,Pending,entity025@example.invalid,,Example exception path
+TST-00086,ENTITY-026,SVC-B,Imaginary Repair,Standard,Fictional Area 1,Route Beta,2025-11-16,,454.70,Pending,entity026@example.invalid,REF-FIC-121,Fictional priority case
+TST-00087,ENTITY-027,SVC-A,Example Setup,Standard,Fictional Area 2,Route Beta,2025-11-27,,473.65,Open,entity027@example.invalid,REF-FIC-134,Imaginary standard case
+TST-00088,ENTITY-028,SVC-C,Fictional Review,Standard,Fictional Area 3,Route Beta,2025-12-08,,492.60,Open,entity028@example.invalid,REF-FIC-147,Synthetic repeat entity
+TST-00089,ENTITY-029,SVC-B,Imaginary Repair,Standard,Fictional Area 4,Route Beta,2025-12-19,2025-12-25,511.55,Cancelled,entity029@example.invalid,REF-FIC-160,Example exception path
+TST-00090,ENTITY-030,SVC-A,Example Setup,Standard,Fictional Area 5,Route Beta,2025-12-30,2026-01-06,530.50,Completed,entity030@example.invalid,,
+TST-00091,ENTITY-031,SVC-C,Fictional Review,Standard,Fictional Area 1,Route Gamma,2026-01-10,2026-01-18,549.45,Completed,entity031@example.invalid,REF-FIC-186,Imaginary standard case
+TST-00092,ENTITY-032,SVC-B,Imaginary Repair,Priority,Fictional Area 2,Route Gamma,2026-01-21,2026-01-30,568.40,Completed,entity032@example.invalid,REF-FIC-199,Synthetic repeat entity
+TST-00093,ENTITY-033,SVC-A,Example Setup,Priority,Fictional Area 3,Route Gamma,2026-02-01,2026-02-11,587.35,Completed,entity033@example.invalid,REF-FIC-212,Example exception path
+TST-00094,ENTITY-034,SVC-C,Fictional Review,Priority,Fictional Area 4,Route Gamma,2026-02-12,2026-02-23,606.30,Completed,entity034@example.invalid,REF-FIC-225,Fictional priority case
+TST-00095,ENTITY-035,SVC-B,Imaginary Repair,Priority,Fictional Area 5,Route Gamma,2026-02-23,,625.25,Pending,entity035@example.invalid,,Imaginary standard case
+TST-00096,ENTITY-036,SVC-A,Example Setup,Priority,Fictional Area 1,Route Delta,2025-10-07,,644.20,Pending,entity036@example.invalid,REF-FIC-251,
+TST-00097,ENTITY-037,SVC-C,Fictional Review,Complex,Fictional Area 2,Route Delta,2025-10-18,,663.15,Open,entity037@example.invalid,REF-FIC-264,Example exception path
+TST-00098,ENTITY-038,SVC-B,Imaginary Repair,Complex,Fictional Area 3,Route Delta,2025-10-29,,682.10,Open,entity038@example.invalid,REF-FIC-277,Fictional priority case
+TST-00099,ENTITY-039,SVC-A,Example Setup,Review,Fictional Area 4,Route Delta,2025-11-09,2025-11-11,701.05,Cancelled,entity039@example.invalid,REF-FIC-290,Imaginary standard case
+TST-00100,ENTITY-040,SVC-C,Fictional Review,Standard,Fictional Area 5,Route Delta,2025-11-20,2025-11-23,720.00,Completed,entity040@example.invalid,,Synthetic repeat entity
+TST-00101,ENTITY-041,SVC-B,Imaginary Repair,Standard,Fictional Area 1,Route Alpha,2025-12-01,2025-12-05,738.95,Completed,entity041@example.invalid,REF-FIC-316,Example exception path
+TST-00102,ENTITY-042,SVC-A,Example Setup,Standard,Fictional Area 2,Route Alpha,2025-12-12,2025-12-17,757.90,Completed,entity042@example.invalid,REF-FIC-329,
+TST-00103,ENTITY-043,SVC-C,Fictional Review,Standard,Fictional Area 3,Route Alpha,2025-12-23,2025-12-29,776.85,Completed,entity043@example.invalid,REF-FIC-342,Imaginary standard case
+TST-00104,ENTITY-044,SVC-B,Imaginary Repair,Standard,Fictional Area 4,Route Alpha,2026-01-03,2026-01-10,795.80,Completed,entity044@example.invalid,REF-FIC-355,Synthetic repeat entity
+TST-00105,ENTITY-045,SVC-A,Example Setup,Standard,Fictional Area 5,Route Alpha,2026-01-14,,814.75,Pending,entity045@example.invalid,,Example exception path
+TST-00106,ENTITY-046,SVC-C,Fictional Review,Standard,Fictional Area 1,Route Beta,2026-01-25,,833.70,Pending,entity046@example.invalid,REF-FIC-381,Fictional priority case
+TST-00107,ENTITY-047,SVC-B,Imaginary Repair,Standard,Fictional Area 2,Route Beta,2026-02-05,,852.65,Open,entity047@example.invalid,REF-FIC-394,Imaginary standard case
+TST-00108,ENTITY-048,SVC-A,Example Setup,Standard,Fictional Area 3,Route Beta,2026-02-16,,871.60,Open,entity048@example.invalid,REF-FIC-407,
+TST-00109,ENTITY-049,SVC-C,Fictional Review,Standard,Fictional Area 4,Route Beta,2026-02-27,2026-03-11,890.55,Cancelled,entity049@example.invalid,REF-FIC-420,Example exception path
+TST-00110,ENTITY-050,SVC-B,Imaginary Repair,Standard,Fictional Area 5,Route Beta,2025-10-11,2025-10-24,909.50,Completed,entity050@example.invalid,,Fictional priority case
+TST-00111,ENTITY-051,SVC-A,Example Setup,Standard,Fictional Area 1,Route Gamma,2025-10-22,2025-11-05,928.45,Completed,entity051@example.invalid,REF-FIC-446,Imaginary standard case
+TST-00112,ENTITY-052,SVC-C,Fictional Review,Priority,Fictional Area 2,Route Gamma,2025-11-02,2025-11-03,947.40,Completed,entity052@example.invalid,REF-FIC-459,Synthetic repeat entity
+TST-00113,ENTITY-053,SVC-B,Imaginary Repair,Priority,Fictional Area 3,Route Gamma,2025-11-13,2025-11-15,966.35,Completed,entity053@example.invalid,REF-FIC-472,Example exception path
+TST-00114,ENTITY-054,SVC-A,Example Setup,Priority,Fictional Area 4,Route Gamma,2025-11-24,2025-11-27,985.30,Completed,entity054@example.invalid,REF-FIC-485,
+TST-00115,ENTITY-055,SVC-C,Fictional Review,Priority,Fictional Area 5,Route Gamma,2025-12-05,,1004.25,Pending,entity055@example.invalid,,Imaginary standard case
+TST-00116,ENTITY-056,SVC-B,Imaginary Repair,Priority,Fictional Area 1,Route Delta,2025-12-16,,1023.20,Pending,entity056@example.invalid,REF-FIC-511,Synthetic repeat entity
+TST-00117,ENTITY-057,SVC-A,Example Setup,Complex,Fictional Area 2,Route Delta,2025-12-27,,1042.15,Open,entity057@example.invalid,REF-FIC-524,Example exception path
+TST-00118,ENTITY-058,SVC-C,Fictional Review,Complex,Fictional Area 3,Route Delta,2026-01-07,,1061.10,Open,entity058@example.invalid,REF-FIC-537,Fictional priority case
+TST-00119,ENTITY-059,SVC-B,Imaginary Repair,Review,Fictional Area 4,Route Delta,2026-01-18,2026-01-26,1080.05,Cancelled,entity059@example.invalid,REF-FIC-550,Imaginary standard case
+TST-00120,ENTITY-060,SVC-A,Example Setup,Standard,Fictional Area 5,Route Delta,2026-01-29,2026-02-07,1099.00,Completed,entity060@example.invalid,,
+TST-00121,ENTITY-001,SVC-C,Fictional Review,Standard,Fictional Area 1,Route Alpha,2026-02-09,2026-02-19,1117.95,Completed,entity001@example.invalid,REF-FIC-576,Example exception path
+TST-00122,ENTITY-002,SVC-B,Imaginary Repair,Standard,Fictional Area 2,Route Alpha,2026-02-20,2026-03-03,1136.90,Completed,entity002@example.invalid,REF-FIC-589,Fictional priority case
+TST-00123,ENTITY-003,SVC-A,Example Setup,Standard,Fictional Area 3,Route Alpha,2025-10-04,2025-10-16,1155.85,Completed,entity003@example.invalid,REF-FIC-602,Imaginary standard case
+TST-00124,ENTITY-004,SVC-C,Fictional Review,Standard,Fictional Area 4,Route Alpha,2025-10-15,2025-10-28,1174.80,Completed,entity004@example.invalid,REF-FIC-615,Synthetic repeat entity
+TST-00125,ENTITY-005,SVC-B,Imaginary Repair,Standard,Fictional Area 5,Route Alpha,2025-10-26,,1193.75,Pending,entity005@example.invalid,,Example exception path
+TST-00126,ENTITY-006,SVC-A,Example Setup,Standard,Fictional Area 1,Route Beta,2025-11-06,,1212.70,Pending,entity006@example.invalid,REF-FIC-641,
+TST-00127,ENTITY-007,SVC-C,Fictional Review,Standard,Fictional Area 2,Route Beta,2025-11-17,,31.65,Open,entity007@example.invalid,REF-FIC-654,Imaginary standard case
+TST-00128,ENTITY-008,SVC-B,Imaginary Repair,Standard,Fictional Area 3,Route Beta,2025-11-28,,50.60,Open,entity008@example.invalid,REF-FIC-667,Synthetic repeat entity
+TST-00129,ENTITY-009,SVC-A,Example Setup,Standard,Fictional Area 4,Route Beta,2025-12-09,2025-12-13,69.55,Cancelled,entity009@example.invalid,REF-FIC-680,Example exception path
+TST-00130,ENTITY-010,SVC-C,Fictional Review,Standard,Fictional Area 5,Route Beta,2025-12-20,2025-12-25,88.50,Completed,entity010@example.invalid,,Fictional priority case
+TST-00131,ENTITY-011,SVC-B,Imaginary Repair,Standard,Fictional Area 1,Route Gamma,2025-12-31,2026-01-06,107.45,Completed,entity011@example.invalid,REF-FIC-706,Imaginary standard case
+TST-00132,ENTITY-012,SVC-A,Example Setup,Priority,Fictional Area 2,Route Gamma,2026-01-11,2026-01-18,126.40,Completed,entity012@example.invalid,REF-FIC-719,
+TST-00133,ENTITY-013,SVC-C,Fictional Review,Priority,Fictional Area 3,Route Gamma,2026-01-22,2026-01-30,145.35,Completed,entity013@example.invalid,REF-FIC-732,Example exception path
+TST-00134,ENTITY-014,SVC-B,Imaginary Repair,Priority,Fictional Area 4,Route Gamma,2026-02-02,2026-02-11,164.30,Completed,entity014@example.invalid,REF-FIC-745,Fictional priority case
+TST-00135,ENTITY-015,SVC-A,Example Setup,Priority,Fictional Area 5,Route Gamma,2026-02-13,,183.25,Pending,entity015@example.invalid,,Imaginary standard case
+TST-00136,ENTITY-016,SVC-C,Fictional Review,Priority,Fictional Area 1,Route Delta,2026-02-24,,202.20,Pending,entity016@example.invalid,REF-FIC-771,Synthetic repeat entity
+TST-00137,ENTITY-017,SVC-B,Imaginary Repair,Complex,Fictional Area 2,Route Delta,2025-10-08,,221.15,Open,entity017@example.invalid,REF-FIC-784,Example exception path
+TST-00138,ENTITY-018,SVC-A,Example Setup,Complex,Fictional Area 3,Route Delta,2025-10-19,,240.10,Open,entity018@example.invalid,REF-FIC-797,
+TST-00139,ENTITY-019,SVC-C,Fictional Review,Review,Fictional Area 4,Route Delta,2025-10-30,2025-11-13,259.05,Cancelled,entity019@example.invalid,REF-FIC-810,Imaginary standard case
+TST-00140,ENTITY-020,SVC-B,Imaginary Repair,Standard,Fictional Area 5,Route Delta,2025-11-10,2025-11-11,278.00,Completed,entity020@example.invalid,,Synthetic repeat entity
+TST-00141,ENTITY-021,SVC-A,Example Setup,Standard,Fictional Area 1,Route Alpha,2025-11-21,2025-11-23,296.95,Completed,entity021@example.invalid,REF-FIC-836,Example exception path
+TST-00142,ENTITY-022,SVC-C,Fictional Review,Standard,Fictional Area 2,Route Alpha,2025-12-02,2025-12-05,315.90,Completed,entity022@example.invalid,REF-FIC-849,Fictional priority case
+TST-00143,ENTITY-023,SVC-B,Imaginary Repair,Standard,Fictional Area 3,Route Alpha,2025-12-13,2025-12-17,334.85,Completed,entity023@example.invalid,REF-FIC-862,Imaginary standard case
+TST-00144,ENTITY-024,SVC-A,Example Setup,Standard,Fictional Area 4,Route Alpha,2025-12-24,2025-12-29,353.80,Completed,entity024@example.invalid,REF-FIC-875,
+TST-00145,ENTITY-025,SVC-C,Fictional Review,Standard,Fictional Area 5,Route Alpha,2026-01-04,,372.75,Pending,entity025@example.invalid,,Example exception path
+TST-00146,ENTITY-026,SVC-B,Imaginary Repair,Standard,Fictional Area 1,Route Beta,2026-01-15,,391.70,Pending,entity026@example.invalid,REF-FIC-901,Fictional priority case
+TST-00147,ENTITY-027,SVC-A,Example Setup,Standard,Fictional Area 2,Route Beta,2026-01-26,,410.65,Open,entity027@example.invalid,REF-FIC-914,Imaginary standard case
+TST-00148,ENTITY-028,SVC-C,Fictional Review,Standard,Fictional Area 3,Route Beta,2026-02-06,,429.60,Open,entity028@example.invalid,REF-FIC-927,Synthetic repeat entity
+TST-00149,ENTITY-029,SVC-B,Imaginary Repair,Standard,Fictional Area 4,Route Beta,2026-02-17,2026-02-27,448.55,Cancelled,entity029@example.invalid,REF-FIC-940,Example exception path
+TST-00150,ENTITY-030,SVC-A,Example Setup,Standard,Fictional Area 5,Route Beta,2025-10-01,2025-10-12,467.50,Completed,entity030@example.invalid,,
+TST-00151,ENTITY-031,SVC-C,Fictional Review,Standard,Fictional Area 1,Route Gamma,2025-10-12,2025-10-24,486.45,Completed,entity031@example.invalid,REF-FIC-966,Imaginary standard case
+TST-00152,ENTITY-032,SVC-B,Imaginary Repair,Priority,Fictional Area 2,Route Gamma,2025-10-23,2025-11-05,505.40,Completed,entity032@example.invalid,REF-FIC-979,Synthetic repeat entity
+TST-00153,ENTITY-033,SVC-A,Example Setup,Priority,Fictional Area 3,Route Gamma,2025-11-03,2025-11-17,524.35,Completed,entity033@example.invalid,REF-FIC-992,Example exception path
+TST-00154,ENTITY-034,SVC-C,Fictional Review,Priority,Fictional Area 4,Route Gamma,2025-11-14,2025-11-15,543.30,Completed,entity034@example.invalid,REF-FIC-008,Fictional priority case
+TST-00155,ENTITY-035,SVC-B,Imaginary Repair,Priority,Fictional Area 5,Route Gamma,2025-11-25,,562.25,Pending,entity035@example.invalid,,Imaginary standard case
+TST-00156,ENTITY-036,SVC-A,Example Setup,Priority,Fictional Area 1,Route Delta,2025-12-06,,581.20,Pending,entity036@example.invalid,REF-FIC-034,
+TST-00157,ENTITY-037,SVC-C,Fictional Review,Complex,Fictional Area 2,Route Delta,2025-12-17,,600.15,Open,entity037@example.invalid,REF-FIC-047,Example exception path
+TST-00158,ENTITY-038,SVC-B,Imaginary Repair,Complex,Fictional Area 3,Route Delta,2025-12-28,,619.10,Open,entity038@example.invalid,REF-FIC-060,Fictional priority case
+TST-00159,ENTITY-039,SVC-A,Example Setup,Review,Fictional Area 4,Route Delta,2026-01-08,2026-01-14,638.05,Cancelled,entity039@example.invalid,REF-FIC-073,Imaginary standard case
+TST-00160,ENTITY-040,SVC-C,Fictional Review,Standard,Fictional Area 5,Route Delta,2026-01-19,2026-01-26,657.00,Completed,entity040@example.invalid,,Synthetic repeat entity
+TST-00161,ENTITY-041,SVC-B,Imaginary Repair,Standard,Fictional Area 1,Route Alpha,2026-01-30,2026-02-07,675.95,Completed,entity041@example.invalid,REF-FIC-099,Example exception path
+TST-00162,ENTITY-042,SVC-A,Example Setup,Standard,Fictional Area 2,Route Alpha,2026-02-10,2026-02-19,694.90,Completed,entity042@example.invalid,REF-FIC-112,
+TST-00163,ENTITY-043,SVC-C,Fictional Review,Standard,Fictional Area 3,Route Alpha,2026-02-21,2026-03-03,713.85,Completed,entity043@example.invalid,REF-FIC-125,Imaginary standard case
+TST-00164,ENTITY-044,SVC-B,Imaginary Repair,Standard,Fictional Area 4,Route Alpha,2025-10-05,2025-10-16,732.80,Completed,entity044@example.invalid,REF-FIC-138,Synthetic repeat entity
+TST-00165,ENTITY-045,SVC-A,Example Setup,Standard,Fictional Area 5,Route Alpha,2025-10-16,,751.75,Pending,entity045@example.invalid,,Example exception path
+TST-00166,ENTITY-046,SVC-C,Fictional Review,Standard,Fictional Area 1,Route Beta,2025-10-27,,770.70,Pending,entity046@example.invalid,REF-FIC-164,Fictional priority case
+TST-00167,ENTITY-047,SVC-B,Imaginary Repair,Standard,Fictional Area 2,Route Beta,2025-11-07,,789.65,Open,entity047@example.invalid,REF-FIC-177,Imaginary standard case
+TST-00168,ENTITY-048,SVC-A,Example Setup,Standard,Fictional Area 3,Route Beta,2025-11-18,,808.60,Open,entity048@example.invalid,REF-FIC-190,
+TST-00169,ENTITY-049,SVC-C,Fictional Review,Standard,Fictional Area 4,Route Beta,2025-11-29,2025-12-01,827.55,Cancelled,entity049@example.invalid,REF-FIC-203,Example exception path
+TST-00170,ENTITY-050,SVC-B,Imaginary Repair,Standard,Fictional Area 5,Route Beta,2025-12-10,2025-12-13,846.50,Completed,entity050@example.invalid,,Fictional priority case
+TST-00171,ENTITY-051,SVC-A,Example Setup,Standard,Fictional Area 1,Route Gamma,2025-12-21,2025-12-25,865.45,Completed,entity051@example.invalid,REF-FIC-229,Imaginary standard case
+TST-00172,ENTITY-052,SVC-C,Fictional Review,Priority,Fictional Area 2,Route Gamma,2026-01-01,2026-01-06,884.40,Completed,entity052@example.invalid,REF-FIC-242,Synthetic repeat entity
+TST-00173,ENTITY-053,SVC-B,Imaginary Repair,Priority,Fictional Area 3,Route Gamma,2026-01-12,2026-01-18,903.35,Completed,entity053@example.invalid,REF-FIC-255,Example exception path
+TST-00174,ENTITY-054,SVC-A,Example Setup,Priority,Fictional Area 4,Route Gamma,2026-01-23,2026-01-30,922.30,Completed,entity054@example.invalid,REF-FIC-268,
+TST-00175,ENTITY-055,SVC-C,Fictional Review,Priority,Fictional Area 5,Route Gamma,2026-02-03,,941.25,Pending,entity055@example.invalid,,Imaginary standard case
+TST-00176,ENTITY-056,SVC-B,Imaginary Repair,Priority,Fictional Area 1,Route Delta,2026-02-14,,960.20,Pending,entity056@example.invalid,REF-FIC-294,Synthetic repeat entity
+TST-00177,ENTITY-057,SVC-A,Example Setup,Complex,Fictional Area 2,Route Delta,2026-02-25,,979.15,Open,entity057@example.invalid,REF-FIC-307,Example exception path
+TST-00178,ENTITY-058,SVC-C,Fictional Review,Complex,Fictional Area 3,Route Delta,2025-10-09,,998.10,Open,entity058@example.invalid,REF-FIC-320,Fictional priority case
+TST-00179,ENTITY-059,SVC-B,Imaginary Repair,Review,Fictional Area 4,Route Delta,2025-10-20,2025-11-01,1017.05,Cancelled,entity059@example.invalid,REF-FIC-333,Imaginary standard case
+TST-00180,ENTITY-060,SVC-A,Example Setup,Standard,Fictional Area 5,Route Delta,2025-10-31,2025-11-13,1036.00,Completed,entity060@example.invalid,,
+TST-00181,ENTITY-001,SVC-C,Fictional Review,Standard,Fictional Area 1,Route Alpha,2025-11-11,2025-11-25,1054.95,Completed,entity001@example.invalid,REF-FIC-359,Example exception path
+TST-00182,ENTITY-002,SVC-B,Imaginary Repair,Standard,Fictional Area 2,Route Alpha,2025-11-22,2025-11-23,1073.90,Completed,entity002@example.invalid,REF-FIC-372,Fictional priority case
+TST-00183,ENTITY-003,SVC-A,Example Setup,Standard,Fictional Area 3,Route Alpha,2025-12-03,2025-12-05,1092.85,Completed,entity003@example.invalid,REF-FIC-385,Imaginary standard case
+TST-00184,ENTITY-004,SVC-C,Fictional Review,Standard,Fictional Area 4,Route Alpha,2025-12-14,2025-12-17,1111.80,Completed,entity004@example.invalid,REF-FIC-398,Synthetic repeat entity
+TST-00185,ENTITY-005,SVC-B,Imaginary Repair,Standard,Fictional Area 5,Route Alpha,2025-12-25,,1130.75,Pending,entity005@example.invalid,,Example exception path
+TST-00186,ENTITY-006,SVC-A,Example Setup,Standard,Fictional Area 1,Route Beta,2026-01-05,,1149.70,Pending,entity006@example.invalid,REF-FIC-424,
+TST-00187,ENTITY-007,SVC-C,Fictional Review,Standard,Fictional Area 2,Route Beta,2026-01-16,,1168.65,Open,entity007@example.invalid,REF-FIC-437,Imaginary standard case
+TST-00188,ENTITY-008,SVC-B,Imaginary Repair,Standard,Fictional Area 3,Route Beta,2026-01-27,,1187.60,Open,entity008@example.invalid,REF-FIC-450,Synthetic repeat entity
+TST-00189,ENTITY-009,SVC-A,Example Setup,Standard,Fictional Area 4,Route Beta,2026-02-07,2026-02-15,1206.55,Cancelled,entity009@example.invalid,REF-FIC-463,Example exception path
+TST-00190,ENTITY-010,SVC-C,Fictional Review,Standard,Fictional Area 5,Route Beta,2026-02-18,2026-02-27,25.50,Completed,entity010@example.invalid,,Fictional priority case
+TST-00191,ENTITY-011,SVC-B,Imaginary Repair,Standard,Fictional Area 1,Route Gamma,2025-10-02,2025-10-12,44.45,Completed,entity011@example.invalid,REF-FIC-489,Imaginary standard case
+TST-00192,ENTITY-012,SVC-A,Example Setup,Priority,Fictional Area 2,Route Gamma,2025-10-13,2025-10-24,63.40,Completed,entity012@example.invalid,REF-FIC-502,
+TST-00193,ENTITY-013,SVC-C,Fictional Review,Priority,Fictional Area 3,Route Gamma,2025-10-24,2025-11-05,82.35,Completed,entity013@example.invalid,REF-FIC-515,Example exception path
+TST-00194,ENTITY-014,SVC-B,Imaginary Repair,Priority,Fictional Area 4,Route Gamma,2025-11-04,2025-11-17,101.30,Completed,entity014@example.invalid,REF-FIC-528,Fictional priority case
+TST-00195,ENTITY-015,SVC-A,Example Setup,Priority,Fictional Area 5,Route Gamma,2025-11-15,,120.25,Pending,entity015@example.invalid,,Imaginary standard case
+TST-00196,ENTITY-016,SVC-C,Fictional Review,Priority,Fictional Area 1,Route Delta,2025-11-26,,139.20,Pending,entity016@example.invalid,REF-FIC-554,Synthetic repeat entity
+TST-00197,ENTITY-017,SVC-B,Imaginary Repair,Complex,Fictional Area 2,Route Delta,2025-12-07,,158.15,Open,entity017@example.invalid,REF-FIC-567,Example exception path
+TST-00198,ENTITY-018,SVC-A,Example Setup,Complex,Fictional Area 3,Route Delta,2025-12-18,,177.10,Open,entity018@example.invalid,REF-FIC-580,
+TST-00199,ENTITY-019,SVC-C,Fictional Review,Review,Fictional Area 4,Route Delta,2025-12-29,2026-01-02,196.05,Cancelled,entity019@example.invalid,REF-FIC-593,Imaginary standard case
+TST-00200,ENTITY-020,SVC-B,Imaginary Repair,Standard,Fictional Area 5,Route Delta,2026-01-09,2026-01-14,215.00,Completed,entity020@example.invalid,,Synthetic repeat entity
+TST-00201,ENTITY-021,SVC-A,Example Setup,Standard,Fictional Area 1,Route Alpha,2026-01-20,2026-01-26,233.95,Completed,entity021@example.invalid,REF-FIC-619,Example exception path
+TST-00202,ENTITY-022,SVC-C,Fictional Review,Standard,Fictional Area 2,Route Alpha,2026-01-31,2026-02-07,252.90,Completed,entity022@example.invalid,REF-FIC-632,Fictional priority case
+TST-00203,ENTITY-023,SVC-B,Imaginary Repair,Standard,Fictional Area 3,Route Alpha,2026-02-11,2026-02-19,271.85,Completed,entity023@example.invalid,REF-FIC-645,Imaginary standard case
+TST-00204,ENTITY-024,SVC-A,Example Setup,Standard,Fictional Area 4,Route Alpha,2026-02-22,2026-03-03,290.80,Completed,entity024@example.invalid,REF-FIC-658,
+TST-00205,ENTITY-025,SVC-C,Fictional Review,Standard,Fictional Area 5,Route Alpha,2025-10-06,,309.75,Pending,entity025@example.invalid,,Example exception path
+TST-00206,ENTITY-026,SVC-B,Imaginary Repair,Standard,Fictional Area 1,Route Beta,2025-10-17,,328.70,Pending,entity026@example.invalid,REF-FIC-684,Fictional priority case
+TST-00207,ENTITY-027,SVC-A,Example Setup,Standard,Fictional Area 2,Route Beta,2025-10-28,,347.65,Open,entity027@example.invalid,REF-FIC-697,Imaginary standard case
+TST-00208,ENTITY-028,SVC-C,Fictional Review,Standard,Fictional Area 3,Route Beta,2025-11-08,,366.60,Open,entity028@example.invalid,REF-FIC-710,Synthetic repeat entity
+TST-00209,ENTITY-029,SVC-B,Imaginary Repair,Standard,Fictional Area 4,Route Beta,2025-11-19,2025-12-03,385.55,Cancelled,entity029@example.invalid,REF-FIC-723,Example exception path
+TST-00210,ENTITY-030,SVC-A,Example Setup,Standard,Fictional Area 5,Route Beta,2025-11-30,2025-12-01,404.50,Completed,entity030@example.invalid,,
+TST-00211,ENTITY-031,SVC-C,Fictional Review,Standard,Fictional Area 1,Route Gamma,2025-12-11,2025-12-13,423.45,Completed,entity031@example.invalid,REF-FIC-749,Imaginary standard case
+TST-00212,ENTITY-032,SVC-B,Imaginary Repair,Priority,Fictional Area 2,Route Gamma,2025-12-22,2025-12-25,442.40,Completed,entity032@example.invalid,REF-FIC-762,Synthetic repeat entity
+TST-00213,ENTITY-033,SVC-A,Example Setup,Priority,Fictional Area 3,Route Gamma,2026-01-02,2026-01-06,461.35,Completed,entity033@example.invalid,REF-FIC-775,Example exception path
+TST-00214,ENTITY-034,SVC-C,Fictional Review,Priority,Fictional Area 4,Route Gamma,2026-01-13,2026-01-18,480.30,Completed,entity034@example.invalid,REF-FIC-788,Fictional priority case
+TST-00215,ENTITY-035,SVC-B,Imaginary Repair,Priority,Fictional Area 5,Route Gamma,2026-01-24,,499.25,Pending,entity035@example.invalid,,Imaginary standard case
+TST-00216,ENTITY-036,SVC-A,Example Setup,Priority,Fictional Area 1,Route Delta,2026-02-04,,518.20,Pending,entity036@example.invalid,REF-FIC-814,
+TST-00217,ENTITY-037,SVC-C,Fictional Review,Complex,Fictional Area 2,Route Delta,2026-02-15,,537.15,Open,entity037@example.invalid,REF-FIC-827,Example exception path
+TST-00218,ENTITY-038,SVC-B,Imaginary Repair,Complex,Fictional Area 3,Route Delta,2026-02-26,,556.10,Open,entity038@example.invalid,REF-FIC-840,Fictional priority case
+TST-00219,ENTITY-039,SVC-A,Example Setup,Review,Fictional Area 4,Route Delta,2025-10-10,2025-10-20,575.05,Cancelled,entity039@example.invalid,REF-FIC-853,Imaginary standard case
+TST-00220,ENTITY-040,SVC-C,Fictional Review,Standard,Fictional Area 5,Route Delta,2025-10-21,2025-11-01,594.00,Completed,entity040@example.invalid,,Synthetic repeat entity
+TST-00221,ENTITY-041,SVC-B,Imaginary Repair,Standard,Fictional Area 1,Route Alpha,2025-11-01,2025-11-13,612.95,Completed,entity041@example.invalid,REF-FIC-879,Example exception path
+TST-00222,ENTITY-042,SVC-A,Example Setup,Standard,Fictional Area 2,Route Alpha,2025-11-12,2025-11-25,631.90,Completed,entity042@example.invalid,REF-FIC-892,
+TST-00223,ENTITY-043,SVC-C,Fictional Review,Standard,Fictional Area 3,Route Alpha,2025-11-23,2025-12-07,650.85,Completed,entity043@example.invalid,REF-FIC-905,Imaginary standard case
+TST-00224,ENTITY-044,SVC-B,Imaginary Repair,Standard,Fictional Area 4,Route Alpha,2025-12-04,2025-12-05,669.80,Completed,entity044@example.invalid,REF-FIC-918,Synthetic repeat entity
+TST-00225,ENTITY-045,SVC-A,Example Setup,Standard,Fictional Area 5,Route Alpha,2025-12-15,,688.75,Pending,entity045@example.invalid,,Example exception path
+TST-00226,ENTITY-046,SVC-C,Fictional Review,Standard,Fictional Area 1,Route Beta,2025-12-26,,707.70,Pending,entity046@example.invalid,REF-FIC-944,Fictional priority case
+TST-00227,ENTITY-047,SVC-B,Imaginary Repair,Standard,Fictional Area 2,Route Beta,2026-01-06,,726.65,Open,entity047@example.invalid,REF-FIC-957,Imaginary standard case
+TST-00228,ENTITY-048,SVC-A,Example Setup,Standard,Fictional Area 3,Route Beta,2026-01-17,,745.60,Open,entity048@example.invalid,REF-FIC-970,
+TST-00229,ENTITY-049,SVC-C,Fictional Review,Standard,Fictional Area 4,Route Beta,2026-01-28,2026-02-03,764.55,Cancelled,entity049@example.invalid,REF-FIC-983,Example exception path
+TST-00230,ENTITY-050,SVC-B,Imaginary Repair,Standard,Fictional Area 5,Route Beta,2026-02-08,2026-02-15,783.50,Completed,entity050@example.invalid,,Fictional priority case
+TST-00231,ENTITY-051,SVC-A,Example Setup,Standard,Fictional Area 1,Route Gamma,2026-02-19,2026-02-27,802.45,Completed,entity051@example.invalid,REF-FIC-012,Imaginary standard case
+TST-00232,ENTITY-052,SVC-C,Fictional Review,Priority,Fictional Area 2,Route Gamma,2025-10-03,2025-10-12,821.40,Completed,entity052@example.invalid,REF-FIC-025,Synthetic repeat entity
+TST-00233,ENTITY-053,SVC-B,Imaginary Repair,Priority,Fictional Area 3,Route Gamma,2025-10-14,2025-10-24,840.35,Completed,entity053@example.invalid,REF-FIC-038,Example exception path
+TST-00234,ENTITY-054,SVC-A,Example Setup,Priority,Fictional Area 4,Route Gamma,2025-10-25,2025-11-05,859.30,Completed,entity054@example.invalid,REF-FIC-051,
+TST-00235,ENTITY-055,SVC-C,Fictional Review,Priority,Fictional Area 5,Route Gamma,2025-11-05,,878.25,Pending,entity055@example.invalid,,Imaginary standard case
+TST-00236,ENTITY-056,SVC-B,Imaginary Repair,Priority,Fictional Area 1,Route Delta,2025-11-16,,897.20,Pending,entity056@example.invalid,REF-FIC-077,Synthetic repeat entity
+TST-00237,ENTITY-057,SVC-A,Example Setup,Complex,Fictional Area 2,Route Delta,2025-11-27,,916.15,Open,entity057@example.invalid,REF-FIC-090,Example exception path
+TST-00238,ENTITY-058,SVC-C,Fictional Review,Complex,Fictional Area 3,Route Delta,2025-12-08,,935.10,Open,entity058@example.invalid,REF-FIC-103,Fictional priority case
+TST-00239,ENTITY-059,SVC-B,Imaginary Repair,Review,Fictional Area 4,Route Delta,2025-12-19,2025-12-21,954.05,Cancelled,entity059@example.invalid,REF-FIC-116,Imaginary standard case
+TST-00240,ENTITY-060,SVC-A,Example Setup,Standard,Fictional Area 5,Route Delta,2025-12-30,2026-01-02,973.00,Completed,entity060@example.invalid,,

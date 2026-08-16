@@ -1,0 +1,41 @@
+fictional_id,status,created_date,amount,email,notes
+FIC-0001,Review,2026-01-01,29.80,case001@example.invalid,Synthetic retry path
+FIC-0002,Closed,2026-01-02,47.10,case002@example.invalid,Example validation case
+FIC-0003,Pending,2026-01-03,64.40,case003@example.invalid,Imaginary follow-up
+FIC-0004,Open,2026-01-04,81.70,case004@example.invalid,Fictional onboarding check
+FIC-0005,Review,2026-01-05,99.00,case005@example.invalid,Synthetic retry path
+FIC-0006,Closed,2026-01-06,21.30,case006@example.invalid,Example validation case
+FIC-0007,Pending,2026-01-07,38.60,case007@example.invalid,
+FIC-0008,Open,2026-01-08,55.90,case008@example.invalid,Fictional onboarding check
+FIC-0009,Review,2026-01-09,73.20,case009@example.invalid,Synthetic retry path
+FIC-0010,Closed,2026-01-10,90.50,case010@example.invalid,Example validation case
+FIC-0011,Pending,2026-01-11,12.80,case011@example.invalid,Imaginary follow-up
+FIC-0012,Open,2026-01-12,30.10,case012@example.invalid,Fictional onboarding check
+FIC-0013,Review,2026-01-13,47.40,case013@example.invalid,Synthetic retry path
+FIC-0014,Closed,2026-01-14,64.70,case014@example.invalid,
+FIC-0015,Pending,2026-01-15,82.00,case015@example.invalid,Imaginary follow-up
+FIC-0016,Open,2026-01-16,99.30,case016@example.invalid,Fictional onboarding check
+FIC-0017,Review,2026-01-17,21.60,case017@example.invalid,Synthetic retry path
+FIC-0018,Closed,2026-01-18,38.90,case018@example.invalid,Example validation case
+FIC-0019,Pending,2026-01-19,56.20,case019@example.invalid,Imaginary follow-up
+FIC-0020,Open,2026-01-20,73.50,case020@example.invalid,Fictional onboarding check
+FIC-0021,Review,2026-01-21,90.80,case021@example.invalid,
+FIC-0022,Closed,2026-01-22,13.10,case022@example.invalid,Example validation case
+FIC-0023,Pending,2026-01-23,30.40,case023@example.invalid,Imaginary follow-up
+FIC-0024,Open,2026-01-24,47.70,case024@example.invalid,Fictional onboarding check
+FIC-0025,Review,2026-01-25,65.00,case025@example.invalid,Synthetic retry path
+FIC-0026,Closed,2026-01-26,82.30,case026@example.invalid,Example validation case
+FIC-0027,Pending,2026-01-27,99.60,case027@example.invalid,Imaginary follow-up
+FIC-0028,Open,2026-01-28,21.90,case028@example.invalid,
+FIC-0029,Review,2026-01-29,39.20,case029@example.invalid,Synthetic retry path
+FIC-0030,Closed,2026-01-30,56.50,case030@example.invalid,Example validation case
+FIC-0031,Pending,2026-01-31,73.80,case031@example.invalid,Imaginary follow-up
+FIC-0032,Open,2026-02-01,91.10,case032@example.invalid,Fictional onboarding check
+FIC-0033,Review,2026-02-02,13.40,case033@example.invalid,Synthetic retry path
+FIC-0034,Closed,2026-02-03,30.70,case034@example.invalid,Example validation case
+FIC-0035,Pending,2026-02-04,48.00,case035@example.invalid,
+FIC-0036,Open,2026-02-05,65.30,case036@example.invalid,Fictional onboarding check
+FIC-0037,Review,2026-02-06,82.60,case037@example.invalid,Synthetic retry path
+FIC-0038,Closed,2026-02-07,99.90,case038@example.invalid,Example validation case
+FIC-0039,Pending,2026-02-08,22.20,case039@example.invalid,Imaginary follow-up
+FIC-0040,Open,2026-02-09,39.50,case040@example.invalid,Fictional onboarding check
