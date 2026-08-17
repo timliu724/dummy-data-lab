@@ -1,247 +1,138 @@
 # Dummy Data Lab
 
-**Offline, single-file HTML dummy-data tool for CSV/TXT that preserves stable
-mappings, useful numeric distributions, and user-confirmed relationships instead
-of simply randomising values.**
+**Transform existing CSV, TSV, or delimited TXT files into controlled dummy and test datasets—or generate linked datasets from scratch—in one offline HTML file.**
 
-Transform existing data—or generate linked test datasets—entirely in your
-browser, with no installation or upload.
+Preserve stable mappings, useful numeric distributions, and user-confirmed relationships when those structures matter to your tests.
 
-Current release: **V1.55**. The user-facing application is one standalone HTML
-file. It needs no Python environment, package installation, account, server, CDN,
-or external API at runtime.
+[**Download Dummy Data Lab V1.55**](https://github.com/timliu724/dummy-data-lab/releases/download/v1.55/Dummy-Data-Lab-v1.55.html)
 
-## Quick start — no installation
+**No installation · No upload · Runs locally in Chrome or Edge**
 
-**One HTML file. No installation. Runs locally in your browser.**
+## Quick start
 
-1. **[Download `Dummy-Data-Lab-v1.55.html`](https://github.com/timliu724/dummy-data-lab/releases/download/v1.55/Dummy-Data-Lab-v1.55.html).**
-2. Open it in a current Chrome or Edge browser.
-3. Load a CSV, TSV, or TXT file—or paste cells from a spreadsheet—and start
-   working locally. The application does not upload your data.
+1. Download `Dummy-Data-Lab-v1.55.html`.
+2. Open the downloaded file in Chrome or Edge.
+3. Load a CSV, TSV, or delimited TXT file—or paste cells copied from a spreadsheet.
+4. Review the proposed column actions, generate the output, and export the result.
 
-Use only source data you are authorised to process, and review generated output
-before sharing it.
-
-**Normal users:** use the standalone HTML above. **Developers:** see [`src/`](src/),
-[`scripts/`](scripts/), and [Development](#development) for the maintainable source
-and build workflow.
+Use only source data you are authorised to process, and review generated output before sharing it.
 
 ## What it does
 
-Dummy Data Lab supports two workflows.
-
 ### Transform existing data
 
-Load a CSV, TSV, or delimited TXT file, or paste cells copied from a spreadsheet.
-The application analyses the table locally, profiles each column, recommends a
-transformation strategy, and lets you review or override every decision. It then
-generates the requested number of rows, validates the result, and exports CSV or
-TSV.
+Dummy Data Lab analyses your table locally, profiles each column, recommends a transformation strategy, and lets you review or override every decision.
 
-Input size and output size are independent. A large source can be profiled while
-the output remains a small test fixture.
+You can preserve useful test structure while changing sensitive or unsuitable values, choose a different output row count, preview the result, and export CSV or TSV together with a quality report.
 
 ### Generate from scratch
 
-Create a new single-table dataset from built-in field generators and custom
-settings, or build a related-table project with primary keys, foreign keys,
-dependent fields, and linked dates. Related-table projects can be saved as a
-configuration and exported as a ZIP.
+Create a single-table dataset or build a related-table project with:
 
-Scratch generation produces obvious, rule-based test data. It is not a
-statistical or machine-learning synthetic-data model.
+- primary and foreign keys;
+- dependent fields;
+- linked dates;
+- configurable table sizes;
+- saved project configurations;
+- ZIP export.
 
-## Why Dummy Data Lab
+See the fully fictional examples in [`demo/`](demo/).
 
-The useful part is the combination of local processing, explicit control, and
-visible evidence:
+## Core capabilities
 
-- **Single HTML file:** download it, open it, and start. No runtime installation
-  is required.
-- **Browser-local:** selected files and pasted values are processed in the
-  current browser session.
-- **Stable mappings:** repeated source identities can receive consistent dummy
-  replacements within a selected scope.
-- **Numeric distributions:** numeric resampling uses bounded distribution
-  evidence instead of relying only on a short top-values list.
-- **Relationship confirmation:** row-level evidence can suggest a relationship,
-  but only the user can activate it as a generation and validation contract.
-- **Field-level strategies:** keep, replace, pattern-replace, shift, resample,
-  generalise, sanitise, clear, or drop each column.
-- **Business-pattern controls:** choose how much source order, grouping, mapping,
-  null placement, and confirmed relationships should influence the result.
-- **Quality reporting:** see what passed, what needs review, what failed, and
-  what could not be evaluated.
-- **Linked datasets:** generate and validate related tables, then export them
-  together.
-- **Column profiling:** review inferred types, patterns, missing values,
-  uniqueness, categories, numeric summaries, samples, and risk signals.
+- **Stable mappings:** repeated source values can receive consistent dummy replacements within the selected scope.
+- **Field-level strategies:** keep, replace, pattern-replace, shift, resample, generalise, sanitise, clear, or drop individual columns.
+- **Useful numeric distributions:** numeric resampling uses bounded distribution evidence rather than only a short list of common values.
+- **Evidence-based relationships:** source data can produce relationship candidates, but only user-confirmed relationships control generation and validation.
+- **Business-pattern controls:** choose how strongly source ordering, grouping, mappings, null placement, numeric rank patterns, and confirmed relationships influence the result.
+- **Quality reporting:** distinguish what passed, what needs review, what failed, and what was not evaluated.
+- **Linked datasets:** generate and validate related tables, including configured PK/FK and linked-field rules.
+- **Column profiling:** inspect inferred types, patterns, missing values, uniqueness, categories, numeric summaries, samples, and risk signals.
 
-## Protection modes
+## Control levels
 
-### Safe Test Data
+### Protection
 
-The recommended default. It protects common direct identifiers, applies
-risk-aware recommendations, and attempts to retain useful test shapes and
-coverage. It is a best-effort masking, sanitisation, and pseudonymisation
-workflow—not certified anonymisation.
+- **Safe Test Data** is the recommended default. It protects common direct identifiers and applies risk-aware transformation recommendations while attempting to retain useful test structure.
+- **ID Only** focuses mainly on direct identifiers. Indirect identifiers, rare combinations, free text, and more source structure can remain.
 
-### ID Only
+### Business pattern
 
-Primarily replaces direct identifiers. Indirect identifiers, rare combinations,
-free text, and business structure can remain. Treat it as pseudonymisation and
-review the output carefully.
+- **Flexible** prioritises varied test rows and scenario coverage.
+- **Balanced** seeks a practical compromise between fidelity, coverage, and privacy guardrails.
+- **High match** retains substantially more source order, grouping, null placement, numeric rank structure, and confirmed relationships. This can improve realism but can also preserve more disclosure risk.
 
-## Business-pattern modes
+Detailed behaviour is documented in the [User Guide](docs/USER_GUIDE.md).
 
-- **Flexible** prioritises varied test rows and coverage. Source order and
-  consecutive grouping may change.
-- **Balanced** is the default. It seeks a practical compromise between useful
-  fidelity, coverage, and privacy guardrails. Stable mappings, common formats,
-  bounded source blocks, and confirmed relationships can be preserved where
-  appropriate.
-- **High match** retains substantially more source structure and requires the
-  output row count to match the source row count. It can preserve row order,
-  group boundaries, null placement, numeric rank patterns, and confirmed
-  relationships. This may improve realism, but it can also preserve more
-  disclosure risk.
+## Quality and privacy boundaries
 
-None of these modes performs formal statistical synthetic modelling.
+The quality report uses four states:
 
-## Relationship handling
+- **PASS:** the evaluated contracts passed.
+- **REVIEW:** output was generated, but a result or boundary needs human review.
+- **FAIL:** one or more declared contracts failed; the output remains available for inspection.
+- **NOT EVALUATED:** there was not enough relevant evidence or no confirmed rule for that area.
 
-Dummy Data Lab does not invent a business relationship solely because columns
-are named state, postcode, city, or something similar. Fields remain independent
-unless there is stronger evidence and the user confirms a rule.
+The standalone HTML is self-contained. Its Content Security Policy disables outbound connections, and the application does not include analytics or telemetry. Source rows are processed in the current browser session and are not uploaded by the application.
 
-Row-level evidence can create a relationship candidate. A candidate is not
-active by default. Once confirmed, the relationship can guide generation and be
-checked as an output contract. When no relationship is confirmed or relevant
-evidence is unavailable, that part of the quality report may be
-**NOT EVALUATED**.
-
-## Quality and privacy report
-
-The report uses four explicit states:
-
-- **PASS:** the contracts that were evaluated passed.
-- **REVIEW:** output was generated, but evidence or a boundary needs human
-  review.
-- **FAIL:** one or more declared contracts failed. The completed output remains
-  downloadable for inspection.
-- **NOT EVALUATED:** the report did not have relevant source evidence or a
-  confirmed rule for that area.
-
-PASS does not mean privacy certification, guaranteed business suitability, or
-formal proof of anonymisation.
-
-## Offline and security model
-
-The V1.55 production artifact is self-contained. Application code, styles,
-parser code, and Worker source are included in the HTML. Its Content Security
-Policy disables outbound connections, and the build does not use external
-scripts, fonts, images, analytics, or telemetry.
-
-Source rows, profile samples, candidate rows, and replacement mappings are not
-written to persistent browser storage. A source-free recovery draft of general
-settings and fictional schemas can use **sessionStorage** for the current tab.
-Optional personal field sets use **localStorage** so they can be reused later.
-Clearing browser site data removes those saved settings.
-
-CSV and TSV exports include optional Excel-safe formula protection. When enabled,
-risky text beginning with characters such as equals, plus, minus, or at-sign is
-prefixed during export. If protection is disabled, the application warns before
-exporting risky headers or cells.
-
-## Privacy boundaries
-
-Dummy Data Lab can:
-
-- mask and replace source values;
-- pseudonymise direct identifiers;
-- apply best-effort text sanitisation;
-- preserve confirmed test-relevant structure;
-- generate synthetic-style data from scratch.
-
-It is not:
+Dummy Data Lab provides practical masking, sanitisation, pseudonymisation, and rule-based test-data generation. It is not:
 
 - certified anonymisation;
-- a k-anonymity engine;
-- a differential privacy implementation;
-- an SDV replacement or ML/statistical synthesiser;
-- a substitute for human review of uncontrolled free text.
+- a k-anonymity or differential privacy implementation;
+- a statistical or machine-learning synthetic-data model;
+- a guarantee that uncontrolled free text is free of sensitive information.
 
-High-fidelity structure, rare groups, unusual dates, or combinations of ordinary
-fields can remain identifying even when direct identifiers have changed.
+A PASS result applies only to the contracts that were evaluated. It is not privacy certification or a guarantee that generated data is safe for every use.
 
-## Supported input and output
+Read the [Security and Privacy notes](docs/SECURITY_PRIVACY.md) and [Known Limitations](docs/KNOWN_LIMITATIONS.md) before sharing generated output.
 
-**Input**
+## Input and output
+
+### Input
 
 - CSV
 - TSV
-- delimited TXT, including comma, tab, semicolon, pipe, and a custom
-  single-character delimiter
+- delimited TXT
 - cells pasted from a spreadsheet
 
-Direct XLSX import is not supported. Save as CSV/TSV or paste the cells.
+Direct XLSX import is not supported. Save the workbook as CSV/TSV or paste the required cells.
 
-**Output**
+### Output
 
-- CSV with UTF-8 BOM and CRLF defaults
-- optional TSV in Advanced mode
-- ZIP for related-table projects
-- JSON configuration save/load
-- JSON quality report
+- CSV
+- optional TSV
+- JSON quality reports
+- saved JSON configurations
+- ZIP archives for related-table projects
 
-## Release download and verification
+## Documentation
 
-The first public release uses **Dummy-Data-Lab-v1.55.html**.
-
-- Size: **791,222 bytes**
-- SHA-256:
-  **94FECCEB54F08DE523EA9EB53CF487C48229E8556C1ED4E31065078194D7FFC5**
-- Public release tag: **v1.55**
-
-Verify the downloaded file before use. See
-[release verification](docs/V1.55_RELEASE_VERIFICATION.md).
-
-## Known limitations
-
-- Text sanitisation is pattern-based and can miss contextual names, facts, and
-  identifiers.
-- Ambiguous dates and uncertain detections can require manual review.
-- High match deliberately retains more source structure.
-- Very large files remain limited by the memory and performance of the browser
-  and device.
-- Browser-local processing prevents upload by the application, but it does not
-  make an unsafe source or generated file safe to share.
-- Relationships that have not been confirmed receive weaker guarantees.
-
-See the [user guide](docs/USER_GUIDE.md),
-[security and privacy notes](docs/SECURITY_PRIVACY.md), and
-[public release notes](docs/RELEASE_NOTES.md).
+- [User Guide](docs/USER_GUIDE.md)
+- [Security and Privacy](docs/SECURITY_PRIVACY.md)
+- [Known Limitations](docs/KNOWN_LIMITATIONS.md)
+- [Release Notes](docs/RELEASE_NOTES.md)
+- [Changelog](CHANGELOG.md)
+- [V1.55 Release Verification](docs/V1.55_RELEASE_VERIFICATION.md)
+- [Third-party Licenses](docs/THIRD_PARTY_LICENSES.md)
 
 ## Development
 
 Development requires Node.js 24 or later and npm.
 
-    npm install
-    npm run build
-    npm run audit:offline
+```bash
+npm install
+npm run build
+npm run audit:offline
+```
 
-The V1.55 public export does not include the private development test suite.
-The standalone application does not require tests or Node.js at runtime.
+Maintainable source is located under [`src/`](src/). Build and audit utilities are under [`scripts/`](scripts/). The standalone application itself does not require Node.js or npm.
 
-The default build output is written under **outputs/**, which is intentionally
-excluded from Git. The maintainable source remains under **src/**; the GitHub
-Release asset is the verified standalone HTML.
+## Support and feedback
+
+Use [GitHub Issues](https://github.com/timliu724/dummy-data-lab/issues) to report a bug, ask a usage question, or suggest an improvement.
 
 ## License
 
 Dummy Data Lab is released under the [MIT License](LICENSE).
 
-Third-party components retain their own licenses. See
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the complete texts in
-[licenses](licenses/).
+Third-party components retain their own licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the complete texts under [`licenses/`](licenses/).
