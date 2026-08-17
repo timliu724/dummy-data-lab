@@ -36,7 +36,7 @@ Create a single-table dataset or build a related-table project with:
 - saved project configurations;
 - ZIP export.
 
-See the fully fictional examples in [`demo/`](demo/).
+Sample input datasets and a Scratch configuration are available in [`demo/`](demo/).
 
 ## Core capabilities
 
