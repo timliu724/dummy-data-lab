@@ -1,11 +1,11 @@
 # Dummy Data Lab
 
-**Offline, single-file browser tool for transforming CSV/TXT data into controlled
-dummy and test datasets, with field-level strategies, relationship controls, and
-quality reports.**
+**Offline, single-file HTML dummy-data tool for CSV/TXT that preserves stable
+mappings, useful numeric distributions, and user-confirmed relationships instead
+of simply randomising values.**
 
 Transform existing data—or generate linked test datasets—entirely in your
-browser, with field-by-field control and no upload.
+browser, with no installation or upload.
 
 Current release: **V1.55**. The user-facing application is one standalone HTML
 file. It needs no Python environment, package installation, account, server, CDN,
@@ -57,26 +57,26 @@ statistical or machine-learning synthetic-data model.
 The useful part is the combination of local processing, explicit control, and
 visible evidence:
 
-- **Browser-local:** selected files and pasted values are processed in the
-  current browser session.
 - **Single HTML file:** download it, open it, and start. No runtime installation
   is required.
-- **Column profiling:** review inferred types, patterns, missing values,
-  uniqueness, categories, numeric summaries, samples, and risk signals.
-- **Field-level strategies:** keep, replace, pattern-replace, shift, resample,
-  generalise, sanitise, clear, or drop each column.
+- **Browser-local:** selected files and pasted values are processed in the
+  current browser session.
 - **Stable mappings:** repeated source identities can receive consistent dummy
   replacements within a selected scope.
 - **Numeric distributions:** numeric resampling uses bounded distribution
   evidence instead of relying only on a short top-values list.
-- **Business-pattern controls:** choose how much source order, grouping, mapping,
-  null placement, and confirmed relationships should influence the result.
 - **Relationship confirmation:** row-level evidence can suggest a relationship,
   but only the user can activate it as a generation and validation contract.
+- **Field-level strategies:** keep, replace, pattern-replace, shift, resample,
+  generalise, sanitise, clear, or drop each column.
+- **Business-pattern controls:** choose how much source order, grouping, mapping,
+  null placement, and confirmed relationships should influence the result.
 - **Quality reporting:** see what passed, what needs review, what failed, and
   what could not be evaluated.
 - **Linked datasets:** generate and validate related tables, then export them
   together.
+- **Column profiling:** review inferred types, patterns, missing values,
+  uniqueness, categories, numeric summaries, samples, and risk signals.
 
 ## Protection modes
 
@@ -202,9 +202,7 @@ The first public release uses **Dummy-Data-Lab-v1.55.html**.
 - Size: **791,222 bytes**
 - SHA-256:
   **94FECCEB54F08DE523EA9EB53CF487C48229E8556C1ED4E31065078194D7FFC5**
-- Production tag: **v1.55**
-- Production commit:
-  **2dd498ef3e1b905c8332952c8e0ebf1abf102aba**
+- Public release tag: **v1.55**
 
 Verify the downloaded file before use. See
 [release verification](docs/V1.55_RELEASE_VERIFICATION.md).
