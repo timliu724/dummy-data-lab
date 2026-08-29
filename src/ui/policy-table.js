@@ -4,7 +4,6 @@ import { defaultActionParams, normaliseActionParams } from '../policy/action-par
 import { patternSegments } from '../generation/pattern-generator.js';
 import { ATTRIBUTE_ROLE_LABELS, normalizeAttributeRole } from '../privacy/attribute-roles.js';
 import { GENERALISATION_STRATEGY_VALUES, generalisationDescription } from '../generation/generalisation-rules.js';
-import { createInfoTooltip } from './info-tooltip.js';
 
 function percentage(value) {
   return Number.isFinite(value) ? `${(value * 100).toFixed(1)}%` : '—';
@@ -18,6 +17,13 @@ function patternSummary(detection) {
 function sampleSummary(profile) {
   const values = (profile.sampleValues ?? []).slice(0, 2).map((value) => String(value).slice(0, 42));
   return values.length ? values.join(' · ') : '—';
+}
+
+function textElement(documentRef, tagName, text, className = '') {
+  const element = documentRef.createElement(tagName);
+  if (className) element.className = className;
+  element.textContent = String(text);
+  return element;
 }
 
 export function policyTableRows({ profiles, detections, policies, actionPreviews = [] }) {
@@ -143,10 +149,6 @@ export function applyRecommendedPolicies({ policies, detections }) {
   })[0]));
 }
 
-const COLUMN_LABELS = Object.freeze([
-  'Column', 'Detected / risk', 'Profile evidence', 'Recommended', 'Final Action', 'Action settings', 'Review',
-]);
-const BASIC_COLUMN_LABELS = Object.freeze(['Column / sample', 'Suggested', 'Final Action', 'Preview / required setting', 'Check']);
 const ACTION_LABELS = Object.freeze({
   KEEP: 'Keep source values',
   REPLACE: 'Create fictional values',
@@ -161,24 +163,6 @@ const ACTION_LABELS = Object.freeze({
 
 function actionLabel(action) {
   return ACTION_LABELS[action] ?? String(action).replaceAll('_', ' ').toLocaleLowerCase();
-}
-
-function policyHeaderHelp(basic, label) {
-  if ((!basic && label === 'Review') || (basic && label === 'Check')) {
-    return Object.freeze({
-      label: 'What Review means',
-      content: 'Review means confirm a recommendation because of risk, ambiguity, or low confidence. It does not mean generation failed.',
-      placement: 'below-right',
-    });
-  }
-  if (!basic && label === 'Detected / risk') {
-    return Object.freeze({
-      label: 'About privacy roles',
-      content: 'Direct identifiers can identify a person or record. Quasi-identifiers may single out records when combined. Sensitive attributes need protection. Ordinary means no special privacy role was detected. Changing a role guides recommendations but does not silently replace your current Final Action.',
-      placement: 'below-left',
-    });
-  }
-  return null;
 }
 
 const DEFAULT_POLICY_PAGE_SIZE = 12;
@@ -196,6 +180,15 @@ export function filterPolicyRows(rows, { query = '', filter = 'ALL' } = {}) {
       || (filter === 'SHIFT' && row.selectedAction === 'SHIFT');
     return matchesQuery && matchesFilter;
   }));
+}
+
+export function policyFilterCounts(rows, { query = '' } = {}) {
+  const matchingRows = filterPolicyRows(rows, { query, filter: 'ALL' });
+  return Object.freeze({
+    ALL: matchingRows.length,
+    REVIEW: matchingRows.filter((row) => row.reviewRequired).length,
+    SHIFT: matchingRows.filter((row) => row.selectedAction === 'SHIFT').length,
+  });
 }
 
 export function policyPageModel(rows, { page = 1, pageSize = DEFAULT_POLICY_PAGE_SIZE } = {}) {
@@ -229,11 +222,6 @@ function appendLabeledControl(documentRef, parent, labelText, control) {
   caption.textContent = labelText;
   label.append(caption, control);
   parent.append(label);
-}
-
-function setMobileCellLabel(cell, label) {
-  cell.dataset.label = label;
-  return cell;
 }
 
 function renderShiftSettings(documentRef, row, rowIndex, onParamsChange) {
@@ -796,6 +784,192 @@ function renderBasicPolicyCards(documentRef, pageModel, data, view, {
   return grid;
 }
 
+function renderAdvancedPreviewPair(documentRef, row, businessFidelityLabel) {
+  const wrap = documentRef.createElement('div');
+  wrap.className = 'advanced-policy-card__preview';
+  wrap.setAttribute('aria-label', `${businessFidelityLabel} source and result preview for ${row.columnName}`);
+  const example = row.actionPreview?.status === 'READY' ? row.actionPreview.examples?.[0] : null;
+  const sourceValue = example?.source === '' ? '(blank)' : (example?.source ?? row.sample ?? '(no sample)');
+  const previewValue = example?.proposed
+    ?? row.actionPreview?.message
+    ?? 'Preview available after this action is configured.';
+
+  const source = documentRef.createElement('span');
+  source.className = 'advanced-policy-card__preview-value';
+  source.append(
+    textElement(documentRef, 'small', 'Source sample'),
+    textElement(documentRef, 'strong', sourceValue),
+  );
+  source.lastElementChild.title = sourceValue;
+
+  const arrow = textElement(documentRef, 'span', '→', 'advanced-policy-card__preview-arrow');
+  arrow.setAttribute('aria-hidden', 'true');
+
+  const proposed = documentRef.createElement('span');
+  proposed.className = 'advanced-policy-card__preview-value';
+  proposed.append(
+    textElement(documentRef, 'small', `${businessFidelityLabel} preview`),
+    textElement(documentRef, 'strong', previewValue),
+  );
+  proposed.lastElementChild.title = previewValue;
+  wrap.append(source, arrow, proposed);
+  return wrap;
+}
+
+function renderAdvancedPolicyCards(documentRef, pageModel, data, view, {
+  onActionChange,
+  onParamsChange,
+  onRoleChange,
+}) {
+  if (pageModel.rows.length === 0) {
+    const empty = documentRef.createElement('p');
+    empty.className = 'empty-note';
+    empty.textContent = 'No columns match this filter.';
+    return empty;
+  }
+
+  const list = documentRef.createElement('div');
+  list.className = 'advanced-policy-list';
+  pageModel.rows.forEach((row) => {
+    const rowIndex = row.columnIndex;
+    const card = documentRef.createElement('article');
+    card.className = `advanced-policy-card ${row.reviewRequired ? 'advanced-policy-card--review' : 'advanced-policy-card--ready'}`;
+    if (row.highRiskKeep) card.classList.add('is-danger');
+
+    const heading = documentRef.createElement('header');
+    heading.className = 'advanced-policy-card__heading';
+    const identity = documentRef.createElement('div');
+    const name = documentRef.createElement('h3');
+    name.textContent = row.columnName;
+    const meta = documentRef.createElement('p');
+    meta.textContent = `${row.detectedType.replaceAll('_', ' ').toLocaleLowerCase()} · ${row.risk.toLocaleLowerCase()} risk`;
+    identity.append(name, meta);
+    const status = documentRef.createElement('strong');
+    status.className = `advanced-policy-card__status ${row.reviewRequired ? 'is-review' : 'is-ready'}`;
+    status.textContent = row.reviewRequired ? 'Review' : 'Ready';
+    heading.append(identity, status);
+    const previewPair = renderAdvancedPreviewPair(documentRef, row, data.businessFidelityLabel);
+
+    const decision = documentRef.createElement('div');
+    decision.className = 'advanced-policy-card__decision';
+    const recommendation = documentRef.createElement('div');
+    recommendation.className = 'advanced-policy-card__recommendation';
+    const recommendationLabel = documentRef.createElement('span');
+    recommendationLabel.textContent = 'Recommended';
+    const recommendationAction = documentRef.createElement('strong');
+    recommendationAction.textContent = actionLabel(row.recommendedAction);
+    recommendation.append(recommendationLabel, recommendationAction);
+
+    const actionControl = documentRef.createElement('label');
+    actionControl.className = 'advanced-policy-card__action';
+    const actionCaption = documentRef.createElement('span');
+    actionCaption.textContent = 'Final action';
+    const select = documentRef.createElement('select');
+    select.className = 'policy-action';
+    select.setAttribute('aria-label', `Final action for ${row.columnName}`);
+    ACTION_VALUES.forEach((action) => appendOption(documentRef, select, action, actionLabel(action), row.selectedAction));
+    select.addEventListener('change', () => onActionChange?.(rowIndex, select.value));
+    actionControl.append(actionCaption, select);
+    if (row.selectedAction !== row.recommendedAction) {
+      const restore = documentRef.createElement('button');
+      restore.type = 'button';
+      restore.className = 'recommendation-restore';
+      restore.textContent = 'Use recommendation';
+      restore.addEventListener('click', () => onActionChange?.(rowIndex, row.recommendedAction));
+      actionControl.append(restore);
+    }
+    decision.append(recommendation, actionControl);
+
+    const details = documentRef.createElement('details');
+    details.className = 'advanced-policy-card__details';
+    const detailsSummary = documentRef.createElement('summary');
+    detailsSummary.textContent = 'Evidence and settings';
+    const detailsGrid = documentRef.createElement('div');
+    detailsGrid.className = 'advanced-policy-card__details-grid';
+
+    const evidence = documentRef.createElement('section');
+    evidence.className = 'advanced-policy-card__evidence';
+    const evidenceTitle = documentRef.createElement('h4');
+    evidenceTitle.textContent = 'Source evidence';
+    const evidenceList = documentRef.createElement('dl');
+    const evidenceRows = [
+      ['Example', row.sample],
+      ['Why recommended', row.reason],
+      ['Profile', `${row.nonEmpty} non-empty · ${row.nullPercent} null · ${row.uniquePercent} unique`],
+      ['Shape', `Length ${row.lengths} · Pattern ${row.pattern}`],
+    ];
+    evidenceRows.forEach(([label, value]) => {
+      const wrap = documentRef.createElement('div');
+      const term = documentRef.createElement('dt');
+      term.textContent = label;
+      const description = documentRef.createElement('dd');
+      description.textContent = value;
+      wrap.append(term, description);
+      evidenceList.append(wrap);
+    });
+    evidence.append(evidenceTitle, evidenceList);
+    if (row.recognizerLabel) {
+      const recognizer = documentRef.createElement('details');
+      recognizer.className = 'recognizer-explanation';
+      const recognizerSummary = documentRef.createElement('summary');
+      recognizerSummary.textContent = row.checksumValidated ? 'Checksum-verified detection' : 'Why this was detected';
+      const recognizerList = documentRef.createElement('ul');
+      row.detectionEvidence.forEach((item) => {
+        const entry = documentRef.createElement('li');
+        entry.textContent = item;
+        recognizerList.append(entry);
+      });
+      recognizer.append(recognizerSummary, recognizerList);
+      evidence.append(recognizer);
+    }
+
+    const role = documentRef.createElement('section');
+    role.className = 'advanced-policy-card__role';
+    const roleTitle = documentRef.createElement('h4');
+    roleTitle.textContent = 'Privacy role';
+    const roleSelect = documentRef.createElement('select');
+    roleSelect.setAttribute('aria-label', `Attribute role for ${row.columnName}`);
+    const selectedRole = row.attributeRoleSource === 'INFERRED' ? 'AUTO' : row.attributeRole;
+    appendOption(documentRef, roleSelect, 'AUTO', 'Auto-detect role', selectedRole);
+    ATTRIBUTE_ROLE_VALUES.forEach((roleValue) => appendOption(documentRef, roleSelect, roleValue, ATTRIBUTE_ROLE_LABELS[roleValue], selectedRole));
+    roleSelect.addEventListener('change', () => onRoleChange?.(rowIndex, roleSelect.value));
+    const roleReason = documentRef.createElement('small');
+    roleReason.textContent = row.attributeRoleReason;
+    role.append(roleTitle, roleSelect, roleReason);
+
+    const settings = documentRef.createElement('section');
+    settings.className = 'advanced-policy-card__settings';
+    const settingsTitle = documentRef.createElement('h4');
+    settingsTitle.textContent = 'Action settings';
+    settings.append(settingsTitle);
+    if (row.selectedAction === 'SHIFT') {
+      settings.append(renderShiftSettings(documentRef, row, rowIndex, onParamsChange ?? (() => {})));
+    } else if (['REPLACE', 'PATTERN_REPLACE'].includes(row.selectedAction)) {
+      settings.append(renderReplacementSettings(documentRef, row, rowIndex, onParamsChange ?? (() => {})));
+    } else if (row.selectedAction === 'GENERALISE') {
+      settings.append(renderGeneralisationSettings(documentRef, row, rowIndex, onParamsChange ?? (() => {})));
+    } else {
+      const noSettings = documentRef.createElement('span');
+      noSettings.className = 'muted-cell';
+      noSettings.textContent = 'No extra settings needed.';
+      settings.append(noSettings);
+    }
+    settings.append(renderActionPreview(documentRef, row, data.businessFidelityLabel, {
+      open: view.openPreviews.has(rowIndex),
+      onToggle(open) {
+        if (open) view.openPreviews.add(rowIndex);
+        else view.openPreviews.delete(rowIndex);
+      },
+    }));
+
+    detailsGrid.append(evidence, role, settings);
+    details.append(detailsSummary, detailsGrid);
+    card.append(heading, previewPair, decision, details);
+    list.append(card);
+  });
+  return list;
+}
+
 export function renderPolicyTable(container, data, handlers) {
   const rows = policyTableRows(data);
   const onActionChange = typeof handlers === 'function' ? handlers : handlers?.onActionChange;
@@ -808,6 +982,7 @@ export function renderPolicyTable(container, data, handlers) {
     query: '', filter: 'ALL', page: 1, pageSize: DEFAULT_POLICY_PAGE_SIZE, openPreviews: new Set(),
   };
   if (!(view.openPreviews instanceof Set)) view.openPreviews = new Set();
+  if (!basic && view.filter === 'CHANGED') view.filter = 'ALL';
   const filteredRows = filterPolicyRows(rows, view);
   const pageModel = policyPageModel(filteredRows, view);
   view.page = pageModel.page;
@@ -832,21 +1007,44 @@ export function renderPolicyTable(container, data, handlers) {
     replacement?.focus();
     replacement?.setSelectionRange?.(replacement.value.length, replacement.value.length);
   });
-  const filter = documentRef.createElement('select');
-  filter.setAttribute('aria-label', 'Filter policy rows');
-  const filterOptions = basic
-    ? [['ALL', 'All columns'], ['REVIEW', 'Needs my review'], ['CHANGED', 'Changed only']]
-    : [['ALL', 'All columns'], ['REVIEW', 'Review required'], ['CHANGED', 'Changed only'], ['SHIFT', 'SHIFT only']];
-  for (const [value, label] of filterOptions) appendOption(documentRef, filter, value, label, view.filter);
-  filter.addEventListener('change', () => {
-    view.filter = filter.value;
-    view.page = 1;
-    rerender();
-  });
+  let filterControl;
+  if (basic) {
+    const filter = documentRef.createElement('select');
+    filter.setAttribute('aria-label', 'Filter policy rows');
+    const filterOptions = [['ALL', 'All columns'], ['REVIEW', 'Suggested review'], ['CHANGED', 'Changed only']];
+    for (const [value, label] of filterOptions) appendOption(documentRef, filter, value, label, view.filter);
+    filter.addEventListener('change', () => {
+      view.filter = filter.value;
+      view.page = 1;
+      rerender();
+    });
+    filterControl = filter;
+  } else {
+    const counts = policyFilterCounts(rows, { query: view.query });
+    const filters = [['ALL', 'All'], ['REVIEW', 'Suggested review'], ['SHIFT', 'Shift']];
+    const filterGroup = documentRef.createElement('div');
+    filterGroup.className = 'policy-filter-control';
+    filterGroup.setAttribute('role', 'group');
+    filterGroup.setAttribute('aria-label', 'Filter policy rows');
+    for (const [value, label] of filters) {
+      const button = documentRef.createElement('button');
+      button.type = 'button';
+      button.dataset.policyFilter = value;
+      button.setAttribute('aria-pressed', String(view.filter === value));
+      button.textContent = `${label} ${counts[value]}`;
+      button.addEventListener('click', () => {
+        view.filter = value;
+        view.page = 1;
+        rerender();
+      });
+      filterGroup.append(button);
+    }
+    filterControl = filterGroup;
+  }
   const count = documentRef.createElement('strong');
   count.className = 'policy-list-count';
   count.textContent = `${pageModel.startNumber}–${pageModel.endNumber} of ${pageModel.totalRowCount} columns`;
-  controls.append(search, filter, count);
+  controls.append(search, filterControl, count);
 
   if (basic) {
     const cards = renderBasicPolicyCards(documentRef, pageModel, data, view, {
@@ -876,243 +1074,28 @@ export function renderPolicyTable(container, data, handlers) {
     return;
   }
 
-  const tableScroll = documentRef.createElement('div');
-  tableScroll.className = 'policy-table-scroll';
-  const table = documentRef.createElement('table');
-  table.className = `policy-table ${basic ? 'policy-table--basic' : 'policy-table--advanced'}`;
-  const head = documentRef.createElement('thead');
-  const headRow = documentRef.createElement('tr');
-  (basic ? BASIC_COLUMN_LABELS : COLUMN_LABELS).forEach((label) => {
-    const cell = documentRef.createElement('th');
-    cell.scope = 'col';
-    const help = policyHeaderHelp(basic, label);
-    if (help) {
-      const heading = documentRef.createElement('span');
-      heading.className = 'table-heading-with-help';
-      const text = documentRef.createElement('span');
-      text.textContent = label;
-      heading.append(text, createInfoTooltip(documentRef, help));
-      cell.append(heading);
-    } else {
-      cell.textContent = label;
-    }
-    headRow.append(cell);
+  const cards = renderAdvancedPolicyCards(documentRef, pageModel, data, view, {
+    onActionChange,
+    onParamsChange,
+    onRoleChange,
   });
-  head.append(headRow);
-  const body = documentRef.createElement('tbody');
-  pageModel.rows.forEach((row) => {
-    const rowIndex = row.columnIndex;
-    const tableRow = documentRef.createElement('tr');
-    if (row.highRiskKeep) tableRow.classList.add('is-danger');
-    if (basic) {
-      const columnCell = documentRef.createElement('td');
-      const columnName = documentRef.createElement('strong');
-      columnName.className = 'policy-column-name';
-      columnName.textContent = row.columnName;
-      const columnMeta = documentRef.createElement('small');
-      columnMeta.className = 'basic-column-meta';
-      columnMeta.textContent = `${row.detectedType} · ${row.risk} risk`;
-      const sample = documentRef.createElement('strong');
-      sample.className = 'profile-sample';
-      sample.textContent = `Sample: ${row.sample}`;
-      columnCell.append(columnName, columnMeta, sample);
-      const roleBadge = documentRef.createElement('span');
-      roleBadge.className = 'attribute-role-badge';
-      roleBadge.textContent = ATTRIBUTE_ROLE_LABELS[row.attributeRole] ?? row.attributeRole;
-      roleBadge.title = row.attributeRoleReason;
-      columnCell.append(roleBadge);
-      if (row.recognizerLabel) {
-        const verified = documentRef.createElement('strong');
-        verified.className = 'recognizer-verified';
-        verified.textContent = 'AU checksum verified';
-        columnCell.append(verified);
-      }
-      setMobileCellLabel(columnCell, 'Column');
-      tableRow.append(columnCell);
-    } else {
-      const columnCell = documentRef.createElement('td');
-      const columnName = documentRef.createElement('strong');
-      columnName.className = 'policy-column-name';
-      columnName.textContent = row.columnName;
-      columnCell.append(columnName);
-      const detectedCell = documentRef.createElement('td');
-      detectedCell.textContent = `${row.detectedType} · ${row.confidence} confidence · ${row.risk} risk`;
-      tableRow.append(columnCell, detectedCell);
-
-      if (row.recognizerLabel && detectedCell) {
-        const verified = documentRef.createElement('strong');
-        verified.className = 'recognizer-verified';
-        verified.textContent = row.checksumValidated ? 'Checksum verified' : 'Recognizer match';
-        const explanation = documentRef.createElement('details');
-        explanation.className = 'recognizer-explanation';
-        const explanationSummary = documentRef.createElement('summary');
-        explanationSummary.textContent = 'Why detected?';
-        const list = documentRef.createElement('ul');
-        row.detectionEvidence.forEach((item) => {
-          const entry = documentRef.createElement('li');
-          entry.textContent = item;
-          list.append(entry);
-        });
-        explanation.append(explanationSummary, list);
-        detectedCell.append(verified, explanation);
-      }
-      if (detectedCell) {
-        const roleLabel = documentRef.createElement('label');
-        roleLabel.className = 'attribute-role-control';
-        const roleCaption = documentRef.createElement('span');
-        roleCaption.textContent = `Privacy role · ${row.attributeRoleConfidence.toLocaleLowerCase()} confidence`;
-        const roleSelect = documentRef.createElement('select');
-        roleSelect.setAttribute('aria-label', `Attribute role for ${row.columnName}`);
-        const selectedRole = row.attributeRoleSource === 'INFERRED' ? 'AUTO' : row.attributeRole;
-        appendOption(documentRef, roleSelect, 'AUTO', 'Auto-detect role', selectedRole);
-        ATTRIBUTE_ROLE_VALUES.forEach((role) => appendOption(documentRef, roleSelect, role, ATTRIBUTE_ROLE_LABELS[role], selectedRole));
-        roleSelect.addEventListener('change', () => onRoleChange?.(rowIndex, roleSelect.value));
-        const roleReason = documentRef.createElement('small');
-        roleReason.textContent = row.attributeRoleReason;
-        roleLabel.append(roleCaption, roleSelect, roleReason);
-        detectedCell.append(roleLabel);
-      }
-
-      const evidenceCell = documentRef.createElement('td');
-      const evidenceSummary = documentRef.createElement('span');
-      evidenceSummary.textContent = `${row.nonEmpty} non-empty · ${row.nullPercent} null · ${row.uniquePercent} unique\nLength ${row.lengths} · Pattern ${row.pattern}`;
-      const sample = documentRef.createElement('strong');
-      sample.className = 'profile-sample';
-      sample.textContent = `Sample: ${row.sample}`;
-      evidenceCell.append(evidenceSummary, sample);
-      tableRow.append(evidenceCell);
-    }
-
-    const recommendationCell = documentRef.createElement('td');
-    const recommendationAction = documentRef.createElement('strong');
-    recommendationAction.textContent = row.recommendedAction;
-    const recommendationReason = documentRef.createElement('span');
-    recommendationReason.textContent = row.reason;
-    if (basic) recommendationReason.className = 'basic-recommendation-reason';
-    recommendationCell.append(recommendationAction, recommendationReason);
-    setMobileCellLabel(recommendationCell, 'Suggested');
-    tableRow.append(recommendationCell);
-
-    const actionCell = documentRef.createElement('td');
-    const select = documentRef.createElement('select');
-    select.className = 'policy-action';
-    select.setAttribute('aria-label', `Action for ${row.columnName}`);
-    ACTION_VALUES.forEach((action) => {
-      const option = documentRef.createElement('option');
-      option.value = action;
-      option.textContent = action;
-      option.selected = action === row.selectedAction;
-      select.append(option);
-    });
-    select.addEventListener('change', () => onActionChange?.(rowIndex, select.value));
-    const reminder = documentRef.createElement('span');
-    reminder.className = 'final-action-recommendation';
-    reminder.textContent = `Recommended: ${row.recommendedAction}`;
-    actionCell.append(select, reminder);
-    if (row.selectedAction !== row.recommendedAction) {
-      const restore = documentRef.createElement('button');
-      restore.type = 'button';
-      restore.className = 'recommendation-restore';
-      restore.textContent = 'Use recommendation';
-      restore.setAttribute('aria-label', `Use ${row.recommendedAction} recommendation for ${row.columnName}`);
-      restore.addEventListener('click', () => onActionChange?.(rowIndex, row.recommendedAction));
-      actionCell.append(restore);
-    }
-    setMobileCellLabel(actionCell, 'Final Action');
-    tableRow.append(actionCell);
-    const settingsCell = documentRef.createElement('td');
-    if (row.selectedAction === 'SHIFT') {
-      settingsCell.append(basic
-        ? renderBasicShiftSettings(documentRef, row, rowIndex, onParamsChange ?? (() => {}), onRequestAdvanced)
-        : renderShiftSettings(documentRef, row, rowIndex, onParamsChange ?? (() => {})));
-    } else if (['REPLACE', 'PATTERN_REPLACE'].includes(row.selectedAction)) {
-      if (basic) {
-        const params = normaliseActionParams({ action: row.selectedAction, detectedType: row.detectedType, params: row.actionParams });
-        const summary = documentRef.createElement('span');
-        summary.className = 'basic-rule-summary';
-        if (row.selectedAction === 'PATTERN_REPLACE') {
-          const multipleValuesActive = params.multiValueMode === 'FORCE'
-            || (params.multiValueMode === 'AUTO' && params.multiValueDetected);
-          const possibleMultipleValues = !multipleValuesActive && params.multiValueConfidence === 'MEDIUM';
-          summary.textContent = `Pattern: ${params.patternMode === 'AUTO' ? 'Smart structure' : params.patternMode.toLowerCase().replaceAll('_', ' ')}`
-            + (multipleValuesActive ? ' · List items: separate' : '')
-            + (possibleMultipleValues ? ' · Possible list: review in Advanced' : '');
-        } else {
-          summary.textContent = 'Consistent replacement (smart default)';
-        }
-        const edit = documentRef.createElement('button');
-        edit.type = 'button';
-        edit.className = 'basic-advanced-jump';
-        edit.textContent = 'Fine-tune in Advanced';
-        edit.addEventListener('click', () => onRequestAdvanced?.());
-        settingsCell.append(summary, edit);
-      } else {
-        settingsCell.append(renderReplacementSettings(documentRef, row, rowIndex, onParamsChange ?? (() => {})));
-      }
-    } else if (row.selectedAction === 'GENERALISE') {
-      if (basic) {
-        const params = normaliseActionParams({ action: 'GENERALISE', detectedType: row.detectedType, params: row.actionParams });
-        const summary = documentRef.createElement('span');
-        summary.className = 'basic-rule-summary';
-        summary.textContent = `Generalise · ${params.level.toLocaleLowerCase()}`;
-        const edit = documentRef.createElement('button');
-        edit.type = 'button';
-        edit.className = 'basic-advanced-jump';
-        edit.textContent = 'Choose hierarchy in Advanced';
-        edit.addEventListener('click', () => onRequestAdvanced?.());
-        settingsCell.append(summary, edit);
-      } else {
-        settingsCell.append(renderGeneralisationSettings(documentRef, row, rowIndex, onParamsChange ?? (() => {})));
-      }
-    } else if (!basic) {
-      const noSettings = documentRef.createElement('span');
-      noSettings.className = 'muted-cell';
-      noSettings.textContent = 'No settings needed';
-      settingsCell.append(noSettings);
-    }
-    settingsCell.append(renderActionPreview(documentRef, row, data.businessFidelityLabel, {
-      open: view.openPreviews.has(rowIndex),
-      onToggle(open) {
-        if (open) view.openPreviews.add(rowIndex);
-        else view.openPreviews.delete(rowIndex);
-      },
-    }));
-    setMobileCellLabel(settingsCell, 'Preview / setting');
-    tableRow.append(settingsCell);
-    const reviewCell = documentRef.createElement('td');
-    reviewCell.textContent = row.reviewRequired ? 'Review' : 'Ready';
-    reviewCell.className = row.reviewRequired ? 'review-yes' : 'review-no';
-    setMobileCellLabel(reviewCell, 'Check');
-    tableRow.append(reviewCell);
-    body.append(tableRow);
-  });
-  table.append(head, body);
-  if (pageModel.rows.length > 0) {
-    tableScroll.append(table);
-  } else {
-    const empty = documentRef.createElement('p');
-    empty.className = 'empty-note';
-    empty.textContent = 'No columns match this filter.';
-    tableScroll.append(empty);
-  }
-
-  const pagination = documentRef.createElement('div');
-  pagination.className = 'policy-pagination';
-  const previous = documentRef.createElement('button');
-  previous.type = 'button';
-  previous.className = 'button';
-  previous.textContent = 'Previous';
-  previous.disabled = pageModel.page <= 1;
-  previous.addEventListener('click', () => { view.page -= 1; rerender(); });
-  const pageStatus = documentRef.createElement('span');
-  pageStatus.textContent = `Page ${pageModel.page} of ${pageModel.pageCount}`;
-  const next = documentRef.createElement('button');
-  next.type = 'button';
-  next.className = 'button';
-  next.textContent = 'Next';
-  next.disabled = pageModel.page >= pageModel.pageCount;
-  next.addEventListener('click', () => { view.page += 1; rerender(); });
-  pagination.append(previous, pageStatus, next);
-  shell.append(controls, tableScroll, pagination);
+  const cardPagination = documentRef.createElement('div');
+  cardPagination.className = 'policy-pagination';
+  const cardPrevious = documentRef.createElement('button');
+  cardPrevious.type = 'button';
+  cardPrevious.className = 'button';
+  cardPrevious.textContent = 'Previous';
+  cardPrevious.disabled = pageModel.page <= 1;
+  cardPrevious.addEventListener('click', () => { view.page -= 1; rerender(); });
+  const cardPageStatus = documentRef.createElement('span');
+  cardPageStatus.textContent = `Page ${pageModel.page} of ${pageModel.pageCount}`;
+  const cardNext = documentRef.createElement('button');
+  cardNext.type = 'button';
+  cardNext.className = 'button';
+  cardNext.textContent = 'Next';
+  cardNext.disabled = pageModel.page >= pageModel.pageCount;
+  cardNext.addEventListener('click', () => { view.page += 1; rerender(); });
+  cardPagination.append(cardPrevious, cardPageStatus, cardNext);
+  shell.append(controls, cards, cardPagination);
   container.replaceChildren(shell);
 }

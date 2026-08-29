@@ -2,7 +2,7 @@
 
 ## Trust boundary
 
-Dummy Data Lab V1.55 processes a user-selected file or explicitly pasted text in
+Dummy Data Lab V1.70 processes a user-selected file or explicitly pasted text in
 the local browser. The production artifact is a standalone HTML file containing
 its application code, styles, Papa Parse runtime, and Worker source.
 

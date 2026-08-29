@@ -1,6 +1,6 @@
 # Known limitations
 
-Dummy Data Lab V1.55 is designed for practical browser-local test-data work. The
+Dummy Data Lab V1.70 is designed for practical browser-local test-data work. The
 following boundaries are intentional and should be understood before using or
 sharing generated output.
 

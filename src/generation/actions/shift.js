@@ -6,7 +6,12 @@ import {
   validateActionParams,
 } from '../../policy/action-parameters.js';
 import { resolveDateOrientation } from '../date-shift-context.js';
-import { shiftDateByDays, shiftNumericSegment, shiftTimeByMinutes } from '../fixed-shift.js';
+import {
+  shiftDateByDays,
+  shiftDateTimeByMinutes,
+  shiftNumericSegment,
+  shiftTimeByMinutes,
+} from '../fixed-shift.js';
 
 function resolveOffset(params, policy, context) {
   if (params.offsetMode === OFFSET_MODES.FIXED) return params.offsetValue;
@@ -42,6 +47,13 @@ export function executeShift({ value, policy, detection, context }) {
     } else if (policy.detectedType === 'TIME') {
       const minutes = params.unit === SHIFT_UNITS.HOURS ? Number(offset) * 60 : Number(offset);
       shifted = shiftTimeByMinutes(value, minutes);
+    } else if (policy.detectedType === 'DATETIME' && [SHIFT_UNITS.HOURS, SHIFT_UNITS.MINUTES].includes(params.unit)) {
+      const minutes = params.unit === SHIFT_UNITS.HOURS ? Number(offset) * 60 : Number(offset);
+      shifted = shiftDateTimeByMinutes(
+        value,
+        minutes,
+        resolveDateOrientation({ actionParams: params, detection }),
+      );
     } else {
       if (params.unit !== SHIFT_UNITS.DAYS) throw new RangeError('Date SHIFT currently requires DAYS.');
       shifted = shiftDateByDays(value, Number(offset), resolveDateOrientation({ actionParams: params, detection }));

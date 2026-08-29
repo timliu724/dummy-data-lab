@@ -11,10 +11,34 @@ export function delimiterFromControl(value, customValue = '') {
   throw new RangeError('Unknown delimiter selection.');
 }
 
-export function selectInputValue({ file = null, pastedText = '' }) {
+export function selectInputValue({
+  file = null,
+  pastedText = '',
+  sourcePreference = null,
+  pastedTextIsSample = false,
+}) {
+  const text = String(pastedText);
+  const hasPaste = text.trim() !== '';
+  if (file && hasPaste) {
+    if (pastedTextIsSample || sourcePreference === 'FILE') {
+      return Object.freeze({ input: file, inputKind: undefined, sourceLabel: file.name || 'Selected file' });
+    }
+    if (sourcePreference === 'PASTE' || sourcePreference === 'SAMPLE') {
+      return Object.freeze({
+        input: text,
+        inputKind: 'PASTE',
+        sourceLabel: pastedTextIsSample ? 'the fictional retail-orders sample' : 'pasted spreadsheet text',
+      });
+    }
+    throw new RangeError('Choose whether to analyse the uploaded file or the pasted data. Only one source table can be analysed at a time.');
+  }
   if (file) return Object.freeze({ input: file, inputKind: undefined, sourceLabel: file.name || 'Selected file' });
-  if (String(pastedText).trim() !== '') return Object.freeze({ input: String(pastedText), inputKind: 'PASTE', sourceLabel: 'Pasted spreadsheet text' });
-  throw new RangeError('Choose a CSV/TXT/TSV file or paste spreadsheet data first.');
+  if (hasPaste) return Object.freeze({
+    input: text,
+    inputKind: 'PASTE',
+    sourceLabel: pastedTextIsSample ? 'the fictional retail-orders sample' : 'pasted spreadsheet text',
+  });
+  throw new RangeError('Upload a CSV, TSV, or TXT file, paste spreadsheet cells, or try the sample data first.');
 }
 
 export function parseOptionsFromControls({ delimiterMode, customDelimiter, headerMode, inputKind }) {

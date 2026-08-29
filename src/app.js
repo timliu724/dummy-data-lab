@@ -28,6 +28,7 @@ import {
   updatePolicyActionParams,
   updatePolicyAttributeRole,
 } from './ui/policy-table.js';
+import { normaliseActionParams } from './policy/action-parameters.js';
 import { renderInlineComparisonTable, renderPreviewTable } from './ui/preview-table.js';
 import { renderProgress } from './ui/progress-panel.js';
 import { interfaceModeModel } from './ui/interface-mode.js';
@@ -52,7 +53,8 @@ import { combineOutputSchema, createSourceOutputSchema } from './schema/output-s
 import { defaultGeneratorSettings, newGeneratedColumn, renderGeneratedColumnEditor } from './ui/generated-column-editor.js';
 import { renderGenerationValidation } from './ui/generation-validation.js';
 import { generateStandaloneDataset } from './generation/generated-column-engine.js';
-import { appendDatasetTemplateBlock, listDatasetTemplates } from './templates/dataset-templates.js';
+import { SeededRandomSource } from './generation/random-source.js';
+import { appendDatasetTemplateBlock, getDatasetTemplate, listDatasetTemplates } from './templates/dataset-templates.js';
 import { createGenerationConfig, parseGenerationConfig, serializeGenerationConfig } from './config/generation-config.js';
 import { downloadJson } from './export/download-json.js';
 import { createProviderCatalog } from './generation/provider-catalog.js';
@@ -69,6 +71,7 @@ import { renderDatasetIntegrity, summarizeDatasetIntegrityFailure } from './ui/d
 import { createQualityReport, serializeQualityReport } from './quality/quality-report.js';
 import { renderQualityReport } from './ui/quality-report.js';
 import { createConnectedCommerceScenario } from './templates/connected-scenario.js';
+import { TRANSFORM_SAMPLE, isTransformSampleText } from './examples/transform-sample.js';
 import { downloadDatasetArchive, prepareDatasetArchive } from './export/dataset-archive.js';
 import {
   DEFAULT_BUSINESS_FIDELITY,
@@ -76,7 +79,13 @@ import {
   defaultBusinessFidelitySettings,
   normaliseBusinessFidelitySettings,
 } from './business/fidelity.js';
+import { mountQuickPrototypeSurface } from './ui/quick-prototype-surface.js';
 import {
+  businessFidelityImpactModel,
+  generationVariationModel,
+} from './ui/generation-expectations.js';
+import {
+  BASIC_GENERATOR_IDS,
   BASIC_QUICK_ADD_IDS,
   basicProtectedColumnIds,
   scratchAdvancedSummary,
@@ -85,6 +94,7 @@ import {
 const providerCatalog = createProviderCatalog();
 
 const elements = Object.freeze({
+  quickSurfaceHost: document.querySelector('#quick-surface-host'),
   fileInput: document.querySelector('#file-input'),
   fileName: document.querySelector('#file-name'),
   pasteInput: document.querySelector('#paste-input'),
@@ -93,6 +103,12 @@ const elements = Object.freeze({
   customDelimiter: document.querySelector('#custom-delimiter'),
   headerMode: document.querySelector('#header-mode'),
   analyseButton: document.querySelector('#analyse-button'),
+  advancedSampleData: document.querySelector('#advanced-sample-data'),
+  advancedSourceStatus: document.querySelector('#advanced-source-status'),
+  advancedSourceConflict: document.querySelector('#advanced-source-conflict'),
+  advancedUseFileSource: document.querySelector('#advanced-use-file-source'),
+  advancedUsePasteSource: document.querySelector('#advanced-use-paste-source'),
+  advancedPasteField: document.querySelector('.paste-field'),
   parseSummary: document.querySelector('#parse-summary'),
   customRowPreset: document.querySelector('input[name="row-count"][value="custom"]'),
   customRowCount: document.querySelector('#custom-row-count'),
@@ -102,6 +118,7 @@ const elements = Object.freeze({
   modeBoundary: document.querySelector('#mode-boundary'),
   businessFidelityInputs: [...document.querySelectorAll('input[name="business-fidelity"]')],
   businessFidelityBoundary: document.querySelector('#business-fidelity-boundary'),
+  businessFidelityImpact: document.querySelector('#business-fidelity-impact'),
   businessFidelitySettings: [...document.querySelectorAll('[data-fidelity-setting]')],
   coverageSummary: document.querySelector('#coverage-summary'),
   policyTable: document.querySelector('#policy-table'),
@@ -115,9 +132,12 @@ const elements = Object.freeze({
   reviewConfirmation: document.querySelector('#review-confirmation'),
   generationReadiness: document.querySelector('#generation-readiness'),
   generateButton: document.querySelector('#generate-button'),
+  advancedRegenerate: document.querySelector('#advanced-regenerate'),
   previewTable: document.querySelector('#preview-table'),
   previewControls: document.querySelector('#preview-controls'),
+  compareControls: document.querySelector('#compare-controls'),
   compareToggle: document.querySelector('#compare-toggle'),
+  previewRowNote: document.querySelector('#preview-row-note'),
   excelSafe: document.querySelector('#excel-safe'),
   exportCsv: document.querySelector('#export-csv'),
   exportTsv: document.querySelector('#export-tsv'),
@@ -179,6 +199,16 @@ const elements = Object.freeze({
   basicStepGuidance: document.querySelector('#basic-step-guidance'),
   basicStepOneLabel: document.querySelector('#basic-step-one-label'),
   basicStepButtons: [...document.querySelectorAll('button[data-basic-step-target]')],
+  quickTaskLabel: document.querySelector('#quick-task-label'),
+  quickOutputRowCount: document.querySelector('#quick-output-row-count'),
+  quickOutputColumnCount: document.querySelector('#quick-output-column-count'),
+  quickSidebarNote: document.querySelector('#quick-sidebar-note'),
+  advancedTaskLabel: document.querySelector('#advanced-task-label'),
+  advancedOutputRowCount: document.querySelector('#advanced-output-row-count'),
+  advancedOutputColumnCount: document.querySelector('#advanced-output-column-count'),
+  quickPreviewSummary: document.querySelector('#quick-preview-summary'),
+  quickPreviewColumnCount: document.querySelector('#quick-preview-column-count'),
+  quickPreviewRowCount: document.querySelector('#quick-preview-row-count'),
   recoveryStatus: document.querySelector('#recovery-status'),
   undoConfig: document.querySelector('#undo-config'),
   clearWork: document.querySelector('#clear-work'),
@@ -188,6 +218,7 @@ const state = {
   workflow: 'IDLE',
   input: null,
   inputKind: null,
+  inputSourcePreference: null,
   analysis: null,
   policies: [],
   relationships: [],
@@ -225,6 +256,7 @@ const state = {
 };
 
 let workerClient = null;
+let quickSurface = null;
 const RECOVERY_DRAFT_KEY = 'dummy-data-lab-safe-draft-v1';
 const undoStack = [];
 let draftSaveTimer = null;
@@ -327,6 +359,12 @@ function renderBusinessFidelity() {
     input.checked = Boolean(model.settings[input.dataset.fidelitySetting]);
   }
   elements.businessFidelityBoundary.textContent = model.boundary;
+  elements.businessFidelityImpact.textContent = businessFidelityImpactModel({
+    level: model.level,
+    settings: model.settings,
+    analysis: state.analysis,
+    activeRelationshipCount: state.relationships.filter(relationshipIsActive).length,
+  }).text;
   document.body.dataset.businessFidelity = model.level;
 }
 
@@ -336,6 +374,52 @@ function basicReviewAvailable() {
     return state.generatedColumns.length > 0 || state.datasetTables.some((table) => table.columns.length > 0);
   }
   return state.generatedColumns.length > 0;
+}
+
+function currentQuickColumnCount() {
+  if (state.generationResult) return state.generationResult.headers.length;
+  if (state.workflowKind === 'TRANSFORM') return state.analysis?.headers.length ?? 0;
+  return state.generatedColumns.filter((column) => column.enabled !== false).length;
+}
+
+function renderQuickSummary() {
+  const columnCount = currentQuickColumnCount();
+  const generatedRowCount = state.generationResult?.rows.length ?? 0;
+  const taskLabel = state.workflowKind === 'TRANSFORM' ? 'Transform existing data' : 'Generate one table';
+  const advancedTaskLabel = state.workflowKind === 'TRANSFORM'
+    ? 'Transform a table'
+    : state.scratchStructure === 'MULTI'
+      ? 'Generate related tables'
+      : 'Generate from scratch';
+  const notes = {
+    INPUT: state.workflowKind === 'TRANSFORM'
+      ? 'Add a source table. You will review the real column decisions before anything is generated.'
+      : 'Choose a one-table template or add fields, then continue to review.',
+    REVIEW: state.workflowKind === 'TRANSFORM'
+      ? 'Check the output size and the highlighted column decisions, then generate.'
+      : 'Check the fields and output size, then generate the complete fictional table.',
+    RESULT: 'The preview is a scrollable window. The download always includes every generated column.',
+  };
+  if (elements.quickTaskLabel) elements.quickTaskLabel.textContent = taskLabel;
+  if (elements.quickOutputRowCount) {
+    elements.quickOutputRowCount.textContent = (generatedRowCount || state.requestedRowCount).toLocaleString();
+  }
+  if (elements.quickOutputColumnCount) {
+    elements.quickOutputColumnCount.textContent = columnCount > 0 ? columnCount.toLocaleString() : 'After analysis';
+  }
+  if (elements.quickSidebarNote) elements.quickSidebarNote.textContent = notes[state.basicStep];
+  if (elements.advancedTaskLabel) elements.advancedTaskLabel.textContent = advancedTaskLabel;
+  if (elements.advancedOutputRowCount) {
+    elements.advancedOutputRowCount.textContent = (generatedRowCount || state.requestedRowCount).toLocaleString();
+  }
+  if (elements.advancedOutputColumnCount) {
+    elements.advancedOutputColumnCount.textContent = columnCount > 0 ? columnCount.toLocaleString() : 'After analysis';
+  }
+  if (elements.quickPreviewSummary) {
+    elements.quickPreviewSummary.hidden = !state.generationResult;
+    elements.quickPreviewColumnCount.textContent = columnCount.toLocaleString();
+    elements.quickPreviewRowCount.textContent = generatedRowCount.toLocaleString();
+  }
 }
 
 function renderBasicJourney() {
@@ -348,16 +432,16 @@ function renderBasicJourney() {
 
   const labels = state.workflowKind === 'TRANSFORM'
     ? {
-        one: 'Add source',
-        INPUT: 'Add a source table. Your review settings will appear after local analysis.',
-        REVIEW: 'Check the output size and recommended column actions, then generate.',
-        RESULT: 'Inspect validation and quality findings before downloading the result.',
+        one: 'Choose',
+        INPUT: 'Choose a file or paste spreadsheet cells. Analysis stays in this browser.',
+        REVIEW: 'Check the output size and the column decisions that need attention.',
+        RESULT: 'Inspect the full-width preview and download every generated column.',
       }
     : {
-        one: 'Choose fields',
-        INPUT: 'Choose a template or fields. Continue when the starting schema looks right.',
-        REVIEW: 'Adjust the fields and output size, test if needed, then generate.',
-        RESULT: 'Inspect validation and quality findings before downloading the result.',
+        one: 'Choose',
+        INPUT: 'Choose a one-table template or add the fields you need.',
+        REVIEW: 'Adjust the fields and output size, then generate.',
+        RESULT: 'Inspect the full-width preview and download every generated column.',
       };
   elements.basicStepOneLabel.textContent = labels.one;
   elements.basicStepGuidance.textContent = labels[state.basicStep];
@@ -386,6 +470,7 @@ function renderBasicJourney() {
               : 'Available after generation';
     }
   }
+  renderQuickSummary();
 }
 
 function setBasicStep(step, { moveFocus = false } = {}) {
@@ -401,7 +486,13 @@ function setBasicStep(step, { moveFocus = false } = {}) {
       ? document.querySelector('.stage--plan')
       : document.querySelector('.stage--preview');
   globalThis.requestAnimationFrame(() => {
-    target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (target) {
+      const scrollMarginTop = Number.parseFloat(globalThis.getComputedStyle(target).scrollMarginTop) || 0;
+      globalThis.scrollTo({
+        top: Math.max(0, globalThis.scrollY + target.getBoundingClientRect().top - scrollMarginTop),
+        behavior: 'smooth',
+      });
+    }
     if (moveFocus && target) {
       target.setAttribute('tabindex', '-1');
       target.focus({ preventScroll: true });
@@ -438,7 +529,7 @@ function createRecoverySnapshot() {
 function updateRecoveryControls(message = null) {
   elements.undoConfig.disabled = undoStack.length === 0;
   elements.undoConfig.textContent = undoStack.length > 0 ? 'Undo last change (' + undoStack.length + ')' : 'Undo last change';
-  if (message) elements.recoveryStatus.textContent = message;
+  if (message && elements.recoveryStatus) elements.recoveryStatus.textContent = message;
 }
 
 function recordUndoPoint(label = 'configuration change') {
@@ -476,8 +567,7 @@ function safeDraftPayload() {
 function saveSafeDraft() {
   try {
     globalThis.sessionStorage?.setItem(RECOVERY_DRAFT_KEY, JSON.stringify(safeDraftPayload()));
-    const time = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(new Date());
-    updateRecoveryControls('Safe settings updated ' + time + ' in this tab. Source rows are never stored.');
+    updateRecoveryControls('Settings saved in this tab.');
   } catch {
     updateRecoveryControls('Draft storage is unavailable. Undo still works in this page.');
   }
@@ -528,11 +618,11 @@ function restoreSafeDraft() {
     state.messages = [createUiMessage(
       'success',
       state.workflowKind === 'SCRATCH' && state.generatedColumns.length > 0
-        ? 'Restored the fictional schema and settings from this tab. No source rows were stored.'
+        ? 'Restored the fictional schema and settings from this tab.'
         : 'Restored your general settings from this tab. Re-add a source table to continue.',
       'RECOVERY_STATE',
     )];
-    updateRecoveryControls('Draft restored from this tab. Source rows were never stored.');
+    updateRecoveryControls('Settings restored from this tab.');
     return true;
   } catch {
     globalThis.sessionStorage?.removeItem(RECOVERY_DRAFT_KEY);
@@ -582,7 +672,7 @@ function recoveryMutationTarget(event) {
   const control = event.target.closest?.('button, input, select, textarea');
   if (!control || !control.closest('.stage')) return null;
   if (control.matches([
-    '#file-input', '#paste-input', '#analyse-button', '#generate-button', '#probe-button',
+    '#file-input', '#paste-input', '#analyse-button', '#generate-button', '#advanced-regenerate', '#probe-button',
     '#export-csv', '#export-tsv', '#export-dataset-zip', '#compare-toggle', '#review-confirm', '#excel-safe',
     '#review-generated-columns', '[data-workflow-kind]', '[data-basic-step-target]',
     '.info-tooltip', '.policy-list-controls *', '.policy-pagination *',
@@ -604,12 +694,13 @@ function prepareRecoveryForMutation(event) {
 function renderInterfaceMode() {
   const model = interfaceModeModel(state.interfaceMode);
   document.body.dataset.interfaceMode = model.mode;
+  if (state.sourceOutputSchema) syncOutputSchema();
   for (const button of elements.interfaceModeButtons) {
     button.setAttribute('aria-pressed', String(button.dataset.interfaceMode === model.mode));
   }
   if (elements.inputOptions) {
     const headerNeedsReview = requiresHeaderConfirmation(state.analysis?.parseResult);
-    elements.inputOptions.open = model.isAdvanced || headerNeedsReview;
+    elements.inputOptions.open = headerNeedsReview;
   }
   if (state.analysis) renderPolicyArea();
   renderGeneratorCatalog();
@@ -622,7 +713,7 @@ function renderGeneratedColumnsDisclosure() {
   const expanded = !canCollapse || state.generatedColumnsExpanded;
   elements.generatedColumnsPanel.hidden = !expanded;
   elements.generatedColumnsToggle.setAttribute('aria-expanded', String(expanded));
-  elements.generatedColumnsToggle.textContent = expanded ? 'Hide fields' : 'Show fields';
+  elements.generatedColumnsToggle.textContent = expanded ? 'Hide fields' : 'Add fields';
 }
 
 function setGeneratedColumnsExpanded(expanded) {
@@ -747,7 +838,7 @@ function currentGenerationCost() {
     }));
     return estimateGenerationCost({ requestedRowCount: state.requestedRowCount, tables });
   }
-  const generatedColumnCount = state.generatedColumns.filter((column) => column.enabled !== false).length;
+  const generatedColumnCount = generatedColumnsForCurrentSurface().filter((column) => column.enabled !== false).length;
   const sourceColumnCount = state.workflowKind === 'TRANSFORM'
     ? state.policies.length > 0
       ? state.policies.filter((policy) => policy.selectedAction !== 'DROP').length
@@ -777,6 +868,7 @@ function invalidateGeneratedResult() {
   elements.exportCsv.disabled = true;
   elements.exportTsv.disabled = true;
   elements.exportDatasetZip.disabled = true;
+  elements.advancedRegenerate.disabled = true;
   elements.previewControls.hidden = true;
   elements.compareToggle.disabled = true;
   elements.compareToggle.textContent = 'Compare with source';
@@ -818,8 +910,14 @@ function commitActiveDatasetTable() {
 
 function syncOutputSchema() {
   if (!state.sourceOutputSchema) return;
-  state.outputSchema = combineOutputSchema(state.sourceOutputSchema, state.generatedColumns);
+  state.outputSchema = combineOutputSchema(state.sourceOutputSchema, generatedColumnsForCurrentSurface());
   commitActiveDatasetTable();
+}
+
+function generatedColumnsForCurrentSurface() {
+  return state.interfaceMode === 'BASIC' && state.workflowKind === 'TRANSFORM'
+    ? Object.freeze([])
+    : state.generatedColumns;
 }
 
 function reindexGeneratedColumns(columns) {
@@ -948,6 +1046,7 @@ function renderGeneratedColumns() {
   });
   renderScratchModeSummary();
   renderTemplateSelectionSummary();
+  renderQuickSummary();
 }
 
 const GENERATOR_FIELD_NAMES = Object.freeze({
@@ -1524,7 +1623,7 @@ function renderDatasetPreviewTabs(selectedId = state.activeDatasetTableId) {
       state.outputPlan = table.outputPlan;
       renderDatasetPreviewTabs(table.id);
       renderCurrentPreview();
-      renderGenerationValidation(elements.generationValidation, table.generationResult);
+      renderGenerationValidation(elements.generationValidation, table.generationResult, { hidePassing: true });
       const exportAllowed = isGeneratedResultDownloadable({
         generationResult: table.generationResult,
         probe: state.datasetPreviewProbe,
@@ -1889,6 +1988,7 @@ function renderRelationships() {
       : `${enabled ? 'Confirmed' : 'Disabled'} relationship ${rule.kind}.`;
     addMessage('info', message, { scope: 'RELATIONSHIP_STATE' });
   });
+  renderBusinessFidelity();
 }
 
 function renderAnalysis() {
@@ -1908,8 +2008,10 @@ function renderAnalysis() {
 }
 
 function prepareComparisonControls() {
-  elements.previewControls.hidden = state.generationResult.sourcePreviewReferences.length === 0;
-  elements.compareToggle.disabled = state.generationResult.sourcePreviewReferences.length === 0;
+  const comparisonAvailable = state.generationResult.sourcePreviewReferences.length > 0;
+  elements.previewControls.hidden = false;
+  elements.compareControls.hidden = !comparisonAvailable;
+  elements.compareToggle.disabled = !comparisonAvailable;
   elements.compareToggle.textContent = 'Compare with source';
   state.sourcePreview = null;
   state.previewMode = 'output';
@@ -1922,10 +2024,10 @@ function renderCurrentPreview() {
     renderInlineComparisonTable(elements.previewTable, {
       generationResult: state.generationResult,
       sourcePreview: state.sourcePreview,
-    });
+    }, { noteContainer: elements.previewRowNote });
     return;
   }
-  renderPreviewTable(elements.previewTable, state.generationResult);
+  renderPreviewTable(elements.previewTable, state.generationResult, { noteContainer: elements.previewRowNote });
 }
 
 async function toggleSourceComparison() {
@@ -1964,9 +2066,15 @@ async function toggleSourceComparison() {
   }
 }
 
-async function analyse() {
+async function analyse(inputOverride = null) {
   try {
-    const selected = selectInputValue({ file: elements.fileInput.files?.[0] ?? null, pastedText: elements.pasteInput.value });
+    const pastedText = inputOverride?.pastedText ?? elements.pasteInput.value;
+    const selected = selectInputValue({
+      file: inputOverride?.file ?? elements.fileInput.files?.[0] ?? null,
+      pastedText,
+      sourcePreference: inputOverride?.sourcePreference ?? state.inputSourcePreference,
+      pastedTextIsSample: inputOverride?.pastedTextIsSample ?? isTransformSampleText(pastedText),
+    });
     const parseOptions = parseOptionsFromControls({
       delimiterMode: elements.delimiterMode.value,
       customDelimiter: elements.customDelimiter.value,
@@ -2050,10 +2158,12 @@ async function analyse() {
     }
     const notice = coverageNotice(state.outputPlan);
     if (notice) addMessage('warning', notice, { scope: 'COVERAGE_STATE' });
+    return true;
   } catch (error) {
     if (state.workflow === 'ANALYSING') setWorkflow(error?.code === 'PIPELINE_CANCELLED' ? 'IDLE' : 'ERROR');
     progress({ phase: 'ERROR', message: 'Analysis stopped.' }, false);
     addMessage(error?.code === 'PIPELINE_CANCELLED' ? 'warning' : 'error', error?.message ?? 'The input could not be analysed.', { replace: true });
+    return false;
   }
 }
 
@@ -2110,26 +2220,27 @@ async function buildScratchOutput(requestedRowCount) {
 }
 
 async function generate() {
-  if (state.workflowKind === 'TRANSFORM' && !state.analysis) return;
+  if (state.workflowKind === 'TRANSFORM' && !state.analysis) return false;
   if (state.workflowKind === 'TRANSFORM' && requiresHeaderConfirmation(state.analysis.parseResult)) {
     addMessage('error', 'Generation is blocked because the header is ambiguous. Choose Yes or No under Header row, then analyse again.');
     elements.headerMode.focus();
-    return;
+    return false;
   }
   const unconfiguredShifts = state.workflowKind === 'TRANSFORM' ? currentUnconfiguredShifts() : [];
   if (unconfiguredShifts.length > 0) {
     addMessage('error', `Generation is paused: configure SHIFT offsets for ${unconfiguredShifts.map((entry) => entry.columnName).join(', ')}.`, { replace: true });
     elements.shiftReadiness.focus();
-    return;
+    return false;
   }
   const generationCost = currentGenerationCost();
   if (generationCost.requiresConfirmation
     && !globalThis.confirm(generationCostConfirmationMessage(generationCost))) {
     addMessage('info', 'Large generation cancelled before processing started. No output was changed.', { replace: true, scope: 'GENERATION_COST' });
-    return;
+    return false;
   }
   try {
     setWorkflow('GENERATING');
+    elements.advancedRegenerate.disabled = true;
     addMessage('info', `Generating exactly ${state.requestedRowCount.toLocaleString()} rows…`, { replace: true });
     const generationRequest = {
       policies: state.policies,
@@ -2138,7 +2249,7 @@ async function generate() {
       mode: state.mode,
       businessFidelity: state.businessFidelity,
       businessFidelitySettings: state.businessFidelitySettings,
-      generatedColumns: state.generatedColumns,
+      generatedColumns: generatedColumnsForCurrentSurface(),
     };
     const built = state.workflowKind === 'SCRATCH'
       ? await buildScratchOutput(state.requestedRowCount)
@@ -2163,7 +2274,7 @@ async function generate() {
     renderDatasetIntegrity(elements.datasetIntegrity, state.datasetResult
       ? { tables: state.datasetTables, datasetResult: state.datasetResult, probe: false }
       : null);
-    renderGenerationValidation(elements.generationValidation, state.generationResult);
+    renderGenerationValidation(elements.generationValidation, state.generationResult, { hidePassing: true });
     renderResultQualityReport({
       generationResult: state.generationResult,
       datasetResult: state.datasetResult,
@@ -2175,6 +2286,7 @@ async function generate() {
     elements.exportCsv.disabled = !outputDownloadable;
     elements.exportTsv.disabled = !outputDownloadable;
     elements.exportDatasetZip.disabled = !datasetDownloadable;
+    elements.advancedRegenerate.disabled = false;
     progress({ phase: 'COMPLETE', message: 'Generation complete.', current: 1, total: 1 }, false);
     if (valid) {
       addMessage('success', state.datasetResult
@@ -2185,13 +2297,19 @@ async function generate() {
         ? `Generated ${state.datasetResult.validation.totalRows.toLocaleString()} dummy rows across ${state.datasetResult.validation.tableCount} table${state.datasetResult.validation.tableCount === 1 ? '' : 's'}; project integrity failed: ${summarizeDatasetIntegrityFailure(state.datasetResult.validation)}.`
         : `Generated ${state.generationResult.rows.length.toLocaleString()} rows; validation failed: ${summarizeValidationIssues(state.generationResult.issues, 4, state.generationResult.rows.length)}.`, { replace: true });
     }
+    if (!state.datasetResult && currentGenerationVariation().kind === 'repeatable') {
+      addMessage('info', currentGenerationVariation().text, { scope: 'GENERATION_VARIATION' });
+    }
     for (const warning of summarizeGenerationWarnings(state.generationResult.warnings)) addMessage('warning', warning);
     renderBasicJourney();
-    if (state.interfaceMode === 'BASIC') setBasicStep('RESULT');
+    if (state.interfaceMode === 'BASIC' && !quickSurface) setBasicStep('RESULT');
+    return true;
   } catch (error) {
     setWorkflow(error?.code === 'PIPELINE_CANCELLED' ? 'READY' : 'ERROR');
+    elements.advancedRegenerate.disabled = !state.generationResult;
     progress({ phase: 'ERROR', message: 'Generation stopped.' }, false);
     addMessage(error?.code === 'PIPELINE_CANCELLED' ? 'warning' : 'error', error?.message ?? 'Dummy data could not be generated.', { replace: true });
+    return false;
   }
 }
 
@@ -2223,7 +2341,7 @@ async function probeGeneration() {
       businessFidelitySettings: highMatchProbe
         ? defaultBusinessFidelitySettings('BALANCED')
         : state.businessFidelitySettings,
-      generatedColumns: state.generatedColumns,
+      generatedColumns: generatedColumnsForCurrentSurface(),
     };
     const built = state.workflowKind === 'SCRATCH'
       ? await buildScratchOutput(probeRows)
@@ -2284,14 +2402,515 @@ function exportResult(format) {
   addMessage('success', `Downloaded ${downloaded.filename}.`);
 }
 
+
+function quickTemplateFields(templateId) {
+  return getDatasetTemplate(templateId).columns
+    .map((column) => Object.freeze({
+      name: column.name,
+      generatorType: column.generatorType,
+    }));
+}
+
+function quickCustomColumnTypes() {
+  return Object.freeze(BASIC_GENERATOR_IDS.map((id) => {
+    const generator = providerCatalog.getGenerator(id);
+    return Object.freeze({ id: generator.id, label: generator.label });
+  }));
+}
+
+function quickResultWarnings() {
+  if (!state.generationResult) return [];
+  const warnings = [...summarizeGenerationWarnings(state.generationResult.warnings)];
+  if (state.generationResult.validation.valid === false) {
+    warnings.push('Validation: ' + summarizeValidationIssues(
+      state.generationResult.issues,
+      4,
+      state.generationResult.rows.length,
+    ));
+  }
+  return warnings;
+}
+
+function applyQuickShiftDefaults() {
+  const missingIndexes = new Set(currentUnconfiguredShifts().map((entry) => entry.columnIndex));
+  state.policies = state.policies.map((policy, columnIndex) => {
+    if (!missingIndexes.has(columnIndex) || policy.selectedAction !== 'SHIFT') return policy;
+    const current = normaliseActionParams({
+      action: 'SHIFT',
+      detectedType: policy.detectedType,
+      params: policy.actionParams,
+    });
+    if (current.offsetValue !== null) return policy;
+    const preset = policy.detectedType === 'TIME'
+      ? { offsetValue: '6', unit: 'HOURS' }
+      : policy.detectedType === 'DATETIME'
+        ? { offsetValue: '150', unit: 'HOURS' }
+        : ['DATE', 'AMBIGUOUS_DATE'].includes(policy.detectedType)
+          ? { offsetValue: '6', unit: 'DAYS' }
+          : { offsetValue: '6', unit: 'INTEGER' };
+    return Object.freeze({
+      ...policy,
+      actionParams: normaliseActionParams({
+        action: 'SHIFT',
+        detectedType: policy.detectedType,
+        params: { ...current, offsetMode: 'FIXED', ...preset },
+      }),
+    });
+  });
+}
+
+function quickBlockers() {
+  const blockers = [];
+  if (state.workflowKind === 'TRANSFORM' && state.analysis
+    && requiresHeaderConfirmation(state.analysis.parseResult)) {
+    blockers.push(Object.freeze({
+      title: 'Confirm the header row',
+      recovery: 'Open Advanced and choose Yes or No under Input options, then analyse the table again.',
+    }));
+  }
+  if (state.workflowKind === 'TRANSFORM' && state.analysis) {
+    for (const entry of currentUnconfiguredShifts()) {
+      const ambiguousDate = entry.detectedType === 'AMBIGUOUS_DATE';
+      blockers.push(Object.freeze(ambiguousDate ? {
+        title: 'Confirm the date order for ' + entry.columnName,
+        recovery: 'Open ' + entry.columnName + ' and choose DD/MM/YYYY or MM/DD/YYYY.',
+      } : {
+        title: 'Set an offset for ' + entry.columnName,
+        recovery: 'Open ' + entry.columnName + ' and enter one explicit non-zero offset.',
+      }));
+    }
+  }
+  const enabledColumnCount = state.workflowKind === 'TRANSFORM'
+    ? state.policies.filter((policy) => policy.selectedAction !== 'DROP').length
+    : state.generatedColumns.filter((column) => column.enabled !== false).length;
+  if ((state.analysis || state.workflowKind === 'SCRATCH') && enabledColumnCount === 0) {
+    blockers.push(Object.freeze({
+      title: 'Keep at least one column',
+      recovery: 'Choose Generate or another transformation for at least one column.',
+    }));
+  }
+  return Object.freeze(blockers);
+}
+
+function quickReviewPreview(task) {
+  if (task === 'transform') {
+    if (!state.analysis || state.policies.length === 0) return Object.freeze([]);
+    const previews = buildActionPreviews({
+      headers: state.analysis.headers,
+      profiles: state.analysis.tableProfile.columns,
+      detections: state.analysis.detections,
+      policies: state.policies,
+      relationshipRules: state.relationships.filter(relationshipIsActive),
+      businessFidelity: state.businessFidelity,
+      businessFidelitySettings: state.businessFidelitySettings,
+      maxExamples: 1,
+    });
+    return Object.freeze(previews.map((preview, columnIndex) => {
+      const example = preview.examples?.[0] ?? null;
+      return Object.freeze({
+        columnIndex,
+        name: state.policies[columnIndex].columnName,
+        source: example ? String(example.source || '(blank)') : '(no sample)',
+        result: example
+          ? String(example.proposed ?? '(blank)')
+          : preview.status === 'EMPTY' ? '(no sample available)' : '(preview unavailable)',
+        available: Boolean(example),
+      });
+    }));
+  }
+  const activeColumns = state.generatedColumns
+    .map((column, columnIndex) => ({ column, columnIndex }))
+    .filter(({ column }) => column.enabled !== false);
+  if (state.generatedColumns.length === 0) return Object.freeze([]);
+  try {
+    const generated = generateStandaloneDataset({
+      generatedColumns: activeColumns.map(({ column }) => column),
+      requestedRowCount: 1,
+      random: new SeededRandomSource(0x51_56_64),
+    }).generationResult;
+    const generatedPositionByColumn = new Map(activeColumns.map(({ columnIndex }, position) => [columnIndex, position]));
+    return Object.freeze(state.generatedColumns.map((column, columnIndex) => {
+      const generatedPosition = generatedPositionByColumn.get(columnIndex);
+      const enabled = generatedPosition !== undefined;
+      return Object.freeze({
+        columnIndex,
+        name: column.name,
+        source: null,
+        result: enabled ? String(generated.rows[0]?.[generatedPosition] ?? '(blank)') : '(field omitted)',
+        available: enabled,
+      });
+    }));
+  } catch {
+    return Object.freeze([]);
+  }
+}
+
+function quickSurfaceSnapshot() {
+  const task = state.workflowKind === 'SCRATCH' ? 'scratch' : 'transform';
+  const columns = task === 'transform'
+    ? state.policies.map((policy) => Object.freeze({
+        task,
+        name: policy.columnName,
+        detectedType: String(policy.detectedType ?? 'UNKNOWN').replaceAll('_', ' '),
+        detectedTypeKey: String(policy.detectedType ?? 'UNKNOWN'),
+        selectedAction: policy.selectedAction,
+        recommendedAction: policy.recommendedAction,
+        reviewRequired: Boolean(policy.reviewRequired),
+        reason: policy.reason ?? '',
+        actionParams: Object.freeze({ ...(policy.actionParams ?? {}) }),
+        shiftKind: policy.actionParams?.shiftKind ?? null,
+      }))
+    : state.generatedColumns.map((column) => Object.freeze({
+        task,
+        name: column.name,
+        detectedType: String(column.generatorType ?? 'generated field').replaceAll('-', ' '),
+        detectedTypeKey: String(column.generatorType ?? 'GENERATED_FIELD').toUpperCase().replaceAll('-', '_'),
+        selectedAction: column.enabled === false ? 'DROP' : 'GENERATE',
+        recommendedAction: 'GENERATE',
+        reviewRequired: false,
+        reason: 'Generated from the ' + (column.blockLabel ?? 'selected') + ' production template.',
+        actionParams: Object.freeze({}),
+        shiftKind: null,
+      }));
+  const result = state.generationResult
+    ? Object.freeze({
+        headers: Object.freeze([...state.generationResult.headers]),
+        rows: Object.freeze(state.generationResult.rows.map((row) => Object.freeze([...row]))),
+        validationValid: state.generationResult.validation.valid,
+        warnings: Object.freeze(quickResultWarnings()),
+      })
+    : null;
+  return Object.freeze({
+    task,
+    columns: Object.freeze(columns),
+    variation: generationVariationModel(columns),
+    blockers: quickBlockers(),
+    reviewPreview: quickReviewPreview(task),
+    requestedRowCount: state.requestedRowCount,
+    inputRowCount: state.analysis?.parseResult.rowCount ?? null,
+    result,
+  });
+}
+
+function currentGenerationVariation() {
+  if (state.workflowKind === 'TRANSFORM') return generationVariationModel(state.policies);
+  return generationVariationModel(state.generatedColumns.map((column) => ({
+    selectedAction: column.enabled === false ? 'DROP' : 'GENERATE',
+  })));
+}
+
+function applyQuickDefaults() {
+  state.interfaceMode = 'BASIC';
+  state.mode = 'SAFE_TEST_DATA';
+  state.businessFidelity = 'BALANCED';
+  state.businessFidelitySettings = defaultBusinessFidelitySettings('BALANCED');
+  setRequestedRowControls(200);
+  elements.modeSelect.value = state.mode;
+  elements.excelSafe.checked = true;
+  updateModeBoundary();
+  renderBusinessFidelity();
+  renderInterfaceMode();
+}
+
+function quickTaskChanged(task) {
+  const kind = task === 'scratch' ? 'SCRATCH' : 'TRANSFORM';
+  if (kind !== state.workflowKind) setWorkflowKind(kind);
+  if (kind === 'SCRATCH' && state.scratchStructure !== 'SINGLE') setScratchStructure('SINGLE');
+  applyQuickDefaults();
+}
+
+async function quickAnalyse({ file = null, pastedText = '', sourcePreference = null } = {}) {
+  if (state.workflowKind !== 'TRANSFORM') setWorkflowKind('TRANSFORM');
+  applyQuickDefaults();
+  const succeeded = await analyse({
+    file,
+    pastedText,
+    sourcePreference,
+    pastedTextIsSample: isTransformSampleText(pastedText),
+  });
+  if (!succeeded || !state.analysis) return null;
+  applyQuickShiftDefaults();
+  renderPolicyArea();
+  updateGenerateAvailability();
+  return quickSurfaceSnapshot();
+}
+
+function quickPrepareScratch(templateId, {
+  enabledTemplateFields = null,
+  templates = null,
+  customColumns = [],
+} = {}) {
+  if (state.workflowKind !== 'SCRATCH') setWorkflowKind('SCRATCH');
+  if (state.scratchStructure !== 'SINGLE') setScratchStructure('SINGLE');
+  applyQuickDefaults();
+  const requestedTemplates = Array.isArray(templates) && templates.length > 0
+    ? templates
+    : [{ templateId, enabledFields: enabledTemplateFields }];
+  state.templateId = getDatasetTemplate(requestedTemplates[0].templateId).id;
+  state.templateBlockSequence = 0;
+  state.generatedColumns = [];
+  state.expandedGeneratedGroups.clear();
+  state.sourceOutputSchema = createSourceOutputSchema();
+  for (const requested of requestedTemplates) {
+    const template = getDatasetTemplate(requested.templateId);
+    state.templateBlockSequence += 1;
+    const appended = appendDatasetTemplateBlock({
+      existingColumns: state.generatedColumns,
+      templateId: template.id,
+      blockSequence: state.templateBlockSequence,
+    });
+    const enabledNames = Array.isArray(requested.enabledFields)
+      ? new Set(requested.enabledFields.map((name) => String(name)))
+      : new Set(template.columns.map((column) => column.name));
+    state.generatedColumns = [
+      ...state.generatedColumns,
+      ...appended.map((column, index) => Object.freeze({
+        ...column,
+        enabled: enabledNames.has(template.columns[index].name),
+      })),
+    ];
+  }
+  const allowedGeneratorTypes = new Set(BASIC_GENERATOR_IDS);
+  for (const customColumn of customColumns) {
+    const name = String(customColumn?.name ?? '').trim();
+    if (!name) continue;
+    const generatorType = allowedGeneratorTypes.has(customColumn?.generatorType)
+      ? customColumn.generatorType
+      : 'category';
+    const sequence = nextGeneratedSequence();
+    state.generatedColumns = [
+      ...state.generatedColumns,
+      newGeneratedColumn(
+        sequence,
+        state.generatedColumns.length,
+        generatorType,
+        uniqueGeneratedName(name),
+      ),
+    ];
+  }
+  state.generatedColumns = reindexGeneratedColumns(state.generatedColumns);
+  focusLatestGeneratedGroup();
+  syncOutputSchema();
+  invalidateGeneratedResult();
+  renderTemplatePicker();
+  renderGeneratedColumns();
+  updateGenerateAvailability();
+  return quickSurfaceSnapshot();
+}
+
+function quickChangeColumnAction(columnIndex, action) {
+  invalidateGeneratedResult();
+  if (state.workflowKind === 'TRANSFORM') {
+    state.policies = [...updatePolicyAction({
+      policies: state.policies,
+      detections: state.analysis.detections,
+      columnIndex,
+      action,
+    })];
+    applyQuickShiftDefaults();
+    renderPolicyArea();
+  } else {
+    if (!['GENERATE', 'DROP'].includes(action)) throw new RangeError('Quick single-table columns can be generated or dropped.');
+    state.generatedColumns = reindexGeneratedColumns(state.generatedColumns.map((column, index) => index === columnIndex
+      ? Object.freeze({ ...column, enabled: action === 'GENERATE' })
+      : column));
+    syncOutputSchema();
+    renderGeneratedColumns();
+    updateGenerateAvailability();
+  }
+  elements.reviewConfirm.checked = false;
+  return quickSurfaceSnapshot();
+}
+
+function quickChangeColumnParams(columnIndex, params) {
+  if (state.workflowKind !== 'TRANSFORM') return quickSurfaceSnapshot();
+  invalidateGeneratedResult();
+  state.policies = [...updatePolicyActionParams({
+    policies: state.policies,
+    columnIndex,
+    params,
+  })];
+  applyQuickShiftDefaults();
+  elements.reviewConfirm.checked = false;
+  renderPolicyArea();
+  return quickSurfaceSnapshot();
+}
+
+function quickChangeRowCount(rowCount) {
+  const allowed = new Set([50, 100, 200, 500, 1000]);
+  if (!allowed.has(rowCount)) throw new RangeError('Quick rows must be 50, 100, 200, 500, or 1,000.');
+  invalidateGeneratedResult();
+  setRequestedRowControls(rowCount);
+  updateGenerateAvailability();
+  return quickSurfaceSnapshot();
+}
+
+async function quickGenerate() {
+  elements.reviewConfirm.checked = true;
+  updateGenerateAvailability();
+  const succeeded = await generate();
+  return succeeded && state.generationResult ? quickSurfaceSnapshot() : null;
+}
+
+function quickDownload() {
+  exportResult('csv');
+}
+
+function quickStartAnother() {
+  state.workflow = 'IDLE';
+  state.input = null;
+  state.inputKind = null;
+  state.analysis = null;
+  state.policies = [];
+  state.relationships = [];
+  state.outputPlan = null;
+  state.outputSchema = null;
+  state.sourceOutputSchema = null;
+  state.generatedColumns = [];
+  state.generatedColumnSequence = 0;
+  state.workflowKind = 'TRANSFORM';
+  state.templateId = null;
+  state.templateBlockSequence = 0;
+  state.scratchStructure = 'SINGLE';
+  state.datasetTables = [];
+  state.activeDatasetTableId = null;
+  state.datasetResult = null;
+  state.generationResult = null;
+  state.qualityReport = null;
+  state.sourcePreview = null;
+  state.previewMode = 'output';
+  state.basicStep = 'INPUT';
+  document.body.dataset.workflowKind = 'TRANSFORM';
+  document.body.dataset.scratchStructure = 'SINGLE';
+  for (const button of elements.workflowKindButtons) {
+    button.setAttribute('aria-pressed', String(button.dataset.workflowKind === 'TRANSFORM'));
+  }
+  applyQuickDefaults();
+  renderDatasetWorkspace();
+  renderGeneratedColumns();
+  updateGenerateAvailability();
+  addMessage('info', 'Choose a file, paste spreadsheet cells, or generate one fictional table.', {
+    replace: true,
+    scope: 'WORKFLOW_KIND',
+  });
+}
+
+function quickOpenAdvanced(scratchDraft = null) {
+  if (scratchDraft?.templateId && state.workflowKind === 'SCRATCH') {
+    quickPrepareScratch(scratchDraft.templateId, scratchDraft);
+  }
+  state.interfaceMode = 'ADVANCED';
+  renderInterfaceMode();
+  scheduleSafeDraftSave();
+  globalThis.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function setAdvancedSourceStatus(title, detail = '', kind = 'info') {
+  elements.advancedSourceStatus.dataset.kind = kind;
+  elements.advancedSourceStatus.replaceChildren();
+  const strong = document.createElement('strong');
+  strong.textContent = title;
+  elements.advancedSourceStatus.append(strong);
+  if (detail) elements.advancedSourceStatus.append(document.createTextNode(' · ' + detail));
+  elements.advancedSourceStatus.hidden = false;
+}
+
+function advancedSourceKind() {
+  const file = elements.fileInput.files?.[0] ?? null;
+  const hasPaste = elements.pasteInput.value.trim() !== '';
+  const sample = isTransformSampleText(elements.pasteInput.value);
+  if (file && hasPaste && !sample && !['FILE', 'PASTE'].includes(state.inputSourcePreference)) return 'CONFLICT';
+  if (file && (sample || state.inputSourcePreference === 'FILE')) return 'FILE';
+  if (hasPaste && (sample || ['PASTE', 'SAMPLE'].includes(state.inputSourcePreference))) return sample ? 'SAMPLE' : 'PASTE';
+  if (file) return 'FILE';
+  if (hasPaste) return 'PASTE';
+  return 'NONE';
+}
+
+function renderAdvancedSourceState() {
+  const kind = advancedSourceKind();
+  const file = elements.fileInput.files?.[0] ?? null;
+  const sample = isTransformSampleText(elements.pasteInput.value);
+  elements.advancedSourceConflict.hidden = kind !== 'CONFLICT';
+  elements.advancedUseFileSource.textContent = file ? 'Use ' + file.name : 'Use uploaded file';
+  elements.advancedPasteField.dataset.source = sample ? 'sample' : '';
+  if (kind === 'CONFLICT') {
+    elements.advancedSourceStatus.hidden = true;
+  } else if (kind === 'FILE') {
+    setAdvancedSourceStatus('Using ' + (file?.name ?? 'uploaded file'), sample ? 'Sample data is not used' : 'Ready to analyse locally');
+  } else if (kind === 'SAMPLE') {
+    setAdvancedSourceStatus('Sample loaded', `${TRANSFORM_SAMPLE.name} · ${TRANSFORM_SAMPLE.columnCount} columns · ${TRANSFORM_SAMPLE.rowCount} rows`);
+  } else if (kind === 'PASTE') {
+    setAdvancedSourceStatus('Using pasted data', 'Ready to analyse locally');
+  } else {
+    elements.advancedSourceStatus.hidden = true;
+  }
+  return kind;
+}
+
+function loadAdvancedTransformSample() {
+  const file = elements.fileInput.files?.[0] ?? null;
+  const hasUserPaste = elements.pasteInput.value.trim() !== '' && !isTransformSampleText(elements.pasteInput.value);
+  if ((file || hasUserPaste)
+    && !globalThis.confirm('Replace the current input choice with the fictional retail-orders sample?')) return;
+  elements.fileInput.value = '';
+  elements.fileName.textContent = 'No file selected';
+  elements.pasteInput.value = TRANSFORM_SAMPLE.text;
+  elements.pasteInput.scrollTop = 0;
+  state.inputSourcePreference = 'SAMPLE';
+  renderAdvancedSourceState();
+  elements.pasteInput.focus();
+  elements.pasteInput.setSelectionRange(0, 0);
+}
+
 elements.fileInput.addEventListener('change', () => {
   elements.fileName.textContent = elements.fileInput.files?.[0]?.name ?? 'No file selected';
+  const hasUserPaste = elements.pasteInput.value.trim() !== '' && !isTransformSampleText(elements.pasteInput.value);
+  state.inputSourcePreference = elements.fileInput.files?.[0]
+    ? (hasUserPaste ? null : 'FILE')
+    : (elements.pasteInput.value.trim() ? (isTransformSampleText(elements.pasteInput.value) ? 'SAMPLE' : 'PASTE') : null);
+  renderAdvancedSourceState();
+});
+elements.pasteInput.addEventListener('input', () => {
+  const file = elements.fileInput.files?.[0] ?? null;
+  const hasPaste = elements.pasteInput.value.trim() !== '';
+  const sample = isTransformSampleText(elements.pasteInput.value);
+  if (!hasPaste) state.inputSourcePreference = file ? 'FILE' : null;
+  else if (sample) state.inputSourcePreference = file ? 'FILE' : 'SAMPLE';
+  else if (!file || state.inputSourcePreference === 'PASTE') state.inputSourcePreference = 'PASTE';
+  else state.inputSourcePreference = null;
+  renderAdvancedSourceState();
 });
 elements.delimiterMode.addEventListener('change', () => {
   elements.customDelimiterWrap.hidden = elements.delimiterMode.value !== 'custom';
   if (elements.delimiterMode.value !== 'custom') elements.customDelimiter.value = '';
 });
-elements.analyseButton.addEventListener('click', analyse);
+elements.advancedSampleData.addEventListener('click', loadAdvancedTransformSample);
+elements.advancedUseFileSource.addEventListener('click', () => {
+  state.inputSourcePreference = 'FILE';
+  renderAdvancedSourceState();
+});
+elements.advancedUsePasteSource.addEventListener('click', () => {
+  state.inputSourcePreference = 'PASTE';
+  renderAdvancedSourceState();
+});
+elements.analyseButton.addEventListener('click', async () => {
+  const kind = renderAdvancedSourceState();
+  if (kind === 'NONE') {
+    setAdvancedSourceStatus('Add a source table', 'Upload a file, paste spreadsheet cells, or try the sample data', 'error');
+    elements.advancedSampleData.focus();
+    return;
+  }
+  if (kind === 'CONFLICT') {
+    elements.advancedSourceConflict.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    elements.advancedUseFileSource.focus();
+    return;
+  }
+  await analyse({
+    sourcePreference: state.inputSourcePreference,
+    pastedTextIsSample: isTransformSampleText(elements.pasteInput.value),
+  });
+});
 for (const button of elements.workflowKindButtons) {
   button.addEventListener('click', () => setWorkflowKind(button.dataset.workflowKind));
 }
@@ -2406,7 +3025,11 @@ for (const input of elements.businessFidelitySettings) {
 }
 for (const button of elements.interfaceModeButtons) {
   button.addEventListener('click', () => {
-    state.interfaceMode = button.dataset.interfaceMode;
+    const nextMode = button.dataset.interfaceMode;
+    if (nextMode === 'BASIC' && state.workflowKind === 'SCRATCH' && state.scratchStructure === 'MULTI') {
+      setScratchStructure('SINGLE');
+    }
+    state.interfaceMode = nextMode;
     renderInterfaceMode();
     scheduleSafeDraftSave();
     addMessage('info', interfaceModeModel(state.interfaceMode).description, { scope: 'INTERFACE_MODE' });
@@ -2416,6 +3039,7 @@ for (const button of elements.basicStepButtons) {
   button.addEventListener('click', () => setBasicStep(button.dataset.basicStepTarget, { moveFocus: true }));
 }
 elements.generateButton.addEventListener('click', generate);
+elements.advancedRegenerate.addEventListener('click', generate);
 elements.reviewConfirm.addEventListener('change', updateGenerateAvailability);
 elements.compareToggle.addEventListener('click', toggleSourceComparison);
 elements.cancelButton.addEventListener('click', cancelActiveTask);
@@ -2437,6 +3061,8 @@ document.addEventListener('click', prepareRecoveryForMutation, true);
 document.addEventListener('change', prepareRecoveryForMutation, true);
 
 restoreSafeDraft();
+elements.inputOptions.open = false;
+renderAdvancedSourceState();
 enhanceStaticInfoTooltips();
 showMessages();
 renderTemplatePicker();
@@ -2450,6 +3076,24 @@ updateModeBoundary();
 renderBusinessFidelity();
 renderInterfaceMode();
 renderBasicJourney();
+
+quickSurface = mountQuickPrototypeSurface(elements.quickSurfaceHost, {
+  templateFields: quickTemplateFields,
+  customColumnTypes: quickCustomColumnTypes,
+  taskChanged: quickTaskChanged,
+  analyse: quickAnalyse,
+  prepareScratch: quickPrepareScratch,
+  changeColumnAction: quickChangeColumnAction,
+  changeColumnParams: quickChangeColumnParams,
+  changeRowCount: quickChangeRowCount,
+  generate: quickGenerate,
+  download: quickDownload,
+  startAnother: quickStartAnother,
+  openAdvanced: quickOpenAdvanced,
+});
+if (state.analysis || state.generatedColumns.length > 0 || state.generationResult) {
+  quickSurface.refresh(quickSurfaceSnapshot());
+}
 
 // Kept as a small public surface for automated browser verification only; it
 // exposes status and counts, never source rows, profiles, mappings, or samples.
@@ -2467,4 +3111,6 @@ globalThis.dummyDataLabStatus = () => Object.freeze({
   workflowKind: state.workflowKind,
   businessFidelity: state.businessFidelity,
   outputColumnCount: state.outputSchema?.columns.length ?? null,
+  quickSurfaceMounted: Boolean(quickSurface),
+  quickStep: quickSurface?.step ?? null,
 });

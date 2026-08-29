@@ -28,24 +28,20 @@ export function renderQualityReport(container, report, { onDownload = null } = {
   reportShell.open = false;
   const reportSummary = documentRef.createElement('summary');
   reportSummary.className = 'quality-report__summary';
-  const titleWrap = documentRef.createElement('div');
-  const eyebrow = documentRef.createElement('small');
-  eyebrow.textContent = report.kind === 'PROBE' ? 'PROBE REPORT' : 'OUTPUT REPORT';
   const title = documentRef.createElement('h3');
-  title.textContent = 'Quality & privacy report';
+  title.textContent = report.kind === 'PROBE' ? 'Probe report' : 'Output report';
   const titleLine = documentRef.createElement('div');
   titleLine.className = 'quality-report__title-line';
   titleLine.append(title, createInfoTooltip(documentRef, {
     label: 'How to read this report',
     content: 'PASS means the automated checks passed. REVIEW means inspect a visible deviation. FAIL means a declared contract failed, without removing your download choice. NOT EVALUATED means the area was not checked. EXACT checks the complete output; SAMPLED checks a bounded sample.',
   }));
-  titleWrap.append(eyebrow, titleLine);
   const overallStatus = report.overallStatus;
   const reportStatus = documentRef.createElement('strong');
   reportStatus.className = `quality-report__status quality-report__status--${overallStatus.toLocaleLowerCase().replaceAll('_', '-')}`;
-  reportStatus.textContent = `(${STATUS_LABELS[overallStatus] ?? overallStatus})`;
+  reportStatus.textContent = STATUS_LABELS[overallStatus] ?? overallStatus;
   reportStatus.title = statusHelp(overallStatus);
-  reportSummary.append(titleWrap, reportStatus);
+  reportSummary.append(titleLine, reportStatus);
 
   const reportBody = documentRef.createElement('div');
   reportBody.className = 'quality-report__body';

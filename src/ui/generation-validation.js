@@ -1,6 +1,6 @@
 import { summarizeGenerationWarnings } from './generation-feedback.js';
 
-export function renderGenerationValidation(container, result, { probe = false } = {}) {
+export function renderGenerationValidation(container, result, { probe = false, hidePassing = false } = {}) {
   container.replaceChildren();
   if (!result) {
     container.hidden = true;
@@ -12,6 +12,11 @@ export function renderGenerationValidation(container, result, { probe = false } 
   const strongWarningCodes = new Set(['OUTPUT_UNIQUENESS_VIOLATION', 'GENERATED_UNIQUENESS_RELAXED', 'GENERATED_UNIQUENESS_VIOLATION']);
   const failed = !result.validation.valid || (result.warnings ?? []).some((warning) => strongWarningCodes.has(warning.code));
   const needsReview = !failed && allWarningMessages.length > 0;
+  if (hidePassing && !failed && !needsReview) {
+    container.hidden = true;
+    return;
+  }
+  container.hidden = false;
   container.className = `generation-validation ${failed ? 'generation-validation--invalid' : needsReview ? 'generation-validation--review' : 'generation-validation--valid'}`;
   const heading = document.createElement('strong');
   heading.textContent = failed

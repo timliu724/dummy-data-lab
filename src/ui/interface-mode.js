@@ -11,7 +11,7 @@ export function interfaceModeModel(value) {
     isBasic: mode === 'BASIC',
     isAdvanced: mode === 'ADVANCED',
     description: mode === 'BASIC'
-      ? 'Basic guide shows one stage at a time. Your Advanced settings remain active and preserved.'
-      : 'Advanced workbench shows all stages and detailed controls. Your Basic progress and settings are preserved.',
+      ? 'Quick shows one clear step at a time for transforming data or generating one table. Advanced settings remain preserved.'
+      : 'Advanced shows the complete workbench for related tables, dependencies, and detailed controls. Quick progress and settings remain preserved.',
   });
 }

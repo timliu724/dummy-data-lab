@@ -36,6 +36,36 @@ export function shiftTimeByMinutes(value, minutes) {
   return formatTemporalTime(time, { hour, minute, second });
 }
 
+export function shiftDateTimeByMinutes(value, minutes, orientation = null) {
+  const offset = requireInteger(minutes, 'minutes');
+  const parsed = parseTemporal(value, { orientation });
+  if (parsed?.kind !== 'DATETIME') {
+    throw new RangeError('The date-time value cannot be parsed. Supported examples include 2026-07-15 08:30 and Jul 15, 2026 8:30 am.');
+  }
+  const shifted = new Date(Date.UTC(
+    parsed.year,
+    parsed.month - 1,
+    parsed.day,
+    parsed.time.hour,
+    parsed.time.minute,
+    parsed.time.second,
+  ) + (offset * 60000));
+  const separator = String(parsed.suffix ?? '').match(/^(T|,\s*|\s+)/)?.[0] ?? ' ';
+  const date = formatDateValue({
+    ...parsed,
+    suffix: '',
+    year: shifted.getUTCFullYear(),
+    month: shifted.getUTCMonth() + 1,
+    day: shifted.getUTCDate(),
+  });
+  const time = formatTemporalTime(parsed.time, {
+    hour: shifted.getUTCHours(),
+    minute: shifted.getUTCMinutes(),
+    second: shifted.getUTCSeconds(),
+  });
+  return `${date}${separator}${time}`;
+}
+
 export function listNumericSegments(value) {
   return Object.freeze([...String(value ?? '').matchAll(/\d+/g)].map((match, index) => Object.freeze({
     index,

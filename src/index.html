@@ -4,64 +4,68 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f3efe3">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' blob:; connect-src 'none'; img-src 'self' data:; style-src 'self'; script-src 'self'; font-src 'self'">
   <title>Dummy Data Lab</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body data-interface-mode="BASIC" data-workflow-kind="TRANSFORM" data-scratch-structure="SINGLE" data-basic-step="INPUT">
-  <header class="masthead">
+  <!--
+  THESIS: The approved standalone Quick prototype is the product surface; the production engine sits behind it and never dictates its information hierarchy.
+  OWN-WORLD: Warm paper, crisp ink rules, orange action, teal assurance, large task labels, and one continuous sidebar, isolated from Advanced styles.
+  STORY: Choose a source or one-table template, review only the real decisions that need judgment, then inspect and download the validated result.
+  FIRST VIEWPORT: The original prototype occupies the complete Quick canvas; production controls remain hidden and serve only as an engine host.
+  FORM: V1.70 keeps Quick to one table while making sample data and every active input source explicit.
+  FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+  -->
+  <div id="quick-surface-host" aria-label="Quick mode"></div>
+  <a class="skip-link advanced-surface-only" href="#top">Skip to main content</a>
+  <header class="masthead advanced-surface-only">
     <a class="brand" href="#top" aria-label="Dummy Data Lab home">
-      <span class="brand__mark">D/D</span>
-      <span>Dummy Data Lab</span>
+      <span class="brand__mark">D<i>/</i>D</span>
+      <span class="brand__name">Dummy Data Lab</span>
     </a>
-    <ul class="masthead__highlights" aria-label="Product advantages">
-      <li>Transform or generate</li>
-      <li>Field-by-field control</li>
-      <li>Edge-case coverage</li>
-      <li>Linked datasets</li>
-    </ul>
-    <div class="masthead__tools">
-      <span id="app-version" class="version-badge" title="Current product version">V1.48</span>
-      <div class="view-mode-switch" role="group" aria-label="Interface mode">
-        <button type="button" data-interface-mode="BASIC" aria-pressed="true">Basic</button>
-        <button type="button" data-interface-mode="ADVANCED" aria-pressed="false">Advanced</button>
-      </div>
-      <div class="local-badge" aria-label="Local-only processing; no upload"><span aria-hidden="true"></span><span class="local-badge__label" aria-hidden="true">Local utility · No upload</span></div>
+    <div class="local-status" aria-label="Runs locally; no upload">
+      <span class="assurance-mark" aria-hidden="true"></span>
+      <span>Runs locally · no upload</span>
     </div>
+    <div class="view-mode-switch" role="group" aria-label="Interface mode">
+      <button type="button" data-interface-mode="BASIC" aria-pressed="true">Quick</button>
+      <button type="button" data-interface-mode="ADVANCED" aria-pressed="false">Advanced</button>
+    </div>
+    <span id="app-version" class="version-badge" hidden>V1.70</span>
   </header>
 
-  <main id="top" class="shell">
+  <main id="top" class="shell advanced-surface-only">
     <section class="hero" aria-labelledby="page-title">
-      <div>
-        <p class="eyebrow">STRUCTURE IN · TEST DATA OUT</p>
-        <h1 id="page-title">Make the small dataset your program actually needs.</h1>
-      </div>
-      <div class="hero__copy" aria-label="Available workflows">
-        <p><strong>Transform</strong><span>Turn a CSV, TXT, TSV, or Excel paste into a small protected test dataset—locally.</span></p>
-        <p><strong>Generate</strong><span>Build one table or linked tables from templates and custom rules—locally.</span></p>
-      </div>
+      <h1 id="page-title">Build test data with full control</h1>
+      <ol class="advanced-stepper" aria-label="Advanced workflow">
+        <li><a href="#input-title" aria-current="step"><span>1</span><strong>Start</strong></a></li>
+        <li><a href="#policy-title"><span>2</span><strong>Fields</strong></a></li>
+        <li><a href="#relations-title"><span>3</span><strong>Relationships</strong></a></li>
+        <li><a href="#preview-title"><span>4</span><strong>Export</strong></a></li>
+      </ol>
     </section>
 
     <section id="basic-journey" class="basic-journey basic-only" aria-labelledby="basic-journey-title">
       <div class="basic-journey__intro">
-        <p class="eyebrow">BASIC GUIDE</p>
-        <h2 id="basic-journey-title">One decision at a time</h2>
-        <p id="basic-step-guidance">Add a source table. Your review settings will appear after local analysis.</p>
+        <h2 id="basic-journey-title">One decision at a time.</h2>
+        <p id="basic-step-guidance">Choose how you want to make this table.</p>
       </div>
-      <ol aria-label="Basic workflow progress">
+      <ol aria-label="Quick workflow progress">
         <li>
           <button type="button" data-basic-step-target="INPUT" aria-current="step">
-            <span>1</span><span><strong id="basic-step-one-label">Add source</strong><small>Start here</small></span>
+            <span>1</span><span><strong id="basic-step-one-label">Choose</strong><small>Current step</small></span>
           </button>
         </li>
         <li>
           <button type="button" data-basic-step-target="REVIEW" disabled>
-            <span>2</span><span><strong>Review &amp; generate</strong><small>Available after step 1</small></span>
+            <span>2</span><span><strong>Review</strong><small>Available after step 1</small></span>
           </button>
         </li>
         <li>
           <button type="button" data-basic-step-target="RESULT" disabled>
-            <span>3</span><span><strong>Validate &amp; download</strong><small>Available after generation</small></span>
+            <span>3</span><span><strong>Download</strong><small>Available after generation</small></span>
           </button>
         </li>
       </ol>
@@ -69,32 +73,23 @@
 
     <div id="messages" class="messages" aria-live="polite"></div>
 
-    <div id="recovery-bar" class="recovery-bar" aria-label="Draft and recovery controls">
-      <span><strong>Safe draft</strong><small id="recovery-status" role="status">Undo works in this page; general settings and fictional schemas auto-save in this tab. Source rows are never stored.</small></span>
-      <div>
-        <button id="undo-config" class="button button--compact" type="button" disabled>Undo last change</button>
-        <button id="clear-work" class="button button--compact button--danger" type="button">Start over</button>
-      </div>
-    </div>
-
     <div class="setup-grid">
     <section class="stage stage--input" aria-labelledby="input-title">
-      <div class="stage__rail"><span>1</span><small>INPUT</small></div>
       <div class="stage__body">
         <div class="input-workflow-bar">
           <div class="source-mode-switch" role="group" aria-label="Starting point">
-            <button type="button" data-workflow-kind="TRANSFORM" aria-pressed="true">Transform a table</button>
-            <button type="button" data-workflow-kind="SCRATCH" aria-pressed="false">Generate from scratch</button>
+            <button type="button" data-workflow-kind="TRANSFORM" aria-pressed="true"><span class="basic-only"><strong>Transform existing data</strong><small>Use a file or paste spreadsheet cells.</small></span><span class="advanced-only">Transform a table</span></button>
+            <button type="button" data-workflow-kind="SCRATCH" aria-pressed="false"><span class="basic-only"><strong>Generate one table</strong><small>Start from a template or choose fields.</small></span><span class="advanced-only">Generate from scratch</span></button>
           </div>
         </div>
         <div class="section-heading transform-only">
-          <div><p class="eyebrow">SOURCE</p><h2 id="input-title">Choose or paste a table</h2></div>
+          <div><h2 id="input-title"><span class="basic-only">Add your source table</span><span class="advanced-only">Choose or paste a table</span></h2></div>
           <p>Your source stays in this tab—never uploaded or saved.</p>
         </div>
         <div class="input-grid transform-only">
           <label class="file-drop" for="file-input">
             <span class="file-drop__icon" aria-hidden="true">↥</span>
-            <strong>Select CSV, TXT, or TSV</strong>
+            <strong><span class="basic-only">Drop a CSV, TSV, or TXT file here</span><span class="advanced-only">Select CSV, TXT, or TSV</span></strong>
             <small id="file-name">No file selected</small>
             <input id="file-input" type="file" accept=".csv,.txt,.tsv,text/csv,text/plain,text/tab-separated-values">
           </label>
@@ -102,6 +97,13 @@
             <span>Or paste cells copied from Excel</span>
             <textarea id="paste-input" rows="5" spellcheck="false" placeholder="customer_id&#9;status&#9;start_date&#10;CU-001&#9;Open&#9;2026-01-10"></textarea>
           </label>
+        </div>
+        <div id="advanced-source-conflict" class="input-source-conflict transform-only" role="alert" hidden>
+          <span><strong>Choose one source</strong><small>Advanced analyses one source table at a time. Nothing will be deleted.</small></span>
+          <span class="input-source-conflict__actions">
+            <button id="advanced-use-file-source" class="button button--compact" type="button">Use uploaded file</button>
+            <button id="advanced-use-paste-source" class="button button--compact" type="button">Use pasted data</button>
+          </span>
         </div>
         <div class="control-strip transform-only">
           <details id="input-options" class="input-options">
@@ -123,21 +125,27 @@
               </label>
             </div>
           </details>
-          <button id="analyse-button" class="button button--primary" type="button">Analyse locally</button>
+          <div class="input-source-actions">
+            <span id="advanced-source-status" class="input-source-status" role="status" aria-live="polite" hidden></span>
+            <span class="input-source-buttons">
+              <button id="advanced-sample-data" class="button button--sample" type="button">Try sample data</button>
+              <button id="analyse-button" class="button button--primary" type="button">Analyse locally</button>
+            </span>
+          </div>
         </div>
         <div id="parse-summary" class="metric-grid transform-only" aria-label="Parse summary"></div>
         <div class="scratch-only scratch-start">
           <div class="section-heading">
-            <div><p class="eyebrow">START FRESH</p><h2>Choose how to start</h2></div>
-            <p>Build everything locally from the fields you choose.</p>
+            <div><h2><span class="basic-only">Start with a simple table</span><span class="advanced-only">Choose how to start</span></h2></div>
+            <p><span class="basic-only">Choose a template, then review or change its fields.</span><span class="advanced-only">Build everything locally from the fields you choose.</span></p>
           </div>
           <div class="scratch-structure-picker" aria-label="Scratch data structure">
             <button type="button" data-scratch-structure="SINGLE" aria-pressed="true"><strong>One table</strong><small>Build one CSV</small></button>
             <button type="button" data-scratch-structure="MULTI" aria-pressed="false"><strong>Related tables <span class="advanced-entry-tag basic-only">Advanced</span></strong><small>Build linked tables with keys and rules</small></button>
           </div>
           <button id="load-connected-scenario" class="connected-scenario-card" type="button">
-            <span><strong>Connected commerce &amp; appointments</strong><small>People + Products + Orders + Appointments, already linked</small></span>
-            <b>Build 4-table project →</b>
+            <span><strong>Try Advanced sample · Connected commerce</strong><small>People + Products + Orders + Appointments with valid keys and linked dates</small></span>
+            <b>Load 4 linked tables →</b>
           </button>
           <div id="template-picker" class="template-picker" aria-label="Dataset templates"></div>
           <div id="template-selection-summary" class="scratch-template-summary scratch-only" hidden aria-live="polite">
@@ -178,10 +186,9 @@
     </section>
 
     <section class="stage stage--plan" aria-labelledby="settings-title">
-      <div class="stage__rail"><span>2</span><small>PLAN</small></div>
       <div class="stage__body">
         <div class="section-heading">
-          <div><p class="eyebrow">OUTPUT</p><h2 id="settings-title"><span class="transform-only">Set the protection and size</span><span class="scratch-only">Choose the output size</span></h2></div>
+          <div><h2 id="settings-title"><span class="transform-only">Choose generation settings</span><span class="scratch-only">Choose the output size</span></h2></div>
           <p><span class="transform-only">Input size does not control output size.</span><span class="scratch-only">Choose a preset or enter an exact row count.</span></p>
         </div>
         <div class="settings-grid">
@@ -214,17 +221,18 @@
             <small>Recommended protection is active. Switch to Advanced to change it.</small>
           </div>
           <fieldset class="option-card business-fidelity-card transform-only">
-            <legend class="business-fidelity-legend">Business pattern
-              <button class="info-tooltip" type="button" data-static-tooltip aria-label="About the selected business pattern" aria-describedby="business-fidelity-boundary" aria-expanded="false">
+            <legend class="business-fidelity-legend">Structure match
+              <button class="info-tooltip" type="button" data-static-tooltip aria-label="About the selected structure match" aria-describedby="business-fidelity-boundary" aria-expanded="false">
                 <span class="info-tooltip__trigger" aria-hidden="true">i</span>
                 <span id="business-fidelity-boundary" class="info-tooltip__content" role="tooltip">Recommended. Preserves repeat mappings, formats, common groups, and confirmed relationships. Evidence-backed candidates stay off until you confirm them. Only High guarantees exact source order.</span>
               </button>
             </legend>
-            <div class="business-fidelity-options" role="radiogroup" aria-label="Business pattern match">
-              <label title="Coverage-first mixing with freedom to resize. Row order and consecutive groups may change."><input type="radio" name="business-fidelity" value="FLEXIBLE"><span><span class="fidelity-choice-heading"><strong>Flexible</strong></span><small>More freedom</small></span></label>
-              <label title="Recommended default. Keeps ordered source blocks, stable repeat mappings, formats, blanks, and confirmed rules where safe."><input type="radio" name="business-fidelity" value="BALANCED" checked><span><span class="fidelity-choice-heading"><strong>Balanced</strong></span><small>Recommended default</small></span></label>
-              <label title="Uses the complete source row sequence and source row count. Confirmed relationship rules are also preserved. Highest structural match and disclosure risk."><input type="radio" name="business-fidelity" value="HIGH"><span><span class="fidelity-choice-heading"><strong>High match</strong></span><small>Source structure</small></span></label>
+            <div class="business-fidelity-options" role="radiogroup" aria-label="Structure match level">
+              <label title="Coverage-first mixing with freedom to resize. Row order and consecutive groups may change."><input type="radio" name="business-fidelity" value="FLEXIBLE"><span><span class="fidelity-choice-heading"><strong>Flexible</strong></span><small>Coverage first</small></span></label>
+              <label title="Recommended default. Keeps ordered source blocks, stable repeat mappings, formats, blanks, and confirmed rules where safe."><input type="radio" name="business-fidelity" value="BALANCED" checked><span><span class="fidelity-choice-heading"><strong>Balanced</strong></span><small>Keep useful structure</small></span></label>
+              <label title="Uses the complete source row sequence and source row count. Confirmed relationship rules are also preserved. Highest structural match and disclosure risk."><input type="radio" name="business-fidelity" value="HIGH"><span><span class="fidelity-choice-heading"><strong>High match</strong></span><small>Mirror source order</small></span></label>
             </div>
+            <p id="business-fidelity-impact" class="fidelity-impact" role="status">Analyse a table to see which useful structures can be retained.</p>
             <details class="business-fidelity-details advanced-only">
               <summary>Fine-tune structure matching</summary>
               <div class="business-fidelity-toggles">
@@ -246,17 +254,16 @@
     </div>
 
     <section id="generated-columns-workspace" class="stage stage--generated generated-columns" aria-labelledby="generated-columns-title">
-      <div class="stage__rail stage__rail--continuation"><small><span class="transform-only">PLAN · OPTIONAL EXTENSION</span><span class="scratch-only">PLAN · GENERATED COLUMNS</span></small></div>
       <div class="stage__body">
           <div class="generated-columns__heading">
-            <div><h3 id="generated-columns-title"><span class="transform-only">Optional generated columns</span><span class="scratch-only">Define the columns to generate</span></h3></div>
+            <div><h3 id="generated-columns-title"><span class="transform-only">Generate additional columns (optional)</span><span class="scratch-only">Define the columns to generate</span></h3></div>
             <div class="generated-columns__actions">
               <span class="inline-control-with-help advanced-only"><label>Probe rows<select id="probe-row-count"><option value="20">20</option><option value="50">50</option></select></label><button class="info-tooltip" type="button" data-static-tooltip aria-label="About testing rules" aria-describedby="tip-probe-rules" aria-expanded="false"><span class="info-tooltip__trigger" aria-hidden="true">i</span><span id="tip-probe-rules" class="info-tooltip__content" role="tooltip">Test rules generates a temporary 20- or 50-row check so you can inspect dependencies and warnings. It does not replace your chosen export size and it does not create a downloadable final result.</span></button></span>
               <button id="probe-button" class="button button--compact" type="button" disabled>Test rules</button>
               <button id="add-generated-column" class="button button--compact" type="button">+ Add column</button>
               <button id="download-config" class="button button--compact advanced-only" type="button">Save config</button>
               <label class="button button--compact config-upload advanced-only">Load config<input id="config-file" type="file" accept=".json,application/json"></label>
-              <button id="generated-columns-toggle" class="button button--compact generated-columns__toggle advanced-only transform-only" type="button" aria-expanded="false" aria-controls="generated-columns-panel">Show fields</button>
+              <button id="generated-columns-toggle" class="button button--compact generated-columns__toggle advanced-only transform-only" type="button" aria-expanded="false" aria-controls="generated-columns-panel">Add fields</button>
             </div>
           </div>
           <div id="generated-columns-panel" class="generated-columns__panel">
@@ -275,7 +282,7 @@
                 <button id="load-personal-set" class="button button--compact" type="button" disabled>Use set</button>
                 <button id="delete-personal-set" class="button button--compact button--danger" type="button" disabled>Delete</button>
               </div>
-              <small class="basic-only">Basic covers common fields. Advanced adds dependencies, saved field sets, and detailed rules.</small>
+              <small class="basic-only">Quick covers common fields. Advanced adds dependencies, saved field sets, and detailed rules.</small>
               <small class="advanced-only">Saved field sets contain definitions only—never your data.</small>
             </div>
             <div id="generated-column-editor" class="generated-column-editor"></div>
@@ -284,11 +291,10 @@
     </section>
 
     <section class="stage stage--policy" aria-labelledby="policy-title">
-      <div class="stage__rail"><span>3</span><small>REVIEW</small></div>
       <div class="stage__body">
         <div class="section-heading">
-          <div><p class="eyebrow">COLUMN POLICY</p><h2 id="policy-title">Choose the final action</h2></div>
-          <p>Recommendations never override your Final Action. SHIFT also requires an explicit offset.</p>
+          <div><h2 id="policy-title">Review each action</h2></div>
+          <p>Compare a source sample with the preview. Open evidence and settings only when needed.</p>
         </div>
         <div class="policy-toolbar" aria-label="Bulk column actions">
           <div>
@@ -303,16 +309,12 @@
     </section>
 
     <section class="stage stage--relationships" aria-labelledby="relations-title">
-      <div class="stage__rail"><span class="transform-only">4</span><span class="scratch-only">3</span><small><span class="transform-only">LINKS</span><span class="scratch-only">GENERATE</span></small></div>
       <div class="stage__body">
         <div class="section-heading">
           <div>
-            <p class="eyebrow advanced-only transform-only">RELATIONSHIPS</p>
-            <p class="eyebrow basic-only transform-only">GENERATE</p>
-            <p class="eyebrow scratch-only">GENERATE</p>
-            <h2 id="relations-title"><span class="advanced-only transform-only">Confirm connected fields</span><span class="basic-only transform-only">Confirm and generate</span><span class="scratch-only">Confirm and generate</span></h2>
+            <h2 id="relations-title"><span class="advanced-only transform-only">Add confirmed relationships</span><span class="basic-only transform-only">Confirm and generate</span><span class="scratch-only">Confirm and generate</span></h2>
           </div>
-          <p class="advanced-only transform-only">Evidence-backed candidates start off. Column-name hints are informational. Only confirmed rules affect generation.</p>
+          <p class="advanced-only transform-only">Only rules you confirm affect generation.</p>
           <p class="basic-only transform-only">Advanced relationship rules remain off unless you enable them.</p>
           <p class="scratch-only">Test first when tuning ranges, weights, blanks, or uniqueness.</p>
         </div>
@@ -335,37 +337,80 @@
     </section>
 
     <section class="stage stage--preview" aria-labelledby="preview-title">
-      <div class="stage__rail"><span class="transform-only">5</span><span class="scratch-only">4</span><small>EXPORT</small></div>
       <div class="stage__body">
         <div class="section-heading">
-          <div><p class="eyebrow">RESULT</p><h2 id="preview-title">Preview and export</h2></div>
-          <p>Preview shows up to 100 rows. Downloads include all generated rows.</p>
+          <div><h2 id="preview-title">Preview and export</h2></div>
+          <p>Downloads include every generated row and column.</p>
         </div>
         <div id="preview-controls" class="preview-controls" hidden>
-          <button id="compare-toggle" class="button" type="button" disabled>Compare with source</button>
-          <small id="compare-boundary">Generated values appear above the exact source values. Source values are never downloaded.</small>
+          <div id="compare-controls" class="preview-compare">
+            <button id="compare-toggle" class="button" type="button" disabled>Compare with source</button>
+            <small id="compare-boundary">Generated values appear above the exact source values.</small>
+          </div>
+          <small id="preview-row-note" class="preview-row-note"></small>
         </div>
         <div id="generation-validation" hidden></div>
         <div id="dataset-integrity" class="dataset-integrity multi-scratch-only" hidden></div>
         <section id="quality-report" class="quality-report" aria-label="Quality and privacy report" hidden></section>
         <div id="dataset-preview-tabs" class="dataset-preview-tabs multi-scratch-only" hidden aria-label="Generated table previews"></div>
+        <div id="quick-preview-summary" class="quick-preview-summary basic-only" hidden>
+          <strong><span id="quick-preview-column-count">0</span> columns in this result</strong>
+          <span><span id="quick-preview-row-count">0</span> rows generated · scroll sideways to inspect wide tables · every column is included in the download</span>
+        </div>
         <div id="preview-table" class="table-scroll empty-panel">Generated data will appear here.</div>
         <div class="export-bar">
           <span class="export-option-with-help"><label><input id="excel-safe" type="checkbox" checked> Spreadsheet formula protection</label><button class="info-tooltip info-tooltip--above-left" type="button" data-static-tooltip aria-label="About spreadsheet formula protection" aria-describedby="tip-spreadsheet-protection" aria-expanded="false"><span class="info-tooltip__trigger" aria-hidden="true">i</span><span id="tip-spreadsheet-protection" class="info-tooltip__content" role="tooltip">When a text cell begins like a spreadsheet formula, the exported file adds a leading apostrophe so Excel or another spreadsheet does not execute it. The apostrophe is an export safety marker, not part of the generated value.</span></button></span>
+          <button id="advanced-regenerate" class="button advanced-only" type="button" disabled>Generate another version</button>
           <button id="export-csv" class="button button--csv" type="button" disabled>Download CSV</button>
           <button id="export-tsv" class="button button--quiet advanced-only" type="button" disabled>TSV (optional)</button>
           <button id="export-dataset-zip" class="button button--csv multi-scratch-only" type="button" disabled>Download all tables (.zip)</button>
         </div>
       </div>
     </section>
+
+    <aside id="quick-sidebar" class="quick-sidebar basic-only" aria-label="Quick mode summary">
+      <section>
+        <h2>Quick defaults</h2>
+        <dl>
+          <div><dt>Task</dt><dd id="quick-task-label">Transform existing data</dd></div>
+          <div><dt>Output rows</dt><dd id="quick-output-row-count">200</dd></div>
+          <div><dt>Columns</dt><dd id="quick-output-column-count">After analysis</dd></div>
+          <div><dt>Protection</dt><dd>Safe Test Data</dd></div>
+          <div><dt>Export</dt><dd>CSV</dd></div>
+        </dl>
+        <p id="quick-sidebar-note">Add a source table. You will review the real column decisions before anything is generated.</p>
+        <div class="quick-local-note"><span aria-hidden="true"></span><p><strong>Runs locally</strong>Everything stays in this browser session.</p></div>
+      </section>
+      <section>
+        <h3>Need related tables?</h3>
+        <p>Keys, links, detailed dependencies, and multi-table projects live in Advanced.</p>
+        <button class="quick-advanced-link" type="button" data-interface-mode="ADVANCED" aria-pressed="false">Open Advanced <span aria-hidden="true">→</span></button>
+      </section>
+    </aside>
+
+    <aside id="advanced-sidebar" class="advanced-sidebar advanced-only" aria-label="Advanced workbench summary">
+      <section>
+        <h2>Current setup</h2>
+        <dl>
+          <div><dt>Task</dt><dd id="advanced-task-label">Transform a table</dd></div>
+          <div><dt>Output rows</dt><dd id="advanced-output-row-count">200</dd></div>
+          <div><dt>Columns</dt><dd id="advanced-output-column-count">After analysis</dd></div>
+        </dl>
+        <div id="recovery-bar" class="advanced-recovery-actions" aria-label="Recovery controls">
+          <span id="recovery-status" class="visually-hidden" role="status"></span>
+          <button id="undo-config" class="button button--compact" type="button" disabled>Undo last change</button>
+          <button id="clear-work" class="button button--compact button--danger" type="button">Start over</button>
+        </div>
+      </section>
+      <div class="advanced-local-note"><span class="assurance-mark" aria-hidden="true"></span><span><strong>Runs locally</strong><small>Everything stays in this browser session.</small></span></div>
+    </aside>
   </main>
 
-  <aside id="progress-panel" class="progress-panel" hidden aria-live="polite">
+  <aside id="progress-panel" class="progress-panel advanced-surface-only" hidden aria-live="polite">
     <div class="progress-heading"><span data-progress-label>Ready.</span><button id="cancel-button" type="button">Cancel</button></div>
     <div class="progress-track"><i data-progress-bar></i></div>
   </aside>
 
-  <footer>No server · No analytics · Pseudonymisation is not anonymisation</footer>
   <script type="module" src="./app.js"></script>
 </body>
 </html>

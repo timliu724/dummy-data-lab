@@ -32,6 +32,17 @@ const DEFINITIONS = Object.freeze({
       column('orders', 4, 'total', 'decimal', { minimum: 10, maximum: 2500, decimals: 2 }),
     ]),
   }),
+  support: Object.freeze({
+    id: 'support', label: 'Support cases', description: 'Case IDs, subjects, priorities, status, and safe notes.',
+    columns: Object.freeze([
+      column('support', 0, 'case_id', 'sequence', { prefix: 'CASE-', start: 1, width: 6, unique: true }),
+      column('support', 1, 'subject', 'category', { values: ['Account access', 'Billing question', 'Delivery update', 'Product help'], weights: [25, 20, 30, 25] }),
+      column('support', 2, 'priority', 'category', { values: ['Low', 'Medium', 'High'], weights: [30, 55, 15] }),
+      column('support', 3, 'status', 'category', { values: ['Open', 'In progress', 'Resolved'], weights: [30, 35, 35] }),
+      column('support', 4, 'opened_at', 'datetime', { startDate: '2025-01-01', endDate: '2026-12-31' }),
+      column('support', 5, 'notes', 'category', { values: ['Synthetic follow-up required', 'Synthetic customer update sent', 'Synthetic case ready for review'], weights: [35, 35, 30] }),
+    ]),
+  }),
   products: Object.freeze({
     id: 'products', label: 'Products', description: 'SKUs, readable labels, categories, and prices.',
     columns: Object.freeze([

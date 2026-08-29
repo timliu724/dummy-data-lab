@@ -1,8 +1,8 @@
-# Dummy Data Lab V1.55 user guide
+# Dummy Data Lab V1.70 user guide
 
 ## Before you begin
 
-Download **Dummy-Data-Lab-v1.55.html** from the GitHub Release and verify its
+Download **Dummy-Data-Lab-v1.70.html** from the GitHub Release and verify its
 SHA-256 checksum before use. Open the file locally in a current Chrome or Edge
 browser. The application is self-contained and does not require a server,
 account, or runtime installation.
@@ -21,7 +21,7 @@ from scratch.
 Use this workflow when you already have CSV, TSV, TXT, or cells copied from a
 spreadsheet.
 
-1. Select a file or paste cells from Excel.
+1. Select a file, paste cells from Excel, or choose **Try sample data**.
 2. Leave delimiter and header detection on Auto unless the preview is wrong.
 3. Select **Analyse locally**.
 4. Review the detected columns and recommended actions.
@@ -44,18 +44,24 @@ Use Scratch when no source table is required.
 Scratch values are deliberately test-oriented. They are not produced by a
 statistical or ML synthetic-data model.
 
-## Basic and Advanced views
+The built-in fictional sample is placed visibly into the input area. It is not
+analysed until you choose **Analyse locally**. A new upload supersedes an
+unchanged built-in sample. If an upload and user-authored paste are both
+present, choose which source to analyse; neither source is silently deleted.
 
-Basic presents the main decisions in a guided sequence:
+## Quick and Advanced views
+
+Quick presents the main decisions in a guided sequence:
 
 1. add a source or choose a Scratch template;
 2. review settings and generate;
 3. validate and download.
 
-Advanced exposes additional controls such as exact repeated-value behaviour,
-custom pattern parts, relationship groups, saved field sets, detailed project
-keys, and optional TSV export. Switching views does not discard the current
-configuration.
+Quick also generates one table from editable People, Orders, or Support Cases
+starters. Advanced exposes additional controls such as exact repeated-value
+behaviour, custom pattern parts, relationship groups, saved field sets,
+detailed project keys, optional TSV export, and the connected-commerce
+multi-table sample. Switching views does not discard the current configuration.
 
 ## Output size
 
@@ -138,8 +144,9 @@ For REPLACE and PATTERN_REPLACE:
 Dates are detected from values as well as headers. Supported forms include ISO,
 day-first, month-first, month-name, and common date-time representations.
 
-An ambiguous slash date requires the user to choose a date orientation. Fixed
-SHIFT actions require an explicit offset. For related date or number columns,
+An ambiguous slash date requires the user to choose a date orientation.
+Supported temporal SHIFT actions start with a six-day, six-hour offset that can
+be changed before generation. For related date or number columns,
 create and enable a Shift Group so that the same offset and ordering contract
 can be applied together. Invalid source ordering is reported rather than
 silently repaired.

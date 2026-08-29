@@ -298,6 +298,8 @@ export function validateActionParams({ action, detectedType = 'UNKNOWN', params 
     ? [SHIFT_UNITS.INTEGER]
     : detectedType === 'TIME'
       ? [SHIFT_UNITS.HOURS, SHIFT_UNITS.MINUTES]
+      : detectedType === 'DATETIME'
+        ? [SHIFT_UNITS.DAYS, SHIFT_UNITS.HOURS, SHIFT_UNITS.MINUTES]
       : [SHIFT_UNITS.DAYS];
   if (!allowedUnits.includes(current.unit)) errors.push('SHIFT unit does not match the selected shift kind.');
   if (!Number.isInteger(current.segmentIndex) || current.segmentIndex < 0) errors.push('Numeric segment index must be a non-negative integer.');

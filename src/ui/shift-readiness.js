@@ -82,7 +82,7 @@ export function renderShiftReadiness(container, missing, onApply) {
   wrap.className = 'shift-readiness';
   const copy = documentRef.createElement('div');
   const title = documentRef.createElement('strong');
-  title.textContent = `${missing.length} SHIFT column${missing.length === 1 ? '' : 's'} need an offset before generation.`;
+  title.textContent = `${missing.length} SHIFT column${missing.length === 1 ? ' needs' : 's need'} an offset before generation.`;
   const names = documentRef.createElement('small');
   names.textContent = missing.map((entry) => entry.columnName).join(', ');
   copy.append(title, names);

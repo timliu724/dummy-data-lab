@@ -1,80 +1,32 @@
-# Dummy Data Lab V1.55 release notes
+# Dummy Data Lab V1.70 release notes
 
-V1.55 is the first public release of Dummy Data Lab: an offline, single-file
-browser tool for transforming delimited data into controlled test datasets or
-generating new single-table and related-table test data from scratch.
+V1.70 makes Dummy Data Lab easier to enter without reducing the depth of its local data engine. The product now presents two clear interfaces: **Quick** for transforming existing data and generating one table, and **Advanced** for detailed controls and related-table projects.
 
 ## Highlights
 
-- Open one standalone HTML file in a current Chrome or Edge browser. No server,
-  account, upload, external API, or runtime installation is required.
-- Analyse CSV, TSV, TXT, or spreadsheet-pasted data locally and review a
-  recommended action for each column before generating output.
-- Use stable replacement mappings, pattern-aware replacement, fixed shifts,
-  resampling, generalisation, clearing, dropping, and best-effort text
-  sanitisation.
-- Choose Flexible, Balanced, or High match business-pattern handling. Balanced
-  is the default compromise between useful fidelity, test coverage, and privacy
-  guardrails; High match retains more source structure and therefore more
-  disclosure risk.
-- Preserve numeric distribution evidence during numeric resampling and report
-  whether checked distribution contracts passed.
-- Review relationship candidates based on row-level evidence. Relationships
-  become generation and validation contracts only after user confirmation;
-  column names alone never activate a relationship.
-- Generate one table or linked People, Products, Orders, and Appointments-style
-  projects with primary keys, foreign keys, dependent fields, configuration
-  save/load, and ZIP export.
-- Inspect a quality and privacy report with explicit PASS, REVIEW, FAIL, and
-  NOT EVALUATED states.
+- Quick uses a quieter, guided three-step flow with improved spacing, typography, tables, previews, and primary actions.
+- Advanced retains its multi-table, key, relationship, fidelity, configuration, and export capabilities while adopting the same visual language and a more scannable review layout.
+- Quick single-table generation starts from editable People, Orders, or Support Cases templates, supports custom columns, and allows default fields to be removed.
+- Supported temporal transformations start with a practical six-day, six-hour shift rather than blocking first-time generation on an empty setting.
+- Output previews and Quality Reports are more compact and consistent. Advanced can generate another version without rebuilding the configuration.
+- Both interfaces provide an explicit **Try sample data** action. The fictional 16-row, 12-column sample is placed visibly into the source area and is analysed only after the user chooses **Analyse locally**.
+- Source choice is explicit. A newly uploaded file supersedes an unchanged built-in sample; an uploaded file plus user-authored pasted data requires a deliberate choice without deleting either source.
+- Advanced includes a labelled connected-commerce sample for its validated People, Products, Orders, and Appointments relationship workflow.
 
-## Quality status meaning
+## Validation summary
 
-- **PASS:** the contracts that were evaluated passed.
-- **REVIEW:** usable output was produced, but evidence or a boundary needs human
-  review.
-- **FAIL:** at least one declared contract failed. The completed result remains
-  downloadable so the user can inspect it.
-- **NOT EVALUATED:** a report area did not have enough relevant source evidence
-  or a confirmed rule to evaluate.
+- Complete automated suite: 480/480 passed.
+- Focused UI and interaction coverage: 89/89 passed within the complete suite.
+- Fictional sample engine flow: 16 rows, 12 columns, four transformation families, 59 scenarios, and a valid 40-row result with zero validation issues.
+- Standalone build: passed.
+- Static offline audit: passed all checks.
 
-A PASS is not a privacy certification, an anonymisation guarantee, or proof
-that the output is suitable for every business purpose.
+See [V1.70 Release Verification](V1.70_RELEASE_VERIFICATION.md) for the recorded scope and the browser-acceptance status of this prepared public export.
 
-## Offline and export behaviour
+## Artifact
 
-The production artifact is self-contained and uses a restrictive Content
-Security Policy with outbound connections disabled. Source rows, profile
-samples, and mapping tables remain in the active browser session and are not
-persisted. A source-free recovery draft may use `sessionStorage`, and optional
-personal field sets use `localStorage`.
-
-CSV export defaults to UTF-8 with a BOM and CRLF line endings. Advanced mode can
-also export TSV. Related-table projects export as ZIP. Excel-safe protection is
-enabled by default and prefixes risky formula-like text during export; users
-receive an explicit warning before deliberately exporting unprotected cells.
-
-## Known limitations
-
-- Safe Test Data and ID Only are masking and pseudonymisation workflows, not
-  certified anonymisation.
-- Text sanitisation is pattern-based and can miss context-specific names,
-  facts, or identifiers.
-- Scratch output is synthetic-style test data, not statistical or ML-based
-  synthetic modelling.
-- High match can retain row order, group sizes, rare structure, and confirmed
-  relationships. That fidelity can increase disclosure risk.
-- Direct XLSX import is not supported. Copy cells from Excel or use CSV/TSV.
-- Business relationships are never guaranteed unless the user confirms them.
-
-## Production artifact
-
-- **Release filename:** `Dummy-Data-Lab-v1.55.html`
-- **Production tag:** `v1.55`
-- **Production commit:** `2dd498ef3e1b905c8332952c8e0ebf1abf102aba`
-- **Size:** `791,222 bytes`
-- **SHA-256:** `94FECCEB54F08DE523EA9EB53CF487C48229E8556C1ED4E31065078194D7FFC5`
-
-The public filename is a byte-for-byte copy of the independently verified V1.55
-production artifact. Public packaging commits do not change the production tag
-or product behaviour.
+- Filename: `Dummy-Data-Lab-v1.70.html`
+- Planned tag: `v1.70`
+- Source commit: `9c1c61159a4ae68386d7ee9284af5ba596fbfde1`
+- Size: `984,084 bytes`
+- SHA-256: `498C62F445B86890A7F9FF8C401A98A29E0DDD0D8F8F70A539C819BADD84D005`

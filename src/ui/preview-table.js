@@ -10,7 +10,17 @@ export function previewModel(result, limit = PREVIEW_ROW_LIMIT) {
   });
 }
 
-export function renderPreviewTable(container, result) {
+function placePreview(container, table, note, noteContainer) {
+  if (!noteContainer) {
+    container.replaceChildren(note, table);
+    return;
+  }
+  noteContainer.className = note.className.replace('preview-note', 'preview-row-note').trim();
+  noteContainer.textContent = note.textContent;
+  container.replaceChildren(table);
+}
+
+export function renderPreviewTable(container, result, { noteContainer = null } = {}) {
   const model = previewModel(result);
   const documentRef = container.ownerDocument;
   const table = documentRef.createElement('table');
@@ -39,7 +49,7 @@ export function renderPreviewTable(container, result) {
   note.textContent = model.truncated
     ? `Showing the first ${model.shownRowCount} of ${model.totalRowCount.toLocaleString()} generated rows.`
     : `Showing all ${model.totalRowCount.toLocaleString()} generated rows.`;
-  container.replaceChildren(note, table);
+  placePreview(container, table, note, noteContainer);
 }
 
 function displayValue(value) {
@@ -73,12 +83,14 @@ export function inlineComparisonModel({ generationResult, sourcePreview }, limit
   return Object.freeze({ headers: generationResult.headers, rows: Object.freeze(rows), totalRowCount: generationResult.rows.length });
 }
 
-export function renderInlineComparisonTable(container, values) {
+export function renderInlineComparisonTable(container, values, { noteContainer = null } = {}) {
   const model = inlineComparisonModel(values);
   const documentRef = container.ownerDocument;
   const note = documentRef.createElement('p');
   note.className = 'preview-note preview-note--comparison';
-  note.textContent = `Showing ${model.rows.length} generated rows with each current value on top and its source value underneath. Source values stay local and are never included in downloads.`;
+  note.textContent = model.rows.length < model.totalRowCount
+    ? `Showing the first ${model.rows.length} of ${model.totalRowCount.toLocaleString()} generated rows.`
+    : `Showing all ${model.totalRowCount.toLocaleString()} generated rows.`;
 
   const table = documentRef.createElement('table');
   table.className = 'preview-table preview-table--inline-comparison';
@@ -110,5 +122,5 @@ export function renderInlineComparisonTable(container, values) {
     body.append(row);
   });
   table.append(head, body);
-  container.replaceChildren(note, table);
+  placePreview(container, table, note, noteContainer);
 }

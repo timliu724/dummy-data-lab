@@ -1,7 +1,7 @@
 {
   "format": "dummy-data-generation-config",
   "schemaVersion": 3,
-  "appVersion": "V1.55",
+  "appVersion": "V1.70",
   "workflowKind": "SCRATCH",
   "requestedRowCount": 200,
   "mode": "SAFE_TEST_DATA",

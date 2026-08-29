@@ -48,6 +48,7 @@ async function bundle(entryPoint, options = {}) {
 const workerSource = await bundle(path.join(sourceRoot, 'worker', 'worker-entry.js'));
 const applicationSource = await bundle(path.join(sourceRoot, 'app.js'), {
   define: { __DUMMY_WORKER_SOURCE__: JSON.stringify(workerSource) },
+  loader: { '.html': 'text' },
 });
 const css = await readFile(path.join(sourceRoot, 'styles.css'), 'utf8');
 let html = await readFile(path.join(sourceRoot, 'index.html'), 'utf8');

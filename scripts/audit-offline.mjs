@@ -12,7 +12,7 @@ const visibleHtml = html
   .replace(/<style\b[\s\S]*?<\/style>/gi, '');
 
 const checks = [
-  ['single HTML document', (html.match(/<!doctype html>/gi) ?? []).length === 1],
+  ['single HTML document', (visibleHtml.match(/<!doctype html>/gi) ?? []).length === 1],
   ['no external script src', !/<script\b[^>]*\bsrc\s*=/i.test(html)],
   ['no external stylesheet link', !/<link\b[^>]*rel=["']stylesheet["']/i.test(html)],
   ['no external image source', !/<img\b[^>]*\bsrc\s*=/i.test(html)],
