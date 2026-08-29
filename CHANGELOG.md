@@ -1,6 +1,6 @@
 # Changelog
 
-This is a user-facing summary of product evolution, not an internal audit diary.
+This is a user-facing summary of product evolution.
 
 ## V1.70
 

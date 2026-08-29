@@ -4,12 +4,11 @@
 
 | Property | Value |
 | --- | --- |
-| Source commit | `9c1c61159a4ae68386d7ee9284af5ba596fbfde1` |
 | Public filename | `Dummy-Data-Lab-v1.70.html` |
 | Size | `984,084 bytes` |
 | SHA-256 | `498C62F445B86890A7F9FF8C401A98A29E0DDD0D8F8F70A539C819BADD84D005` |
 
-The public file is a byte-for-byte copy of the archived V1.70 candidate.
+The public file is a byte-for-byte copy of the V1.70 release file.
 
 ## Static checks
 
