@@ -6,6 +6,10 @@
 
 **No installation · No upload · Runs locally in current Chrome or Edge**
 
+**Quick mode:** turn source data into downloadable test data in a few guided steps.
+
+![Dummy Data Lab Quick mode demo: load fictional sample data, analyse it locally, and generate downloadable test data](docs/assets/dummy-data-lab-demo.gif)
+
 ## Quick start
 
 1. Download `Dummy-Data-Lab-v1.70.html`.
@@ -16,7 +20,11 @@
 
 Use only source data you are authorised to process, and review generated output before sharing it.
 
-## Quick and Advanced
+## What it does
+
+Use **Quick** for the shortest path from source data to output. Switch to **Advanced** when you want to inspect source-to-preview changes and control individual column actions.
+
+![Dummy Data Lab Advanced mode: compare source samples with generated previews and review each column action](docs/assets/dummy-data-lab-overview.png)
 
 ### Quick
 
