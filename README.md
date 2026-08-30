@@ -2,9 +2,11 @@
 
 **Turn existing CSV, TSV, or delimited TXT data into controlled dummy datasets—or generate new test data—in one offline HTML file.**
 
-[**Download Dummy Data Lab V1.70**](https://github.com/timliu724/dummy-data-lab/releases/download/v1.70/Dummy-Data-Lab-v1.70.html)
+[**Use Dummy Data Lab online**](https://timliu724.github.io/dummy-data-lab/) · [**Download Dummy Data Lab V1.70**](https://github.com/timliu724/dummy-data-lab/releases/download/v1.70/Dummy-Data-Lab-v1.70.html)
 
-**No installation · No upload · Runs locally in current Chrome or Edge**
+**No installation · No data upload · Runs locally in current Chrome or Edge**
+
+The online version is served by GitHub Pages; source data is still processed locally in your browser. Download the HTML file for use without an internet connection.
 
 **Quick mode:** turn source data into downloadable test data in a few guided steps.
 
@@ -12,8 +14,8 @@
 
 ## Quick start
 
-1. Download `Dummy-Data-Lab-v1.70.html`.
-2. Open it in Chrome or Edge.
+1. Open the [online version](https://timliu724.github.io/dummy-data-lab/), or download `Dummy-Data-Lab-v1.70.html` for offline use.
+2. If downloaded, open the HTML file in Chrome or Edge.
 3. Choose **Quick** for an existing table or a new single table, or **Advanced** for detailed controls and related tables.
 4. Upload or paste data, or select **Try sample data**, then choose **Analyse locally**.
 5. Review the proposed actions, generate the result, inspect the Quality Report, and download the output.
