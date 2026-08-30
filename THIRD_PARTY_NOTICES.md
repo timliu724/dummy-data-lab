@@ -36,4 +36,4 @@ Copyright (c) 2020 Evan Wallace.
 
 `@faker-js/faker` was evaluated during development but is not listed in
 `package.json` or `package-lock.json`, and no Faker code is included in the
-V1.70 production artifact.
+V1.71 production artifact.

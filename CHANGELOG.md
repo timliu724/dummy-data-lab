@@ -2,6 +2,14 @@
 
 This is a user-facing summary of product evolution.
 
+## V1.71
+
+- Improved the Advanced Start layout across common desktop, laptop, and embedded widths.
+- Moved Current setup below the main content when a stable sidebar no longer fits.
+- Reflowed Source and Generation settings before their controls become cramped.
+- Prevented Input options, primary actions, and Protection mode from compressing into unreadable layouts.
+- Removed repeated mode guidance and moved the short protection boundary into a keyboard-accessible information tooltip.
+
 ## V1.70
 
 - Reworked the guided interface as **Quick**, with less visual density and a clearer three-step path for transforming existing data or generating one table.

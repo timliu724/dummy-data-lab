@@ -1,7 +1,7 @@
 # Public demo data
 
 Every file in this directory is fictional and was created specifically for the
-public Dummy Data Lab V1.70 repository. Do not replace these files with internal,
+public Dummy Data Lab V1.71 repository. Do not replace these files with internal,
 operational, or production-derived data.
 
 ## simple-transform.csv
@@ -27,7 +27,7 @@ There are no real addresses, telephone numbers, organisations, or events.
 
 ## related-tables-config.json
 
-A source-free V1.70 Advanced configuration created through the current public
+A source-free V1.71 Advanced configuration created through the current public
 configuration serializer and the built-in connected scenario. It defines
 People, Products, Orders, and Appointments tables with fictional generators,
 keys, and dependent rules. It contains schemas and settings, not generated or

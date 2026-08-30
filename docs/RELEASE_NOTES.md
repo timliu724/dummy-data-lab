@@ -1,15 +1,14 @@
-# Dummy Data Lab V1.70
+# Dummy Data Lab V1.71
 
-V1.70 introduces a new Quick workflow for common tasks and updates Advanced to use the same cleaner interface. Everything still runs locally in the browser.
+V1.71 makes Advanced easier to use across common desktop, laptop, and embedded widths. The data engine is unchanged, and everything still runs locally in the browser.
 
 ## What's new
 
-- Quick replaces Basic and covers two common tasks: transforming an existing table and generating one new table.
-- Quick includes editable People, Orders, and Support Cases templates, with support for custom columns.
-- Advanced keeps its detailed controls, saved configurations, and related-table generation.
-- Quick and Advanced now share the same navigation, typography, previews, and output flow.
-- Date and time transformations start with a six-day, six-hour shift that can be changed before generation.
-- Preview tables are more compact, and Advanced now includes Generate another version.
-- Try sample data is available in both modes. Sample data is shown before analysis, and the app asks which source to use when uploaded and pasted data are both present.
+- Current setup moves below the main content when there is not enough room for a stable sidebar.
+- Source and Generation settings switch to a single column before their controls become cramped.
+- Input options and primary actions reflow into separate rows when needed.
+- Protection mode remains readable at narrower widths and stacks naturally on smaller screens.
+- Repeated mode guidance has been removed, and the short protection boundary is available from a keyboard-accessible information tooltip.
+- Quick and Advanced workflows, generation behaviour, downloads, and offline operation remain unchanged.
 
-Existing V1.55 releases remain available from the Releases page.
+Existing V1.70 and V1.55 releases remain available from the Releases page.

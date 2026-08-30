@@ -1,8 +1,8 @@
-# Dummy Data Lab V1.70 user guide
+# Dummy Data Lab V1.71 user guide
 
 ## Before you begin
 
-Download **Dummy-Data-Lab-v1.70.html** from the GitHub Release and verify its
+Download **Dummy-Data-Lab-v1.71.html** from the GitHub Release and verify its
 SHA-256 checksum before use. Open the file locally in a current Chrome or Edge
 browser. The application is self-contained and does not require a server,
 account, or runtime installation.

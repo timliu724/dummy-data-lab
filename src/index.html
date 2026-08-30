@@ -15,7 +15,7 @@
   OWN-WORLD: Warm paper, crisp ink rules, orange action, teal assurance, large task labels, and one continuous sidebar, isolated from Advanced styles.
   STORY: Choose a source or one-table template, review only the real decisions that need judgment, then inspect and download the validated result.
   FIRST VIEWPORT: The original prototype occupies the complete Quick canvas; production controls remain hidden and serve only as an engine host.
-  FORM: V1.70 keeps Quick to one table while making sample data and every active input source explicit.
+  FORM: V1.71 improves Advanced responsiveness without changing Quick or the data engine.
   FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
   -->
   <div id="quick-surface-host" aria-label="Quick mode"></div>
@@ -33,7 +33,7 @@
       <button type="button" data-interface-mode="BASIC" aria-pressed="true">Quick</button>
       <button type="button" data-interface-mode="ADVANCED" aria-pressed="false">Advanced</button>
     </div>
-    <span id="app-version" class="version-badge" hidden>V1.70</span>
+    <span id="app-version" class="version-badge" hidden>V1.71</span>
   </header>
 
   <main id="top" class="shell advanced-surface-only">
@@ -107,7 +107,7 @@
         </div>
         <div class="control-strip transform-only">
           <details id="input-options" class="input-options">
-            <summary>Input options <small>Auto-detect works for most tables</small></summary>
+            <summary>Input options</summary>
             <div class="input-option-controls">
               <label>Delimiter
                 <select id="delimiter-mode">
@@ -208,12 +208,11 @@
             </div>
             <small id="same-as-input-note" class="custom-count-note">Analyse a table to detect its data-row count.</small>
           </fieldset>
-          <div class="option-card protection-mode-card advanced-only transform-only"><span class="option-card-label"><label for="mode-select">Protection mode</label><button class="info-tooltip" type="button" data-static-tooltip aria-label="About protection modes" aria-describedby="tip-protection-modes" aria-expanded="false"><span class="info-tooltip__trigger" aria-hidden="true">i</span><span id="tip-protection-modes" class="info-tooltip__content" role="tooltip">Safe Test Data protects identifiers and keeps useful test patterns. ID Only changes identifiers but can leave other source values intact. Both are pseudonymisation workflows, not proof that a person cannot be re-identified.</span></button></span>
+          <div class="option-card protection-mode-card advanced-only transform-only"><span class="option-card-label"><label for="mode-select">Protection mode</label><button class="info-tooltip" type="button" data-static-tooltip aria-label="About protection modes" aria-describedby="tip-protection-modes" aria-expanded="false"><span class="info-tooltip__trigger" aria-hidden="true">i</span><span id="tip-protection-modes" class="info-tooltip__content" role="tooltip">Preserves useful patterns but is not an anonymisation guarantee.</span></button></span>
             <select id="mode-select">
               <option value="SAFE_TEST_DATA" selected>Safe Test Data — recommended</option>
               <option value="ID_ONLY">ID Only — pseudonymised</option>
             </select>
-            <small id="mode-boundary">Protects identifiers while preserving useful patterns. Not an anonymisation guarantee.</small>
           </div>
           <div class="option-card basic-only basic-protection-summary transform-only">
             <span class="option-card-label">Protection <button class="info-tooltip" type="button" data-static-tooltip aria-label="About Safe Test Data protection" aria-describedby="tip-safe-protection" aria-expanded="false"><span class="info-tooltip__trigger" aria-hidden="true">i</span><span id="tip-safe-protection" class="info-tooltip__content" role="tooltip">Safe Test Data protects identifiers and keeps useful test patterns. It reduces exposure but does not certify anonymisation or eliminate re-identification risk.</span></button></span>

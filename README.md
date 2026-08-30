@@ -2,7 +2,7 @@
 
 **Turn existing CSV, TSV, or delimited TXT data into controlled dummy datasets—or generate new test data—in one offline HTML file.**
 
-[**Use Dummy Data Lab online**](https://timliu724.github.io/dummy-data-lab/) · [**Download Dummy Data Lab V1.70**](https://github.com/timliu724/dummy-data-lab/releases/download/v1.70/Dummy-Data-Lab-v1.70.html)
+[**Use Dummy Data Lab online**](https://timliu724.github.io/dummy-data-lab/) · [**Download Dummy Data Lab V1.71**](https://github.com/timliu724/dummy-data-lab/releases/download/v1.71/Dummy-Data-Lab-v1.71.html)
 
 **No installation · No data upload · Runs locally in current Chrome or Edge**
 
@@ -14,7 +14,7 @@ The online version is served by GitHub Pages; source data is still processed loc
 
 ## Quick start
 
-1. Open the [online version](https://timliu724.github.io/dummy-data-lab/), or download `Dummy-Data-Lab-v1.70.html` for offline use.
+1. Open the [online version](https://timliu724.github.io/dummy-data-lab/), or download `Dummy-Data-Lab-v1.71.html` for offline use.
 2. If downloaded, open the HTML file in Chrome or Edge.
 3. Choose **Quick** for an existing table or a new single table, or **Advanced** for detailed controls and related tables.
 4. Upload or paste data, or select **Try sample data**, then choose **Analyse locally**.
@@ -42,7 +42,7 @@ The fictional 16-row, 12-column sample is loaded visibly into the input area and
 
 ### Advanced
 
-Advanced retains the complete data engine and adds detailed policy settings, relationship controls, saved configurations, optional TSV export, and multi-table generation. Its connected-commerce sample demonstrates People, Products, Orders, and Appointments with primary keys, foreign keys, dependent fields, and linked dates.
+Advanced retains the complete data engine and adds detailed policy settings, relationship controls, saved configurations, optional TSV export, and multi-table generation. Its setup panels adapt cleanly across common desktop, laptop, and embedded widths. The connected-commerce sample demonstrates People, Products, Orders, and Appointments with primary keys, foreign keys, dependent fields, and linked dates.
 
 ## Core capabilities
 
@@ -77,7 +77,7 @@ Sample files are available in [`demo/`](demo/).
 - [Security and Privacy](docs/SECURITY_PRIVACY.md)
 - [Known Limitations](docs/KNOWN_LIMITATIONS.md)
 - [Release Notes](docs/RELEASE_NOTES.md)
-- [V1.70 Release Verification](docs/V1.70_RELEASE_VERIFICATION.md)
+- [V1.71 Release Verification](docs/V1.71_RELEASE_VERIFICATION.md)
 - [Offline Security Audit](docs/OFFLINE_SECURITY_AUDIT.md)
 - [Changelog](CHANGELOG.md)
 - [Third-party Licenses](docs/THIRD_PARTY_LICENSES.md)

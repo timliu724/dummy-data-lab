@@ -115,7 +115,6 @@ const elements = Object.freeze({
   sameAsInputRows: document.querySelector('#same-as-input-rows'),
   sameAsInputNote: document.querySelector('#same-as-input-note'),
   modeSelect: document.querySelector('#mode-select'),
-  modeBoundary: document.querySelector('#mode-boundary'),
   businessFidelityInputs: [...document.querySelectorAll('input[name="business-fidelity"]')],
   businessFidelityBoundary: document.querySelector('#business-fidelity-boundary'),
   businessFidelityImpact: document.querySelector('#business-fidelity-impact'),
@@ -341,12 +340,6 @@ function syncSameAsInputControl() {
 }
 
 function updateModeBoundary() {
-  const descriptions = {
-    SAFE_TEST_DATA: 'Protects identifiers while preserving useful patterns. Not an anonymisation guarantee.',
-    ID_ONLY: 'Changes direct identifiers only. Indirect identifiers remain; the result is pseudonymised, not anonymous.',
-    FULL_SYNTHETIC: 'Regenerates or resamples more values while preserving selected structure and relationships. It is still not an anonymity certification.',
-  };
-  elements.modeBoundary.textContent = descriptions[state.mode];
   elements.basicModeLabel.textContent = state.mode === 'ID_ONLY' ? 'ID Only' : 'Safe Test Data';
 }
 
@@ -1910,7 +1903,6 @@ function renderPolicyArea() {
     onRequestAdvanced() {
       state.interfaceMode = 'ADVANCED';
       renderInterfaceMode();
-      addMessage('info', interfaceModeModel(state.interfaceMode).description, { scope: 'INTERFACE_MODE' });
     },
   });
   updateGenerateAvailability();
@@ -3032,7 +3024,6 @@ for (const button of elements.interfaceModeButtons) {
     state.interfaceMode = nextMode;
     renderInterfaceMode();
     scheduleSafeDraftSave();
-    addMessage('info', interfaceModeModel(state.interfaceMode).description, { scope: 'INTERFACE_MODE' });
   });
 }
 for (const button of elements.basicStepButtons) {
