@@ -7,6 +7,19 @@ function hasColumnHint(columnName, tokens) {
   return tokens.some((token) => words.has(token));
 }
 
+function referenceLikeValue(value) {
+  const text = String(value ?? '').trim();
+  if (!text) return false;
+  const items = text
+    .replace(/^["']+|["']+$/gu, '')
+    .split(/\s*(?:[\r\n,;|/]+|\s{2,})\s*/u)
+    .filter(Boolean);
+  return items.length > 0 && items.every((item) => (
+    /\p{N}/u.test(item)
+    && /^[\p{L}\p{N}._-]+$/u.test(item)
+  ));
+}
+
 /** @param {import('../core/contracts.js').ColumnProfile} profile */
 export function detectSemanticHints(profile) {
   const values = (profile.sampleValues ?? []).map(String);
@@ -17,15 +30,28 @@ export function detectSemanticHints(profile) {
   const timeHeaderHint = hasColumnHint(columnName, ['time']) && !dateHeaderHint;
   const jobReferenceHint = hasColumnHint(columnName, ['job', 'work', 'ticket', 'case', 'order'])
     && hasColumnHint(columnName, ['number', 'no', 'id', 'code', 'reference', 'ref']);
+  const referenceLikeRatio = values.filter(referenceLikeValue).length / values.length;
+  const supportedJobReferenceHint = jobReferenceHint && referenceLikeRatio >= 0.9;
   const signatureHeaderHint = hasColumnHint(columnName, ['signature', 'signed', 'signoff']);
-  const peopleHeaderHint = hasColumnHint(columnName, ['member', 'staff', 'employee', 'assignee', 'operator', 'worker', 'technician']);
+  const numericValues = allMatch((value) => /^[-+]?\d+(?:\.\d+)?$/.test(value.trim()));
+  const peopleHeaderHint = !numericValues
+    && hasColumnHint(columnName, ['member', 'staff', 'employee', 'assignee', 'operator', 'worker', 'technician']);
+  const urlPattern = /^https?:\/\/[^\s]+$/iu;
 
-  if (dateHeaderHint || timeHeaderHint || jobReferenceHint || signatureHeaderHint || peopleHeaderHint) {
+  if (allMatch((value) => urlPattern.test(value))) {
+    return Object.freeze({
+      detector: 'semantic-hints', type: 'GENERAL_TEXT', score: 98, confidence: 'HIGH',
+      evidence: Object.freeze([`All ${values.length} bounded samples matched a web-address shape.`]),
+      warnings: Object.freeze([]), reviewRequired: false, details: Object.freeze({ urlLike: true }),
+    });
+  }
+
+  if (dateHeaderHint || timeHeaderHint || supportedJobReferenceHint || signatureHeaderHint || peopleHeaderHint) {
     const type = dateHeaderHint
       ? 'DATE'
       : timeHeaderHint
         ? 'TIME'
-        : jobReferenceHint
+        : supportedJobReferenceHint
           ? 'ALPHANUMERIC_CODE'
           : 'NAME_LIKE';
     return Object.freeze({
@@ -40,7 +66,7 @@ export function detectSemanticHints(profile) {
         details: Object.freeze({}),
       })]),
       reviewRequired: true,
-      details: Object.freeze({ headerSemanticHint: true }),
+      details: Object.freeze({ headerSemanticHint: true, referenceLikeRatio }),
     });
   }
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
@@ -69,12 +95,16 @@ export function detectSemanticHints(profile) {
     });
   }
 
-  const addressHint = hasColumnHint(profile.columnName ?? '', ['address', 'street', 'road', 'location']);
-  const addressMatch = (value) => /^\d+[A-Za-z]?\s+.+\s(?:Street|St|Road|Rd|Avenue|Ave|Lane|Ln|Drive|Dr)$/i.test(value);
-  if (addressHint && allMatch((value) => /\p{L}/u.test(value)) || allMatch(addressMatch)) {
+  const addressHint = hasColumnHint(profile.columnName ?? '', ['address', 'street', 'road']);
+  const streetAddressMatch = (value) => /^\d+[A-Za-z]?\s+.+\s(?:Street|St|Road|Rd|Avenue|Ave|Lane|Ln|Drive|Dr|Court|Ct|Crescent|Cres|Way|Walk)\b(?:\s+.+)?$/iu.test(value.trim());
+  const regionalAddressMatch = (value) => /^\d+[A-Za-z]?\s+[\p{L}'-]+(?:\s+[\p{L}'-]+){1,7}\s+[A-Z]{2,3}\s+\d{4}$/u.test(value.trim());
+  const addressMatch = (value) => streetAddressMatch(value) || regionalAddressMatch(value);
+  const addressValuesMatch = allMatch(addressMatch);
+  if ((addressHint && allMatch((value) => /\p{L}/u.test(value))) || addressValuesMatch) {
+    const strongAddressEvidence = addressHint && addressValuesMatch;
     return Object.freeze({
-      detector: 'semantic-hints', type: 'ADDRESS_LIKE', score: 85,
-      confidence: addressHint && allMatch(addressMatch) ? 'HIGH' : 'MEDIUM',
+      detector: 'semantic-hints', type: 'ADDRESS_LIKE', score: strongAddressEvidence ? 95 : 85,
+      confidence: strongAddressEvidence ? 'HIGH' : 'MEDIUM',
       evidence: Object.freeze([
         `Address evidence used ${values.length} bounded samples.`,
         addressHint ? 'The column name contained an address hint.' : 'Values matched a simple address-like shape.',

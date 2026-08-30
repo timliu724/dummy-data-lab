@@ -16,7 +16,7 @@ const DEFINITIONS = Object.freeze({
     id: 'people', label: 'People', description: 'IDs, names, contact details, and status.',
     columns: Object.freeze([
       column('people', 0, 'person_id', 'sequence', { prefix: 'PER-', start: 1, width: 5, unique: true }),
-      column('people', 1, 'full_name', 'person-name'),
+      column('people', 1, 'full_name', 'person-name', { unique: true }),
       column('people', 2, 'email', 'email', { unique: true }),
       column('people', 3, 'phone', 'phone'),
       column('people', 4, 'status', 'category', { values: ['Active', 'Pending', 'Inactive'], weights: [70, 20, 10] }),
@@ -40,7 +40,7 @@ const DEFINITIONS = Object.freeze({
       column('support', 2, 'priority', 'category', { values: ['Low', 'Medium', 'High'], weights: [30, 55, 15] }),
       column('support', 3, 'status', 'category', { values: ['Open', 'In progress', 'Resolved'], weights: [30, 35, 35] }),
       column('support', 4, 'opened_at', 'datetime', { startDate: '2025-01-01', endDate: '2026-12-31' }),
-      column('support', 5, 'notes', 'category', { values: ['Synthetic follow-up required', 'Synthetic customer update sent', 'Synthetic case ready for review'], weights: [35, 35, 30] }),
+      column('support', 5, 'notes', 'category', { values: ['Follow-up required', 'Customer update sent', 'Case ready for review'], weights: [35, 35, 30] }),
     ]),
   }),
   products: Object.freeze({

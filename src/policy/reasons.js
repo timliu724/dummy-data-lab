@@ -9,6 +9,7 @@ export const POLICY_REASONS = Object.freeze({
   CATEGORY_RESAMPLE: 'Category distribution is useful, but output should be resampled rather than copied row-for-row.',
   OPERATIONAL_VOCABULARY_RESAMPLE: 'This looks like a bounded business vocabulary, so reuse its valid choices and distribution instead of inventing invalid labels.',
   MIXED_OPERATIONAL_TEXT_REPLACE: 'This field mixes normal business labels with longer free-form values, so replace it rather than resampling unusual source text.',
+  MIXED_REFERENCE_TEXT_REPLACE: 'This field mixes readable business labels with reference-like values, so generate clear replacement labels instead of turning every value into a code shape.',
   ORDINARY_TEXT_REPLACE: 'No special privacy role was detected, but the values are not a bounded vocabulary that can be safely reused; generate replacement text instead of copying source values.',
   STRUCTURED_REFERENCE_PATTERN: 'This looks like a business reference or catalog code, so generate new values in the same structural style instead of copying source values.',
   STRONG_UNLABELLED_PATTERN: 'The values have a strong repeated code-like shape even without a useful header, so regenerate that shape instead of treating them as free text.',

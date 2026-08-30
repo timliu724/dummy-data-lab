@@ -5,6 +5,23 @@ const NUMERIC_DISTRIBUTION_TYPES = new Set(['INTEGER', 'DECIMAL', 'PERCENTAGE', 
 const MIXED_NUMERIC_TYPES = new Set(['CATEGORY', 'GENERAL_TEXT']);
 const MIXED_NUMERIC_MINIMUM_RATIO = 0.80;
 
+function isLowCardinalityTextVocabulary(profile, detectedType) {
+  return MIXED_NUMERIC_TYPES.has(detectedType)
+    && profile.uniqueCountStatus === 'EXACT'
+    && (profile.uniqueCount ?? Number.POSITIVE_INFINITY) <= 64
+    && (profile.uniqueRatio ?? 1) <= 0.1;
+}
+
+function boundedVocabularyTopValues(profile, detectedType) {
+  const entries = profile.topValues ?? [];
+  if (!isLowCardinalityTextVocabulary(profile, detectedType)) return entries;
+  const dominantLength = (profile.lengthStats?.common ?? [])[0];
+  if ((dominantLength?.ratio ?? 0) < 0.99) return entries;
+  const expectedLength = Number(dominantLength.value);
+  const matching = entries.filter((entry) => String(entry.value ?? '').length === expectedLength);
+  return matching.length > 0 ? matching : entries;
+}
+
 function weightedPick(entries, random) {
   const total = entries.reduce((sum, entry) => sum + Math.max(0, entry.count ?? 0), 0);
   if (total <= 0) return random.pick(entries).value;
@@ -85,6 +102,7 @@ function numericDistributionEligible(profile, detectedType) {
   if (NUMERIC_DISTRIBUTION_TYPES.has(detectedType)) return true;
   if (!MIXED_NUMERIC_TYPES.has(detectedType)) return false;
   const nonEmptyCount = profile.nonEmptyCount ?? 0;
+  if (isLowCardinalityTextVocabulary(profile, detectedType)) return false;
   return nonEmptyCount > 0
     && (profile.numericStats?.count ?? 0) / nonEmptyCount >= MIXED_NUMERIC_MINIMUM_RATIO;
 }
@@ -137,6 +155,7 @@ function shouldInterpolate(profile, detectedType) {
 }
 
 function sampleNumeric({ profile, detectedType, random, probability = random.nextFloat(), forcedValue = null }) {
+  if (!numericDistributionEligible(profile, detectedType)) return null;
   const distribution = numericDistribution(profile, detectedType);
   const numeric = profile.numericStats;
   let sampled;
@@ -260,7 +279,7 @@ export function sampleDistribution({ profile = {}, detectedType = 'UNKNOWN', ran
   if (!random) throw new TypeError('random is required.');
   const sampledNumeric = sampleNumeric({ profile, detectedType, random });
   if (sampledNumeric !== null) return sampledNumeric;
-  const topValues = profile.topValues ?? [];
+  const topValues = boundedVocabularyTopValues(profile, detectedType);
   if (topValues.length > 0) return weightedPick(topValues, random);
   const numeric = profile.numericStats;
   if (numeric?.count > 0 && Number.isFinite(numeric.minimum) && Number.isFinite(numeric.maximum)) {

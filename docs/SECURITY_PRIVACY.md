@@ -2,7 +2,7 @@
 
 ## Trust boundary
 
-Dummy Data Lab V1.71 processes a user-selected file or explicitly pasted text in
+Dummy Data Lab V1.74 processes a user-selected file or explicitly pasted text in
 the local browser. The production artifact is a standalone HTML file containing
 its application code, styles, Papa Parse runtime, and Worker source.
 
@@ -87,12 +87,12 @@ than looping indefinitely.
 
 Column names can help describe evidence, but they do not automatically create a
 business rule. State, postcode, city, coordinates, codes, dates, and similar
-fields remain independent unless suitable row-level evidence exists and the
-user confirms a candidate.
+fields remain independent unless strong row-level evidence establishes one of
+the supported narrow rules or the user confirms a candidate.
 
-Confirmed relationships can influence generation and validation. Unconfirmed
-candidates remain inactive, and a report area without a confirmed contract may
-be NOT EVALUATED.
+Strongly evidenced narrow rules and confirmed relationships can influence
+generation and validation. Ambiguous candidates remain inactive, and a report
+area without relevant evidence or a confirmed contract may be NOT EVALUATED.
 
 ## Text sanitisation
 

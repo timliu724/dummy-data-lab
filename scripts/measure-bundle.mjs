@@ -79,7 +79,7 @@ console.log(JSON.stringify({
   basicProvider: {
     importMs: basicImportMs,
     generationMsFor4000Values: basicGenerationMs,
-    safetyCharacteristic: 'Uses obvious test labels and reserved example.invalid email domains.',
+    safetyCharacteristic: 'Uses obvious test labels and reserved example domains.',
   },
   faker,
 }, null, 2));

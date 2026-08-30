@@ -144,6 +144,7 @@ export function generateOutput({
   businessRelationshipRules = [],
   sourceNumericRankData = null,
   relationshipRules = [],
+  jointSamplingGroups = [],
   mode = DEFAULT_MODE,
   businessFidelity = DEFAULT_BUSINESS_FIDELITY,
   businessFidelitySettings = null,
@@ -164,9 +165,14 @@ export function generateOutput({
   const fidelity = normaliseBusinessFidelity(businessFidelity);
   const fidelitySettings = normaliseBusinessFidelitySettings(fidelity, businessFidelitySettings ?? {});
   const modeResult = applyMode(mode, policies);
-  const relationshipRegistry = new RelationshipRegistry({ rules: relationshipRules });
+  const activeRelationshipRules = fidelitySettings.preserveRelationships ? relationshipRules : [];
+  const activeBusinessRelationshipRules = fidelitySettings.preserveNumericRelationships
+    ? businessRelationshipRules
+    : [];
+  const activeJointSamplingGroups = fidelitySettings.preserveRelationships ? jointSamplingGroups : [];
+  const relationshipRegistry = new RelationshipRegistry({ rules: activeRelationshipRules });
   const businessRelationshipPreserver = new BusinessRelationshipPreserver({
-    rules: businessRelationshipRules,
+    rules: activeBusinessRelationshipRules,
   });
   const policyValidation = validatePoliciesForGeneration({
     headers,
@@ -191,6 +197,11 @@ export function generateOutput({
     businessFidelity: fidelity,
   });
   const usingStructuredSource = Array.isArray(sourceEntries) && sourceEntries.length > 0;
+  const jointSamplingColumnIndexes = new Set(
+    usingStructuredSource
+      ? activeJointSamplingGroups.flatMap((group) => group.columnIndexes ?? [])
+      : [],
+  );
   const schedule = usingStructuredSource
     ? buildSourceSchedule(sourceEntries, outputPlan.requestedRowCount)
     : buildSchedule(outputPlan);
@@ -237,6 +248,7 @@ export function generateOutput({
         preserveDistribution: true,
         businessFidelity: fidelity,
         businessFidelitySettings: fidelitySettings,
+        jointSamplingColumnIndexes,
         deferBusinessRelationships: true,
         ...options,
       }),
@@ -262,13 +274,16 @@ export function generateOutput({
 
   let rankAlignment = Object.freeze({ alignedColumnCount: 0, alignedCellCount: 0 });
   const applyAutomaticBusinessStructure = () => {
-    rankAlignment = alignGeneratedNumericRanks({
-      sourceHeaders: headers,
-      outputHeaders,
-      generatedRows,
-      sourceNumericRankData,
-    });
+    rankAlignment = fidelitySettings.preserveNumericRelationships
+      ? alignGeneratedNumericRanks({
+          sourceHeaders: headers,
+          outputHeaders,
+          generatedRows,
+          sourceNumericRankData,
+        })
+      : Object.freeze({ alignedColumnCount: 0, alignedCellCount: 0 });
     businessRelationshipPreserver.resetStatistics();
+    if (!fidelitySettings.preserveNumericRelationships) return;
     for (let rowIndex = 0; rowIndex < generatedRows.length; rowIndex += 1) {
       const related = businessRelationshipPreserver.applyToRow({
         outputHeaders,
@@ -364,6 +379,10 @@ export function generateOutput({
       rankAlignment,
       businessFidelity: fidelity,
       businessFidelitySettings: fidelitySettings,
+      jointSampling: Object.freeze({
+        activeGroupCount: jointSamplingColumnIndexes.size > 0 ? activeJointSamplingGroups.length : 0,
+        activeColumnCount: jointSamplingColumnIndexes.size,
+      }),
     }),
   });
 }

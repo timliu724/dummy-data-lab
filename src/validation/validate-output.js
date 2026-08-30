@@ -70,7 +70,7 @@ function valueMatchesGeneralisation(value, policy) {
     return valueMatchesType(text, expectedType);
   }
   if (strategy === 'POSTCODE_PREFIX') return /^[A-Za-z0-9]{1,3}\*+$/.test(text);
-  const categoryGroup = /^(?:Category|Synthetic .+) Group \d+$/u;
+  const categoryGroup = /^(?:Category|.+) Group \d+$/u;
   if (strategy === 'CATEGORY_GROUP') return categoryGroup.test(text);
   if (strategy === 'TEXT_LENGTH_BAND') return /^Text length \d+-\d+$/.test(text);
   if (strategy === 'AGE_BAND' || strategy === 'NUMERIC_BAND') {

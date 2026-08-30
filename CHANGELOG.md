@@ -2,6 +2,14 @@
 
 This is a user-facing summary of product evolution.
 
+## V1.74
+
+- Made generated names, email addresses, identifiers, places, and other fictional values easier to read while remaining clearly non-production data.
+- Added an Independent business-pattern mode for cases where fields should be processed without inferred cross-field structure.
+- Preserved supported row-level relationships only when the source contains strong evidence, while keeping explicit relationship controls for related tables.
+- Improved compact preview columns so meaningful differences remain visible without wasting horizontal space.
+- Strengthened handling of ragged input rows and expanded output-quality checks for readable values and evidence-backed structure.
+
 ## V1.71
 
 - Improved the Advanced Start layout across common desktop, laptop, and embedded widths.

@@ -46,6 +46,18 @@ export async function generateFromAnalysis({
   const totalStartedAt = now();
   const fidelity = normaliseBusinessFidelity(businessFidelity);
   const fidelitySettings = normaliseBusinessFidelitySettings(fidelity, businessFidelitySettings ?? {});
+  const detectedAndSelectedRules = [
+    ...(analysis.autoRelationshipRules ?? []),
+    ...relationshipRules,
+  ].filter((rule, index, rules) => rules.findIndex((candidate) => candidate.id === rule.id) === index);
+  const effectiveRelationshipRules = Object.freeze(detectedAndSelectedRules.filter((rule) => (
+    BUSINESS_RELATIONSHIP_KINDS.has(rule.kind)
+      ? fidelitySettings.preserveNumericRelationships
+      : fidelitySettings.preserveRelationships
+  )));
+  const effectiveJointSamplingGroups = fidelitySettings.preserveRelationships
+    ? (analysis.jointSamplingGroups ?? [])
+    : [];
   const safeTemplateSignature = (policy) => {
     if (policy?.selectedAction === 'GENERALISE') {
       const params = normaliseActionParams({ action: 'GENERALISE', detectedType: policy.detectedType, params: policy.actionParams });
@@ -128,7 +140,7 @@ export async function generateFromAnalysis({
   });
   let sourceEntries = null;
   let structureScanMs = 0;
-  const confirmedBusinessRelationshipRules = relationshipRules.filter((rule) => relationshipIsActive(rule)
+  const confirmedBusinessRelationshipRules = effectiveRelationshipRules.filter((rule) => relationshipIsActive(rule)
     && BUSINESS_RELATIONSHIP_KINDS.has(rule.kind));
   const confirmedNumericColumnIndexes = [...new Set(confirmedBusinessRelationshipRules.flatMap((rule) => [
     rule.options?.sourceColumnIndex,
@@ -178,7 +190,10 @@ export async function generateFromAnalysis({
   const needsStructuredSource = fidelity === 'BALANCED' && (
     fidelitySettings.preserveRowOrder
     || fidelitySettings.preserveGroupRuns
-    || (fidelitySettings.preserveRelationships && relationshipRules.some(relationshipIsActive))
+    || (fidelitySettings.preserveRelationships && (
+      effectiveRelationshipRules.some(relationshipIsActive)
+      || effectiveJointSamplingGroups.length > 0
+    ))
     || (fidelitySettings.preserveNumericRelationships && confirmedBusinessRelationshipRules.length > 0)
     || fidelitySettings.preserveNullPositions
   );
@@ -265,7 +280,8 @@ export async function generateFromAnalysis({
     sourceEntries,
     businessRelationshipRules: confirmedBusinessRelationshipRules,
     sourceNumericRankData,
-    relationshipRules,
+    relationshipRules: effectiveRelationshipRules,
+    jointSamplingGroups: effectiveJointSamplingGroups,
     mode,
     businessFidelity: fidelity,
     businessFidelitySettings: fidelitySettings,
@@ -281,6 +297,8 @@ export async function generateFromAnalysis({
     templateScanMs,
     structureScanMs,
     confirmedBusinessRelationshipCount: confirmedBusinessRelationshipRules.length,
+    autoRelationshipCount: effectiveRelationshipRules.filter((rule) => rule.source === 'DETECTED').length,
+    jointSamplingGroupCount: effectiveJointSamplingGroups.length,
     generationMs,
     totalMs: now() - totalStartedAt,
     candidateSource: canReuseCandidates ? 'ANALYSIS_REUSE' : 'POLICY_RESCAN',

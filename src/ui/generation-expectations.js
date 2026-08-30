@@ -53,7 +53,7 @@ export function businessFidelityImpactModel({
 
   if (!analysis) {
     const text = normalisedLevel === 'FLEXIBLE'
-      ? 'Analyse a table to see which source structures can change.'
+      ? 'Analyse a table to generate its columns independently.'
       : normalisedLevel === 'HIGH'
         ? 'Analyse a table to match its complete row sequence and source row count.'
         : 'Analyse a table to see which useful structures can be retained.';
@@ -74,13 +74,23 @@ export function businessFidelityImpactModel({
 
   let text;
   if (normalisedLevel === 'FLEXIBLE') {
-    text = `Mixes ${plural(rowCount, 'source row')} freely. ${kept.length ? `Keeps ${joinFacts(kept)}; ` : ''}row order, groups and blank positions may change.`;
+    const crossFieldRulesEnabled = Boolean(settings.preserveRelationships || settings.preserveNumericRelationships);
+    if (!crossFieldRulesEnabled) {
+      const repeatMappingNote = settings.preserveStableMappings
+        ? ' Repeat mappings stay stable within each column.'
+        : '';
+      text = `Columns are generated independently.${repeatMappingNote} Cross-field consistency, row order, groups and blank positions are not preserved.`;
+    } else {
+      text = kept.length
+        ? `Generates columns independently except for ${joinFacts(kept)}. Row order, groups and blank positions may change.`
+        : 'Columns are generated independently. Row order, groups and blank positions are not preserved.';
+    }
   } else if (normalisedLevel === 'HIGH') {
     text = `Uses all ${plural(rowCount, 'source row')} in source order. ${kept.length ? `Keeps ${joinFacts(kept)}. ` : ''}Output size is locked to the source.`;
   } else {
     text = `${kept.length ? `Keeps ${joinFacts(kept)}.` : 'No source structures are currently retained.'} Source row order can still change.`;
     if (blankColumnCount === 0 && relationshipCount === 0) {
-      text += ' This file has no blank patterns or confirmed rules, so the difference from Flexible may be subtle.';
+      text += ' This file has no blank patterns or confirmed rules, so the difference from Independent may be subtle.';
     }
   }
   return Object.freeze({ text, rowCount, blankColumnCount, relationshipCount });

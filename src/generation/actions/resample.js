@@ -15,6 +15,9 @@ export function executeResample({ value, columnIndex, policy, profile, context }
   })) {
     return Object.freeze({ value: sourceText, dropped: false, warnings: Object.freeze([]) });
   }
+  if (context.options?.jointSamplingColumnIndexes?.has(columnIndex)) {
+    return Object.freeze({ value: sourceText, dropped: false, warnings: Object.freeze([]) });
+  }
   return Object.freeze({
     value: context.distributionSampler?.sample({
       profile,

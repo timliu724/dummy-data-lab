@@ -68,7 +68,7 @@ function structureZone({ generationResult, datasetResult }) {
   const fidelity = generationResult.statistics?.businessFidelity;
   if (fidelity) {
     metrics.push(
-      metric('Business pattern', fidelity === 'HIGH' ? 'High match' : fidelity === 'BALANCED' ? 'Balanced' : 'Flexible'),
+      metric('Business pattern', fidelity === 'HIGH' ? 'High match' : fidelity === 'BALANCED' ? 'Balanced' : 'Independent'),
       metric('Structured source rows', generationResult.statistics?.structuredSourceRowCount ?? 0),
     );
   }
@@ -218,13 +218,13 @@ function distributionRelationshipZone({ relationshipRules = [], generationResult
         : 'From-scratch output has no source distribution to compare.',
       distributionComparison?.boundary ?? 'No single synthetic quality score is inferred. Each measurable check is shown separately.',
       ...(distributionComparison?.domainChangedColumnCount > 0
-        ? [`${distributionComparison.domainChangedColumnCount} column${distributionComparison.domainChangedColumnCount === 1 ? '' : 's'} intentionally left the source value domain under REPLACE, PATTERN_REPLACE, GENERALISE, or TEXT_SANITISE. Synthetic labels are not claims of real domain validity.`]
+        ? [`${distributionComparison.domainChangedColumnCount} column${distributionComparison.domainChangedColumnCount === 1 ? '' : 's'} intentionally left the source value domain under REPLACE, PATTERN_REPLACE, GENERALISE, or TEXT_SANITISE. Generated labels are not claims of real domain validity.`]
         : []),
       fidelity === 'HIGH'
         ? 'High match protects source row order. Numeric rank alignment is used only when a confirmed numeric relationship is active; closer structure increases disclosure risk.'
         : fidelity === 'BALANCED'
           ? 'Balanced preserves confirmed exact rules and common structure. Unconfirmed candidates and column-name hints do not control generation, and it does not claim exact source-row correspondence.'
-          : 'Flexible prioritises coverage and resizing freedom; it does not claim exact source-row correspondence.',
+          : 'Independent generates columns separately and does not claim cross-field or exact source-row correspondence.',
     ],
     notEvaluatedAreas,
   });

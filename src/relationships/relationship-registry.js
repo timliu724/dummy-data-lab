@@ -6,6 +6,33 @@ const MAPPING_KINDS = new Set(['SAME_ID', 'COLUMN_GROUP', 'MAPPING_RULE']);
 const CODE_KINDS = new Set(['CODE_DESCRIPTION', 'CATEGORY_CODE_NAME']);
 const SHIFT_GROUP_KINDS = new Set(['DATE_TIME_SHIFT_GROUP', 'NUMBER_SEQUENCE_SHIFT_GROUP']);
 
+function applyDerivedRelationship({ row, headers, rule }) {
+  const sourceName = rule.options?.sourceColumnName ?? rule.columnNames[0];
+  const targetName = rule.options?.targetColumnName ?? rule.columnNames[1];
+  const sourceIndex = headers.indexOf(sourceName);
+  const targetIndex = headers.indexOf(targetName);
+  if (sourceIndex < 0 || targetIndex < 0) return row;
+  const sourceValue = String(row[sourceIndex] ?? '');
+  if (!sourceValue) return row;
+  const updated = [...row];
+  if (rule.kind === 'PREFIX_DEPENDENCY') {
+    const separator = String(rule.options?.separator ?? '_');
+    const targetValue = String(updated[targetIndex] ?? '');
+    const separatorIndex = targetValue.indexOf(separator);
+    const suffix = separatorIndex >= 0
+      ? targetValue.slice(separatorIndex + separator.length)
+      : targetValue.slice(Math.max(0, targetValue.length - 4));
+    updated[targetIndex] = sourceValue + separator + suffix;
+  } else if (rule.kind === 'URL_CONTAINS_ID') {
+    const protocolSeparator = [58, 47, 47].map((code) => String.fromCharCode(code)).join('');
+    const extension = /^\.[a-z0-9]{1,8}$/i.test(String(rule.options?.extension ?? ''))
+      ? String(rule.options.extension)
+      : '.png';
+    updated[targetIndex] = 'https' + protocolSeparator + 'example.invalid/signatures/' + encodeURIComponent(sourceValue) + extension;
+  }
+  return updated;
+}
+
 function rulesConflict(left, right) {
   const overlap = left.columnNames.some((name) => right.columnNames.includes(name));
   if (!overlap) return false;
@@ -60,6 +87,8 @@ export class RelationshipRegistry {
     for (const rule of this.rules) {
       if (CODE_KINDS.has(rule.kind)) {
         row = applyCodeDescription({ row, headers: outputHeaders, rule, context: this.codeDescriptionContext });
+      } else if (rule.kind === 'PREFIX_DEPENDENCY' || rule.kind === 'URL_CONTAINS_ID') {
+        row = applyDerivedRelationship({ row, headers: outputHeaders, rule });
       }
     }
     return Object.freeze({ row: Object.freeze(row), warnings: Object.freeze(warnings) });

@@ -8,6 +8,7 @@ import { createTableProfiler } from '../profile/profile-table.js';
 import { proposeRelationships } from '../relationships/propose-relationships.js';
 import { assessTableRisk } from '../risk/risk-engine.js';
 import { createBusinessRelationshipProfiler } from '../business/relationship-profiler.js';
+import { createJointSourceEvidenceProfiler } from '../business/joint-source-evidence-profiler.js';
 
 function reportProgress(callback, phase, message, current = null, total = null) {
   callback?.(Object.freeze({ phase, message, current, total }));
@@ -82,6 +83,12 @@ export async function analyseInput({
   const policies = recommendPolicies({ tableProfile, detections, tableRisk });
   const headerRelationshipHints = proposeRelationships({ headers, detections });
   const businessRelationshipProfiler = createBusinessRelationshipProfiler({ headers, detections, policies });
+  const jointSourceEvidenceProfiler = createJointSourceEvidenceProfiler({
+    headers,
+    detections,
+    policies,
+    profiles: tableProfile.columns,
+  });
   const extraction = extractCoverageScenarios({ tableProfile, detections, relationships: headerRelationshipHints });
   const detectionMs = now() - detectionStartedAt;
 
@@ -93,6 +100,7 @@ export async function analyseInput({
     collectRows: false,
     onRow(row, context) {
       businessRelationshipProfiler.update(row);
+      jointSourceEvidenceProfiler.update(row);
       reservoir.offer(row, { sourceRowIndex: context.sourceRowIndex, matchers: extraction.matchers });
       if (chunkController && !chunkController.checkpoint({
         phase: 'COVERAGE',
@@ -105,6 +113,7 @@ export async function analyseInput({
   });
   chunkController?.throwIfCancelled();
   const businessRelationshipCandidates = businessRelationshipProfiler.finalize().rules;
+  const jointSourceEvidence = jointSourceEvidenceProfiler.finalize();
   const relationshipProposals = Object.freeze([
     ...businessRelationshipCandidates,
     ...headerRelationshipHints,
@@ -138,6 +147,8 @@ export async function analyseInput({
     tableRisk,
     policies,
     relationshipProposals,
+    autoRelationshipRules: jointSourceEvidence.autoRelationshipRules,
+    jointSamplingGroups: jointSourceEvidence.groups,
     extraction,
     candidates,
     candidateSummary,

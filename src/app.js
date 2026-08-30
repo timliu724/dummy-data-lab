@@ -356,7 +356,9 @@ function renderBusinessFidelity() {
     level: model.level,
     settings: model.settings,
     analysis: state.analysis,
-    activeRelationshipCount: state.relationships.filter(relationshipIsActive).length,
+    activeRelationshipCount: state.relationships.filter(relationshipIsActive).length
+      + (state.analysis?.autoRelationshipRules?.length ?? 0)
+      + (state.analysis?.jointSamplingGroups?.length ?? 0),
   }).text;
   document.body.dataset.businessFidelity = model.level;
 }
@@ -2009,17 +2011,39 @@ function prepareComparisonControls() {
   state.previewMode = 'output';
 }
 
+function previewExcludedOutputColumnIndexes(result = state.generationResult) {
+  if (!result || state.workflowKind !== 'TRANSFORM' || !state.analysis) return Object.freeze([]);
+  const rawHeaders = state.analysis.parseResult?.headers ?? [];
+  const profiles = state.analysis.tableProfile?.columns ?? [];
+  const outputSourceIndexes = state.policies.flatMap((policy, sourceIndex) => (
+    policy.selectedAction === 'DROP' ? [] : [sourceIndex]
+  ));
+  return Object.freeze(outputSourceIndexes.flatMap((sourceIndex, outputIndex) => {
+    const unnamedInSource = String(rawHeaders[sourceIndex] ?? '').trim() === '';
+    const emptyInSource = (profiles[sourceIndex]?.nonEmptyCount ?? 0) === 0;
+    const emptyInOutput = result.rows.every((row) => String(row?.[outputIndex] ?? '').trim() === '');
+    return unnamedInSource && emptyInSource && emptyInOutput ? [outputIndex] : [];
+  }));
+}
+
 function renderCurrentPreview() {
   if (!state.generationResult) return;
   elements.previewTable.classList.remove('empty-panel');
+  const excludedColumnIndexes = previewExcludedOutputColumnIndexes();
   if (state.previewMode === 'comparison' && state.sourcePreview) {
     renderInlineComparisonTable(elements.previewTable, {
       generationResult: state.generationResult,
       sourcePreview: state.sourcePreview,
-    }, { noteContainer: elements.previewRowNote });
+    }, {
+      noteContainer: elements.previewRowNote,
+      excludedColumnIndexes,
+    });
     return;
   }
-  renderPreviewTable(elements.previewTable, state.generationResult, { noteContainer: elements.previewRowNote });
+  renderPreviewTable(elements.previewTable, state.generationResult, {
+    noteContainer: elements.previewRowNote,
+    excludedColumnIndexes,
+  });
 }
 
 async function toggleSourceComparison() {
@@ -2570,6 +2594,7 @@ function quickSurfaceSnapshot() {
         rows: Object.freeze(state.generationResult.rows.map((row) => Object.freeze([...row]))),
         validationValid: state.generationResult.validation.valid,
         warnings: Object.freeze(quickResultWarnings()),
+        previewExcludedColumnIndexes: previewExcludedOutputColumnIndexes(),
       })
     : null;
   return Object.freeze({

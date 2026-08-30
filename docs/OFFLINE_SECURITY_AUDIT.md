@@ -1,14 +1,14 @@
-# V1.71 offline security audit
+# V1.74 offline security audit
 
 ## Artifact
 
 | Property | Value |
 | --- | --- |
-| Public filename | `Dummy-Data-Lab-v1.71.html` |
-| Size | `985,600 bytes` |
-| SHA-256 | `99AB49FA81B3BC7D3D03EC02DA6CE1B99A9DFCFA08207DBB8E636F73E205B0D7` |
+| Public filename | `Dummy-Data-Lab-v1.74.html` |
+| Size | `1,021,386 bytes` |
+| SHA-256 | `9B2CBB160228A2C7386E06E438578D12D18F1606235FD99590ED5F78F7A62BFD` |
 
-The public file is a byte-for-byte copy of the V1.71 release file.
+The root application and release asset are byte-for-byte copies of the verified V1.74 build.
 
 ## Static checks
 

@@ -36,6 +36,8 @@ function publicAnalysis(analysis) {
     tableRisk: analysis.tableRisk,
     policies: analysis.policies,
     relationshipProposals: analysis.relationshipProposals,
+    autoRelationshipRules: analysis.autoRelationshipRules,
+    jointSamplingGroups: analysis.jointSamplingGroups,
     extraction: Object.freeze({
       scenarios: analysis.extraction.scenarios,
       warnings: analysis.extraction.warnings ?? Object.freeze([]),

@@ -27,7 +27,8 @@ export function executeReplace({ value, policy, profile, context }) {
   });
   const useCodeShape = Boolean(
     context.options?.businessFidelitySettings?.preserveCodeShape
-    && descriptor?.codeStructure,
+    && descriptor?.codeStructure
+    && policy.detectedType !== 'CATEGORY'
   );
   const generated = context.mappingContext.resolve(
     scope,

@@ -59,9 +59,9 @@ export function businessFidelityModel(level = DEFAULT_BUSINESS_FIDELITY, setting
   const normalisedLevel = normaliseBusinessFidelity(level);
   const copy = {
     FLEXIBLE: Object.freeze({
-      label: 'Flexible',
-      shortDescription: 'Coverage-first mixing with the most freedom to resize.',
-      boundary: 'Best for quick test rows. Row order and business group boundaries may change.',
+      label: 'Independent',
+      shortDescription: 'Generate each column separately with freedom to resize.',
+      boundary: 'Columns are independent by default. Cross-field consistency, row order, groups, and blank positions may change unless you turn selected structure settings back on.',
       requiresInputRowCount: false,
     }),
     BALANCED: Object.freeze({

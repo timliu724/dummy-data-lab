@@ -624,13 +624,22 @@ body[data-interface-mode="BASIC"] .generation-bar { margin-top: 0; }
 .preview-note { padding: 0 10px; color: var(--muted); }
 .preview-note--comparison { color: var(--ink); font-weight: 700; }
 #preview-table { max-height: min(58vh, 620px); overflow: auto; }
+.preview-table { width: max-content; min-width: 0; table-layout: fixed; }
+.preview-table th, .preview-table td { min-width: 0; overflow: hidden; white-space: nowrap; overflow-wrap: normal; }
+.preview-cell-value, .preview-heading-value { display: block; min-width: 0; overflow: hidden; white-space: nowrap; }
+.preview-cell-value.is-truncated, .preview-heading-value.is-truncated { cursor: help; }
+.preview-cell-value.is-truncated:focus-visible, .preview-heading-value.is-truncated:focus-visible {
+  border-radius: 4px;
+  outline: 3px solid var(--teal);
+  outline-offset: 2px;
+}
 .preview-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 18px; align-items: center; margin-bottom: 8px; padding: 8px; border: 1px solid var(--line); background: #f0ebdf; }
 .preview-controls[hidden] { display: none; }
 .preview-compare { display: flex; gap: 10px; align-items: center; min-width: 0; }
 .preview-compare[hidden] { display: none; }
 .preview-controls small { color: var(--muted); }
 .preview-row-note { margin-left: auto; text-align: right; white-space: nowrap; }
-.preview-table--inline-comparison td { min-width: 150px; padding: 0; }
+.preview-table--inline-comparison td { min-width: 0; padding: 0; }
 .comparison-current { min-height: 34px; padding: 8px 9px 6px; font-weight: 700; }
 .comparison-current.is-changed { box-shadow: inset 3px 0 0 var(--orange); }
 .comparison-source { min-height: 30px; padding: 6px 9px; border-top: 1px solid #a8d5cb; background: var(--teal-light); color: #075d56; font-family: Consolas, 'Courier New', monospace; font-size: .75rem; overflow-wrap: anywhere; }
@@ -1428,16 +1437,16 @@ body[data-interface-mode="BASIC"] #preview-table {
   scrollbar-color: var(--quick-orange) var(--quick-surface-muted);
 }
 
-body[data-interface-mode="BASIC"] #preview-table table { min-width: max-content; }
+body[data-interface-mode="BASIC"] #preview-table table { min-width: 0; }
 body[data-interface-mode="BASIC"] #preview-table th {
   position: sticky;
   z-index: 2;
   top: 0;
-  min-width: 145px;
+  min-width: 0;
   background: var(--quick-surface-muted);
   color: var(--quick-ink);
 }
-body[data-interface-mode="BASIC"] #preview-table td { min-width: 145px; }
+body[data-interface-mode="BASIC"] #preview-table td { min-width: 0; }
 
 body[data-interface-mode="BASIC"] .export-bar {
   gap: 14px;

@@ -219,6 +219,8 @@ export async function parseDelimited(
       return true;
     };
 
+    let skippedSeverelyRaggedRowCount = 0;
+
     const emitRow = (entry, parser) => {
       const row = Object.freeze(entry.row.map((value) => String(value ?? '')));
       if (!isEmptyLogicalRow(row) && expectedColumnCount > 0 && row.length !== expectedColumnCount) {
@@ -231,6 +233,21 @@ export async function parseDelimited(
           columnIndex: row.length < expectedColumnCount ? row.length : expectedColumnCount,
           details: { expectedFieldCount: expectedColumnCount, actualFieldCount: row.length },
         }));
+      }
+      const severelyRagged = !isEmptyLogicalRow(row)
+        && expectedColumnCount >= 4
+        && row.length < Math.ceil(expectedColumnCount / 2);
+      if (severelyRagged) {
+        skippedSeverelyRaggedRowCount += 1;
+        addIssue(createParseIssue({
+          code: 'SEVERELY_RAGGED_ROW_SKIPPED',
+          type: 'FIELD_MISMATCH',
+          message: 'A severely incomplete record was skipped instead of being aligned to the wrong columns.',
+          severity: 'WARNING',
+          rowIndex: entry.sourceRowIndex,
+          details: { expectedFieldCount: expectedColumnCount, actualFieldCount: row.length },
+        }));
+        return true;
       }
       if (row.some((value) => value.includes('\uFFFD'))) {
         addIssue(createParseIssue({
@@ -367,6 +384,7 @@ export async function parseDelimited(
         collectRows: Boolean(collectRows),
         inputSupportsIncrementalRead: input.supportsIncrementalRead,
         browserBlobStreaming: prepared.browserBlobStreaming,
+        skippedSeverelyRaggedRowCount,
       }),
     });
 

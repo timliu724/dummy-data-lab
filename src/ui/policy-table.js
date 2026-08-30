@@ -596,7 +596,7 @@ function renderActionPreview(documentRef, row, businessFidelityLabel = 'Balanced
   const note = documentRef.createElement('small');
   note.className = 'action-preview-note';
   const modeNotes = {
-    Flexible: 'Flexible may change row order and consecutive groups when you generate.',
+    Independent: 'Independent generates columns separately and may change row order and consecutive groups.',
     Balanced: 'Balanced also preserves useful groups and relationships when you generate.',
     'High match': 'High match also locks source row count and order when you generate.',
   };

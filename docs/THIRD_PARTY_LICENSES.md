@@ -11,5 +11,5 @@ Papa Parse 5.5.4 is bundled into the standalone HTML at runtime. esbuild 0.28.1
 and its selected platform package are build-time dependencies and are not loaded
 by the standalone application.
 
-Faker is not a project dependency and no Faker code is included in the V1.71
+Faker is not a project dependency and no Faker code is included in the V1.74
 production artifact.

@@ -1,17 +1,9 @@
 import { createGenerationResult, createOutputPlan } from '../core/contracts.js';
 import { createRandomSource } from './random-source.js';
-
-const FIRST_NAMES = Object.freeze(['Avery', 'Casey', 'Jordan', 'Morgan', 'Quinn', 'Riley', 'Sam', 'Taylor']);
-const LAST_NAMES = Object.freeze(['Bennett', 'Chen', 'Garcia', 'Khan', 'Martin', 'Nguyen', 'Singh', 'Wilson']);
-const STREETS = Object.freeze(['Example Street', 'Sample Road', 'Test Avenue', 'Demo Lane']);
+import { fictionalAddress, fictionalEmail, fictionalPersonName } from './fictional-values.js';
 
 function pad(value, width = 2) {
   return String(value).padStart(width, '0');
-}
-
-function token(random, length = 8) {
-  const alphabet = [...'abcdefghijklmnopqrstuvwxyz0123456789'];
-  return Array.from({ length }, () => random.pick(alphabet)).join('');
 }
 
 function uuid(random) {
@@ -228,13 +220,13 @@ export function generateColumnValue(column, { rowIndex, random, row = [], header
   const settings = column.settings ?? {};
   switch (column.generatorType) {
     case 'person-name':
-      return `${random.pick(FIRST_NAMES)} ${random.pick(LAST_NAMES)}`;
+      return fictionalPersonName(random);
     case 'email':
-      return `test_${token(random, 10)}@example.invalid`;
+      return fictionalEmail(random);
     case 'phone':
       return `04${pad(random.integer(0, 99))} ${pad(random.integer(0, 999), 3)} ${pad(random.integer(0, 999), 3)}`;
     case 'address':
-      return `${random.integer(1, 999)} ${random.pick(STREETS)}, Testville`;
+      return fictionalAddress(random);
     case 'integer': {
       const minimum = Number.isInteger(settings.minimum) ? settings.minimum : 1;
       const maximum = Number.isInteger(settings.maximum) ? settings.maximum : 1000;

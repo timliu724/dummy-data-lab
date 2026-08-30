@@ -25,7 +25,8 @@ function codeStructure(value, { detectedType, columnName }) {
   const semanticHeader = /(?:^|[_\s-])(id|code|no|number|batch|model|sku|serial|ref|reference|job|order|postcode|postal|zip)(?:$|[_\s-])/i.test(columnName);
   const recognisedCode = ['ALPHANUMERIC_CODE', 'NUMERIC_ID'].includes(detectedType);
   const structuralCode = /\p{N}/u.test(text) && (/[._/-]/.test(text) || /\p{Lu}/u.test(text));
-  if (!semanticHeader && !recognisedCode && !structuralCode) return null;
+  const numericReference = semanticHeader && /^\d+$/u.test(text);
+  if (!numericReference && !recognisedCode && !structuralCode) return null;
   const prefix = text.match(/^([A-Za-z]{1,8})(?=[0-9._/-])/)?.[1] ?? null;
   return Object.freeze({
     kind: 'CODE_STRUCTURE',

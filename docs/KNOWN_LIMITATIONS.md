@@ -1,6 +1,6 @@
 # Known limitations
 
-Dummy Data Lab V1.71 is designed for practical browser-local test-data work. The
+Dummy Data Lab V1.74 is designed for practical browser-local test-data work. The
 following boundaries are intentional and should be understood before using or
 sharing generated output.
 
@@ -15,8 +15,8 @@ sharing generated output.
   identifier, and long-number shapes but can miss context-specific names, facts,
   events, or locations.
 - High match deliberately retains more source ordering, grouping, null
-  placement, rank structure, and confirmed relationships. That fidelity can
-  increase disclosure risk.
+  placement, rank structure, and evidence-backed or confirmed relationships.
+  That fidelity can increase disclosure risk.
 - Source-value and combination checks are bounded evidence, not a formal
   disclosure-risk measurement.
 - A PASS quality status means evaluated contracts passed. It is not privacy
@@ -27,8 +27,8 @@ sharing generated output.
 - Type, semantic, delimiter, and header detection are evidence-based heuristics.
   Ambiguous input can require a manual choice.
 - Column names are useful hints but do not establish a business relationship.
-  Relationships become active only after row-level evidence and user
-  confirmation.
+  Only supported narrow rules with strong row-level evidence can activate
+  automatically; other candidates require user confirmation.
 - Ambiguous slash dates require the user to choose an orientation before a shift
   can be applied safely.
 - Unusual local date, identifier, and multi-value formats may not be recognised.
@@ -39,8 +39,8 @@ sharing generated output.
 
 - Scratch generation is rule-based, synthetic-style test-data generation. It is
   not a statistical or machine-learning synthesis system.
-- Faker is not included. Human-like fields favour obvious test values and
-  reserved domains rather than broad locale realism.
+- Faker is not included. Human-like fields use a bounded fictional vocabulary
+  and reserved example domains rather than broad locale realism.
 - Numeric resampling preserves bounded distribution evidence, not a full
   multivariate probability model.
 - Stable mappings operate within the selected generation scope and are not
@@ -53,12 +53,13 @@ sharing generated output.
 ## Relationships
 
 - Unconfirmed relationship candidates do not control generation.
-- Confirmed rules have stronger generation and validation guarantees, but only
-  for the declared columns and supported relationship kind.
+- Strongly evidenced automatic rules and confirmed rules affect only their
+  declared columns and supported relationship kind.
 - A report area without relevant evidence or a confirmed contract can be NOT
   EVALUATED.
 - State, postcode, city, coordinates, and similar fields remain independent
-  unless the user confirms an evidence-backed relationship.
+  unless strong row-level evidence establishes a supported rule or the user
+  confirms an evidence-backed relationship.
 - Related-table integrity checks cover configured primary keys, foreign keys,
   cardinality rules, and linked fields. They cannot validate undeclared business
   rules.

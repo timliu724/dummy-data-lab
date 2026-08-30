@@ -12,6 +12,7 @@ const COMPACT_STRUCTURED_REFERENCE_HEADER = /^(?:sales|service|work|purchase|rep
 const MODEL_REFERENCE_HEADER = /(^|_)(product_model|factory_model|model_(?:no|number))(_|$)/;
 const OPERATIONAL_VOCABULARY_HEADER = /(^|_)(status|state|stage|region|accuracy|service_type|warranty_term|reason_code|symptom_code)(_|$)/;
 const LOCATION_HEADER = /(^|_)(address(?:_line_\d+)?|street_address|suburb|city|town|locality|state|province|territory|postcode|post_code|postal_code|zip|zip_code)(_|$)/;
+const BOUNDED_PUBLIC_LOCATION_HEADER = /(^|_)(state|province|territory|country|region)(_|$)/;
 
 function isStructuredReference(profile) {
   const header = normalizeHeader(profile.columnName);
@@ -21,6 +22,16 @@ function isStructuredReference(profile) {
     || MODEL_REFERENCE_HEADER.test(header);
 }
 
+function isMixedStructuredReferenceText(profile, detection) {
+  if (!isStructuredReference(profile)
+    || !['GENERAL_TEXT', 'FREE_TEXT'].includes(detection.type)
+    || (profile.nonEmptyCount ?? 0) < 5) return false;
+  const phraseCountLowerBound = (profile.topValues ?? [])
+    .filter((entry) => /\p{L}[^\r\n]*\s+[^\r\n]*\p{L}/u.test(String(entry.value ?? '')))
+    .reduce((sum, entry) => sum + Math.max(0, (entry.count ?? 0) - (entry.error ?? 0)), 0);
+  return phraseCountLowerBound / profile.nonEmptyCount >= 0.5;
+}
+
 function hasSingleSourceValue(profile) {
   return (profile.nonEmptyCount ?? 0) > 0
     && profile.uniqueCountStatus === 'EXACT'
@@ -28,13 +39,15 @@ function hasSingleSourceValue(profile) {
 }
 
 function isOperationalVocabulary(profile) {
+  const header = normalizeHeader(profile.columnName);
+  const maximumUniqueValues = /(^|_)(code|reason_code|symptom_code)(_|$)/.test(header) ? 64 : 12;
   if ((profile.nonEmptyCount ?? 0) < 2
     || profile.uniqueCountStatus !== 'EXACT'
     || (profile.uniqueCount ?? Number.POSITIVE_INFINITY) < 2
-    || (profile.uniqueCount ?? Number.POSITIVE_INFINITY) > 12
+    || (profile.uniqueCount ?? Number.POSITIVE_INFINITY) > maximumUniqueValues
     || (profile.uniqueRatio ?? 1) > 0.75
     || (profile.lengthStats?.maximum ?? Number.POSITIVE_INFINITY) > 40) return false;
-  return OPERATIONAL_VOCABULARY_HEADER.test(normalizeHeader(profile.columnName));
+  return OPERATIONAL_VOCABULARY_HEADER.test(header);
 }
 
 function isMixedOperationalText(profile) {
@@ -47,6 +60,16 @@ function isMixedOperationalText(profile) {
 function isLocationField(profile, detection) {
   return detection.type === 'ADDRESS_LIKE'
     || LOCATION_HEADER.test(normalizeHeader(profile.columnName));
+}
+
+function isBoundedPublicLocationVocabulary(profile) {
+  const header = normalizeHeader(profile.columnName);
+  const fixedPublicVocabulary = /(^|_)(state|province|territory|country)(_|$)/.test(header);
+  return BOUNDED_PUBLIC_LOCATION_HEADER.test(header)
+    && profile.uniqueCountStatus === 'EXACT'
+    && (profile.uniqueCount ?? 0) >= 2
+    && (profile.uniqueCount ?? Number.POSITIVE_INFINITY) <= 16
+    && (fixedPublicVocabulary || (profile.uniqueRatio ?? 1) <= 0.75);
 }
 
 function hasStrongUnlabelledPattern(profile, detection) {
@@ -70,11 +93,15 @@ function chooseRecommendation({ profile, detection, riskAssessment, mode, attrib
     }
     return [ACTIONS.REPLACE, POLICY_REASONS.FULL_SYNTHETIC];
   }
+  if (isBoundedPublicLocationVocabulary(profile)) return [ACTIONS.RESAMPLE, POLICY_REASONS.CATEGORY_RESAMPLE];
   if (isLocationField(profile, detection)) return [ACTIONS.REPLACE, POLICY_REASONS.LOCATION_REPLACE];
   if (type === 'NAME_LIKE' && isOrganisationNameHeader(profile.columnName)) {
     return [ACTIONS.REPLACE, POLICY_REASONS.ORGANISATION_NAME_REPLACE];
   }
   if (['EMAIL', 'NAME_LIKE'].includes(type)) return [ACTIONS.REPLACE, POLICY_REASONS.DIRECT_REPLACE];
+  if (attributeRole.role === 'ORDINARY' && isMixedStructuredReferenceText(profile, detection)) {
+    return [ACTIONS.REPLACE, POLICY_REASONS.MIXED_REFERENCE_TEXT_REPLACE];
+  }
   if (attributeRole.role === 'ORDINARY' && isStructuredReference(profile) && ['INTEGER', 'DECIMAL', 'CATEGORY', 'GENERAL_TEXT', 'FREE_TEXT'].includes(type)) {
     return [ACTIONS.PATTERN_REPLACE, POLICY_REASONS.STRUCTURED_REFERENCE_PATTERN];
   }
@@ -82,7 +109,7 @@ function chooseRecommendation({ profile, detection, riskAssessment, mode, attrib
     return [ACTIONS.PATTERN_REPLACE, POLICY_REASONS.STRUCTURED_REFERENCE_PATTERN];
   }
   if (hasSingleSourceValue(profile)
-    && !['NUMERIC_ID', 'ALPHANUMERIC_CODE'].includes(type)
+    && !['NUMERIC_ID', 'ALPHANUMERIC_CODE', 'DATE', 'DATETIME', 'TIME', 'AMBIGUOUS_DATE'].includes(type)
     && ['ORDINARY', 'SENSITIVE_ATTRIBUTE'].includes(attributeRole.role)) {
     return [ACTIONS.REPLACE, POLICY_REASONS.CONSTANT_REPLACE];
   }

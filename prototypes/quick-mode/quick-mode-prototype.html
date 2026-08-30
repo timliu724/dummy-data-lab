@@ -1,0 +1,2036 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Dummy Data Lab - Quick Mode Prototype</title>
+  <style>
+    :root {
+      --canvas: #f7f4ec;
+      --surface: #fffefa;
+      --surface-muted: #f1eee6;
+      --ink: #1b2421;
+      --muted: #5c6965;
+      --line: #c9c6bd;
+      --line-strong: #7b817e;
+      --orange: #d13f00;
+      --orange-dark: #a93305;
+      --orange-soft: #fff0e8;
+      --teal: #0f766e;
+      --teal-dark: #085e58;
+      --teal-soft: #e5f4f1;
+      --danger: #a63628;
+      --focus: #0f766e;
+      --radius: 12px;
+      --font-ui: Aptos, Candara, Calibri, "Segoe UI", sans-serif;
+      --font-numeric: Aptos, Calibri, "Segoe UI", Arial, sans-serif;
+      --font-display: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    }
+
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+
+    html {
+      color: var(--ink);
+      background: var(--canvas);
+      scroll-behavior: smooth;
+      scrollbar-color: var(--line-strong) var(--surface-muted);
+    }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      background: var(--canvas);
+      font: 16px/1.45 var(--font-ui);
+    }
+
+    button, input, textarea, select { font: inherit; }
+    button { color: inherit; }
+    button, label, input, textarea, select { -webkit-tap-highlight-color: transparent; }
+    ::selection { background: #ffd5bf; color: var(--ink); }
+
+    :focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 3px;
+    }
+
+    .prototype-note {
+      position: fixed;
+      z-index: 60;
+      right: 14px;
+      bottom: 12px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,254,250,.94);
+      color: var(--muted);
+      font-size: .74rem;
+      box-shadow: 0 8px 24px rgba(27,36,33,.08);
+      pointer-events: none;
+    }
+
+    .masthead {
+      position: sticky;
+      z-index: 30;
+      top: 0;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      min-height: 64px;
+      padding: 8px clamp(18px, 3vw, 46px);
+      border-bottom: 1px solid var(--ink);
+      background: rgba(255,254,250,.97);
+    }
+
+    .brand {
+      display: inline-flex;
+      gap: 14px;
+      align-items: center;
+      color: inherit;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 50px;
+      height: 44px;
+      border: 1px solid var(--ink);
+      border-radius: 4px;
+      background: var(--surface);
+      font: 700 1.32rem/1 var(--font-display);
+      letter-spacing: -.08em;
+    }
+
+    .brand-mark i { color: var(--orange); font-style: normal; }
+    .brand-name { font: 700 1.18rem/1 var(--font-ui); }
+
+    .local-status {
+      display: inline-flex;
+      justify-self: center;
+      gap: 8px;
+      align-items: center;
+      color: var(--teal-dark);
+      font-weight: 700;
+    }
+
+    .assurance-mark {
+      position: relative;
+      width: 20px;
+      height: 20px;
+      border: 2px solid currentColor;
+      border-radius: 50%;
+      background: var(--teal-soft);
+    }
+
+    .assurance-mark::after {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 5px;
+      width: 6px;
+      height: 3px;
+      border-bottom: 2px solid currentColor;
+      border-left: 2px solid currentColor;
+      transform: rotate(-45deg);
+    }
+
+    .mode-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-width: 250px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .mode-switch button {
+      min-height: 42px;
+      padding: 8px 20px;
+      border: 0;
+      background: transparent;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .mode-switch button + button { border-left: 1px solid var(--line); }
+    .mode-switch button[aria-pressed="true"] { background: var(--orange); color: white; }
+    .mode-switch button:not([aria-pressed="true"]):hover { background: var(--surface-muted); }
+
+    .advanced-notice {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      align-items: center;
+      min-height: 44px;
+      padding: 8px 20px;
+      border-bottom: 1px solid #87bbb6;
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      font-weight: 700;
+    }
+
+    .advanced-notice button {
+      padding: 3px 8px;
+      border: 0;
+      border-bottom: 1px solid currentColor;
+      background: transparent;
+      color: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .journey-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(420px, .8fr);
+      gap: 40px;
+      align-items: center;
+      padding: 32px clamp(24px, 4vw, 64px) 28px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .journey-header h1 {
+      max-width: 760px;
+      margin: 0;
+      font: 500 clamp(2.2rem, 3.2vw, 3.55rem)/1.02 var(--font-display);
+      letter-spacing: -.035em;
+      text-wrap: balance;
+    }
+
+    .stepper {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: start;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .stepper li {
+      position: relative;
+      min-width: 0;
+    }
+
+    .stepper li:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      top: 17px;
+      left: calc(50% + 24px);
+      right: calc(-50% + 24px);
+      height: 1px;
+      background: var(--line-strong);
+    }
+
+    .step-button {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      justify-items: center;
+      gap: 7px;
+      width: 100%;
+      padding: 0 4px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: default;
+    }
+
+    .step-button.is-available { cursor: pointer; }
+
+    .step-number {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--line-strong);
+      border-radius: 50%;
+      background: var(--surface);
+      font-weight: 900;
+    }
+
+    .step-label { font-size: .88rem; font-weight: 800; white-space: nowrap; }
+    .step-button[aria-current="step"] { color: var(--orange); }
+    .step-button[aria-current="step"] .step-number { border-color: var(--orange); background: var(--orange); color: white; }
+    .step-button.is-complete { color: var(--teal-dark); }
+    .step-button.is-complete .step-number { border-color: var(--teal); background: var(--teal); color: white; }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      min-height: calc(100vh - 201px);
+      background: var(--surface);
+    }
+
+    .primary-pane {
+      min-width: 0;
+      padding: 30px clamp(24px, 4vw, 64px) 70px;
+      border-right: 1px solid var(--line);
+    }
+
+    .primary-pane > [data-step-panel] {
+      width: 100%;
+      max-width: 1120px;
+      margin-inline: auto;
+    }
+
+    .sidebar {
+      min-width: 0;
+      padding: 30px 24px 70px;
+      background: #fbfaf5;
+    }
+
+    .sidebar-section {
+      padding: 0 0 26px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .sidebar-section + .sidebar-section { padding-top: 26px; }
+    .sidebar-section:last-child { border-bottom: 0; }
+    .sidebar h2, .sidebar h3 {
+      margin: 0 0 18px;
+      font-family: Iowan Old Style, Baskerville, Georgia, "Times New Roman", serif;
+      font-weight: 600;
+      line-height: 1.1;
+    }
+    .sidebar h2 { font-size: 1.55rem; }
+    .sidebar h3 { font-size: 1.35rem; }
+
+    .setting-list { margin: 0; font-family: var(--font-ui); }
+    .setting-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px 16px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .setting-row:last-child { border-bottom: 0; }
+    .setting-row dt { color: var(--muted); }
+    .setting-row dd { margin: 0; font-weight: 800; text-align: right; }
+    .setting-row select {
+      min-width: 96px;
+      min-height: 38px;
+      padding: 6px 30px 6px 10px;
+      border: 1px solid var(--line-strong);
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--ink);
+      font: inherit;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .trust-message {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      align-items: center;
+      margin: 20px 0 0;
+      padding: 16px;
+      border: 1px solid #85b9b4;
+      border-radius: var(--radius);
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      font-weight: 800;
+    }
+
+    .trust-message .assurance-mark { flex: none; width: 22px; height: 22px; }
+    .trust-message strong, .trust-message small { display: block; }
+    .trust-message small { margin-top: 3px; color: inherit; font-size: .82rem; font-weight: 500; line-height: 1.35; }
+    .sidebar p { color: var(--muted); }
+    .text-link {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 3px 0;
+      border: 0;
+      border-bottom: 1px solid currentColor;
+      background: transparent;
+      color: var(--teal-dark);
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .section-title {
+      margin: 0 0 20px;
+      font-size: 1.55rem;
+      line-height: 1.15;
+    }
+
+    .task-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 34px;
+    }
+
+    .task-card {
+      position: relative;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 16px;
+      align-items: center;
+      min-height: 138px;
+      padding: 22px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: var(--surface);
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 180ms ease-out, background 180ms ease-out;
+    }
+
+    .task-card:hover { border-color: var(--ink); }
+    .task-card[aria-pressed="true"] { border-color: var(--orange); background: var(--orange-soft); }
+    .task-card[aria-pressed="true"]::after {
+      content: "";
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 15px;
+      height: 15px;
+      border: 5px solid var(--orange);
+      border-radius: 50%;
+      background: var(--surface);
+    }
+
+    .task-icon {
+      display: grid;
+      place-items: center;
+      width: 68px;
+      height: 68px;
+      color: var(--orange);
+    }
+
+    .task-icon svg { width: 62px; height: 62px; stroke: currentColor; fill: none; stroke-width: 1.7; }
+    .task-card strong { display: block; margin-bottom: 5px; font-size: 1.2rem; }
+    .task-card small { display: block; max-width: 33ch; color: var(--muted); font-size: .94rem; line-height: 1.4; }
+
+    .workbench {
+      padding-top: 4px;
+    }
+
+    .workbench-heading {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .workbench-heading h2 { margin: 0; font-size: 1.55rem; }
+    .workbench-heading small { color: var(--muted); }
+
+    .input-split {
+      display: grid;
+      grid-template-columns: 1fr auto 1.15fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .or-divider {
+      display: grid;
+      grid-template-rows: 1fr auto 1fr;
+      gap: 8px;
+      align-items: center;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .or-divider::before, .or-divider::after { content: ""; width: 1px; height: 100%; margin: auto; background: var(--line); }
+    .or-divider span { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); }
+
+    .file-drop, .paste-zone {
+      min-height: 270px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .file-drop {
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 13px;
+      padding: 24px;
+      border-style: dashed;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 180ms ease-out, background 180ms ease-out;
+    }
+
+    .file-drop:hover, .file-drop.is-dragging { border-color: var(--orange); background: var(--orange-soft); }
+    .file-drop:focus-within { outline: 3px solid var(--focus); outline-offset: 3px; border-color: var(--orange); }
+    .file-drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .file-symbol {
+      position: relative;
+      width: 48px;
+      height: 58px;
+      border: 2px solid var(--ink);
+      border-radius: 4px;
+    }
+    .file-symbol::before {
+      content: "";
+      position: absolute;
+      right: -2px;
+      top: -2px;
+      width: 17px;
+      height: 17px;
+      border-bottom: 2px solid var(--ink);
+      border-left: 2px solid var(--ink);
+      background: var(--surface);
+    }
+    .file-symbol::after {
+      content: "";
+      position: absolute;
+      left: 16px;
+      bottom: 12px;
+      width: 12px;
+      height: 12px;
+      border-top: 2px solid var(--orange);
+      border-left: 2px solid var(--orange);
+      transform: rotate(45deg);
+    }
+
+    .file-drop strong { font-size: 1.05rem; }
+    .file-drop small { max-width: 30ch; color: var(--muted); }
+    .choose-file {
+      display: inline-flex;
+      min-height: 42px;
+      align-items: center;
+      padding: 8px 18px;
+      border: 1px solid var(--orange);
+      border-radius: 7px;
+      color: var(--orange-dark);
+      font-weight: 800;
+    }
+
+    .paste-zone { display: grid; grid-template-rows: auto 1fr; overflow: hidden; }
+    .paste-zone label { padding: 15px 17px 9px; font-weight: 800; }
+    .paste-zone textarea {
+      width: 100%;
+      min-height: 215px;
+      resize: vertical;
+      padding: 6px 17px 17px;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      line-height: 1.55;
+    }
+    .paste-zone textarea::placeholder { color: #69736f; opacity: 1; }
+    .paste-zone textarea:focus { outline: 0; box-shadow: inset 0 0 0 2px var(--focus); }
+
+    .action-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .source-status {
+      min-width: 0;
+      margin-right: auto;
+      color: var(--muted);
+      font-size: .82rem;
+      line-height: 1.4;
+    }
+    .source-status strong { color: var(--teal-dark); }
+    .source-status[data-kind="error"] { color: var(--orange-dark); font-weight: 750; }
+    .source-status[hidden], .source-conflict[hidden] { display: none; }
+    .source-conflict {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: center;
+      margin-top: 14px;
+      padding: 13px 15px;
+      border: 1px solid #e4b19d;
+      border-left: 4px solid var(--orange);
+      border-radius: 8px;
+      background: var(--orange-soft);
+    }
+    .source-conflict__copy { display: grid; gap: 3px; }
+    .source-conflict__copy small { color: var(--muted); }
+    .source-conflict__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .source-conflict .button { min-height: 40px; padding: 7px 12px; background: var(--surface); }
+    .button--sample { border-color: var(--teal); color: var(--teal-dark); background: var(--surface); }
+    .button--sample:hover:not(:disabled) { border-color: var(--teal-dark); background: var(--teal-soft); }
+    .paste-zone[data-source="sample"] { border-color: var(--teal); box-shadow: inset 0 0 0 1px var(--teal); }
+
+    .button {
+      display: inline-flex;
+      justify-content: center;
+      gap: 9px;
+      align-items: center;
+      min-height: 46px;
+      padding: 10px 18px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+      font-weight: 850;
+      cursor: pointer;
+      transition: background 160ms ease-out, border-color 160ms ease-out, color 160ms ease-out;
+    }
+
+    .button:hover:not(:disabled) { border-color: var(--ink); background: var(--surface-muted); }
+    .button--primary { min-width: 220px; border-color: var(--orange); background: var(--orange); color: white; }
+    .button--primary:hover:not(:disabled) { border-color: var(--orange-dark); background: var(--orange-dark); }
+    .button:disabled { cursor: not-allowed; opacity: .48; }
+    .button--quiet { border-color: transparent; background: transparent; color: var(--muted); }
+    .button--small { min-height: 38px; padding: 7px 12px; font-size: .86rem; }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .template-button {
+      position: relative;
+      min-height: 105px;
+      padding: 18px 48px 18px 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .template-button strong, .template-button small { display: block; }
+    .template-button small { margin-top: 5px; color: var(--muted); }
+    .template-button[aria-pressed="true"] { border-color: var(--orange); background: var(--orange-soft); }
+    .template-selection-mark {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border: 1px solid var(--line-strong);
+      border-radius: 50%;
+      color: transparent;
+      background: var(--surface);
+    }
+    .template-selection-mark svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.2; }
+    .template-button[aria-pressed="true"] .template-selection-mark {
+      border-color: var(--teal-dark);
+      color: var(--surface);
+      background: var(--teal-dark);
+    }
+
+    .field-preview {
+      display: grid;
+      gap: 0;
+      padding: 16px 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .template-field-group {
+      display: grid;
+      grid-template-columns: minmax(130px, 170px) minmax(0, 1fr);
+      gap: 12px 18px;
+      align-items: start;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .template-field-group:last-child { border-bottom: 0; }
+    .template-field-group__heading { display: grid; gap: 3px; padding-top: 7px; }
+    .template-field-group__heading small { color: var(--muted); }
+    .template-field-group__fields { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .field-chip {
+      min-height: 36px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: .88rem;
+      font-weight: 750;
+      cursor: pointer;
+    }
+    .field-chip[aria-pressed="true"] { border-color: var(--orange); background: var(--orange-soft); color: var(--ink); }
+    .field-selection-heading {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+    .field-selection-heading small { color: var(--muted); }
+    .custom-column-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .custom-column-row {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) minmax(180px, .75fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+    .custom-column-row input,
+    .custom-column-row select {
+      min-height: 42px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--ink);
+    }
+    .custom-column-remove {
+      min-height: 42px;
+      padding: 8px 11px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .add-custom-column {
+      min-height: 40px;
+      margin-top: 10px;
+      padding: 7px 0;
+      border: 0;
+      background: transparent;
+      color: var(--teal-dark);
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .review-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      margin-bottom: 18px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .review-summary div { padding: 14px 16px; }
+    .review-summary div + div { border-left: 1px solid var(--line); }
+    .review-summary strong { display: block; font-size: 1.25rem; }
+    .review-summary small { color: var(--muted); }
+    .review-summary .needs-review strong { color: var(--orange-dark); }
+
+    .review-toolbar, .preview-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .search-control {
+      position: relative;
+      flex: 1 1 260px;
+    }
+
+    .search-control input {
+      width: 100%;
+      min-height: 44px;
+      padding: 9px 13px 9px 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+    }
+
+    .search-control::before {
+      content: "";
+      position: absolute;
+      left: 15px;
+      top: 13px;
+      width: 11px;
+      height: 11px;
+      border: 2px solid var(--muted);
+      border-radius: 50%;
+    }
+
+    .search-control::after {
+      content: "";
+      position: absolute;
+      left: 27px;
+      top: 26px;
+      width: 8px;
+      height: 2px;
+      background: var(--muted);
+      transform: rotate(45deg);
+    }
+
+    .segmented-control {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .segmented-control button {
+      min-height: 42px;
+      padding: 8px 13px;
+      border: 0;
+      background: transparent;
+      font-size: .86rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .segmented-control button + button { border-left: 1px solid var(--line); }
+    .segmented-control button[aria-pressed="true"] { background: var(--ink); color: white; }
+
+    .column-list { border-top: 1px solid var(--line); }
+
+    .column-row {
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .column-main {
+      display: grid;
+      grid-template-columns: minmax(170px, .85fr) minmax(145px, .68fr) minmax(240px, 1.25fr) minmax(105px, .45fr) auto;
+      gap: 16px;
+      align-items: center;
+      width: 100%;
+      min-height: 82px;
+      padding: 14px 4px;
+      border: 0;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .column-main:hover { background: #fbfaf6; }
+    .column-name strong, .column-name small { display: block; }
+    .column-name strong { font-size: 1.03rem; }
+    .column-name small { color: var(--muted); }
+
+    .action-name { font-weight: 850; color: var(--teal-dark); }
+    .column-inline-preview {
+      display: grid;
+      grid-template-columns: minmax(0, .8fr) auto minmax(0, 1.2fr);
+      gap: 8px;
+      align-items: center;
+      min-width: 0;
+      color: var(--muted);
+      font-size: .86rem;
+    }
+    .column-inline-preview--scratch { grid-template-columns: minmax(0, 1fr); }
+    .column-inline-preview__source,
+    .column-inline-preview__result {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-family: var(--font-numeric);
+      font-variant-numeric: lining-nums tabular-nums;
+      font-feature-settings: "onum" 0, "lnum" 1, "tnum" 1;
+    }
+    .column-inline-preview__result { color: var(--teal-dark); }
+    .column-inline-preview__arrow { color: var(--orange-dark); font-weight: 900; }
+    .column-inline-preview.is-unavailable .column-inline-preview__result { color: var(--muted); font-weight: 650; }
+    .status {
+      display: inline-flex;
+      gap: 7px;
+      align-items: center;
+      font-weight: 850;
+    }
+    .status::before {
+      content: "";
+      width: 12px;
+      height: 12px;
+      border: 2px solid currentColor;
+      border-radius: 50%;
+    }
+    .status--ready { color: var(--teal-dark); }
+    .status--review { color: var(--orange-dark); }
+
+    .chevron {
+      width: 10px;
+      height: 10px;
+      border-right: 2px solid var(--muted);
+      border-bottom: 2px solid var(--muted);
+      transform: rotate(45deg);
+      transition: transform 160ms ease-out;
+    }
+
+    .column-row.is-open { background: var(--orange-soft); }
+    .column-row.is-open .column-main { box-shadow: inset 0 0 0 1px var(--orange); }
+    .column-row.is-open .chevron { transform: rotate(225deg); }
+    .column-details {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      padding: 16px 18px 18px;
+      border-top: 1px solid #efb99e;
+    }
+
+    .column-details p { margin: 0; color: var(--ink); }
+    .column-details small { display: block; margin-top: 4px; color: var(--muted); }
+    .column-details select {
+      min-width: 180px;
+      min-height: 42px;
+      padding: 8px 34px 8px 10px;
+      border: 1px solid var(--line-strong);
+      border-radius: 7px;
+      background: var(--surface);
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      margin-top: 16px;
+    }
+
+    .pagination small { color: var(--muted); }
+    .pagination-buttons { display: flex; gap: 8px; }
+
+    .review-action {
+      position: sticky;
+      z-index: 12;
+      bottom: 0;
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: center;
+      margin: 26px -10px -18px;
+      padding: 14px 10px;
+      border-top: 1px solid var(--line);
+      background: rgba(255,254,250,.97);
+    }
+
+    .review-note { margin: 0; color: var(--muted); font-size: .88rem; line-height: 1.4; }
+
+    .readiness {
+      padding: 18px;
+      border: 1px solid #85b9b4;
+      border-radius: var(--radius);
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+    }
+
+    .readiness strong { display: block; font-size: 1.15rem; }
+    .readiness small { display: block; margin-top: 4px; }
+
+    .result-summary {
+      display: flex;
+      gap: 26px;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 0 0 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .result-summary div { display: flex; gap: 8px; align-items: baseline; }
+    .result-summary div + div { padding-left: 26px; border-left: 1px solid var(--line); }
+    .result-summary strong { color: var(--teal-dark); font: 800 2rem/1 var(--font-numeric); }
+    .result-summary span { color: var(--muted); }
+
+    .preview-toolbar { justify-content: space-between; }
+    .preview-toolbar-left, .preview-toolbar-right { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .preview-toolbar strong { font-size: 1.2rem; }
+    .preview-toolbar small { color: var(--muted); }
+
+    .preview-table-wrap {
+      max-width: 100%;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      scrollbar-color: var(--orange) var(--surface-muted);
+      scrollbar-width: auto;
+    }
+
+    .preview-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: max-content;
+      min-width: 0;
+      table-layout: fixed;
+      font-size: .91rem;
+      font-family: var(--font-numeric);
+      font-variant-numeric: lining-nums tabular-nums;
+      font-feature-settings: "onum" 0, "lnum" 1, "tnum" 1;
+    }
+
+    .preview-table.is-content-fit th, .preview-table.is-content-fit td { min-width: 0; max-width: none; }
+
+    .preview-table th, .preview-table td {
+      min-width: 120px;
+      max-width: 200px;
+      padding: 9px 11px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .preview-table th {
+      position: sticky;
+      z-index: 2;
+      top: 0;
+      background: var(--surface-muted);
+      font-weight: 850;
+    }
+
+    .preview-table tr:last-child td { border-bottom: 0; }
+    .preview-table th:last-child, .preview-table td:last-child { border-right: 0; }
+    .preview-caption { display: flex; justify-content: space-between; gap: 16px; margin: 10px 2px 0; color: var(--muted); font-size: .86rem; }
+
+    .result-actions {
+      justify-content: space-between;
+      margin: 0 0 22px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .result-secondary-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+    .quality-status {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 22px;
+      color: var(--teal-dark);
+    }
+
+    .quality-mark {
+      display: grid;
+      place-items: center;
+      width: 68px;
+      height: 68px;
+      border: 2px solid currentColor;
+      border-radius: 50%;
+      font-size: 1.4rem;
+      font-weight: 900;
+    }
+
+    .quality-status strong { display: block; font: 700 1.45rem/1.08 var(--font-display); }
+    .quality-status small { display: block; margin-top: 5px; color: var(--muted); }
+
+    .quality-item {
+      padding: 16px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .quality-item strong { display: block; color: var(--orange-dark); }
+    .quality-item p { margin: 5px 0 0; }
+
+    .boundary-note { margin: 0; padding: 16px 0; color: var(--muted); font-size: .88rem; }
+
+    dialog {
+      width: min(560px, calc(100% - 30px));
+      max-height: min(720px, calc(100vh - 40px));
+      overscroll-behavior: contain;
+      padding: 0;
+      border: 1px solid var(--ink);
+      border-radius: 14px;
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: 0 24px 80px rgba(27,36,33,.2);
+    }
+
+    dialog::backdrop { background: rgba(27,36,33,.38); }
+    .dialog-header {
+      position: sticky;
+      z-index: 2;
+      top: 0;
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: center;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .dialog-header h2 { margin: 0; font-size: 1.35rem; }
+    .dialog-body { padding: 18px 20px 22px; }
+    .dialog-toolbar { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 14px; }
+    .dialog-toolbar input {
+      min-height: 42px;
+      padding: 8px 11px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      color: var(--ink);
+    }
+
+    .column-chooser {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      max-height: 430px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      background: var(--line);
+    }
+
+    .column-choice {
+      display: flex;
+      gap: 9px;
+      align-items: center;
+      min-height: 44px;
+      padding: 9px 11px;
+      background: var(--surface);
+      cursor: pointer;
+    }
+
+    .column-choice input { width: 18px; height: 18px; accent-color: var(--teal); }
+    .dialog-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+
+    .quality-details {
+      margin-top: 24px;
+      padding: 18px 20px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-muted);
+    }
+
+    .quality-details h3 { margin: 0 0 8px; }
+    .quality-details p { margin: 0; color: var(--muted); }
+
+    .loading-label {
+      display: inline-flex;
+      gap: 9px;
+      align-items: center;
+    }
+
+    .loading-label::before {
+      content: "";
+      width: 15px;
+      height: 15px;
+      border: 2px solid rgba(255,255,255,.5);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin .75s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+    }
+
+    @media (max-width: 1080px) {
+      .journey-header { grid-template-columns: 1fr; gap: 24px; }
+      .app-shell { grid-template-columns: minmax(0, 1fr); }
+      .primary-pane { border-right: 0; }
+      .sidebar { border-top: 1px solid var(--line); }
+      .masthead { grid-template-columns: auto 1fr; }
+      .local-status { justify-self: end; }
+      .mode-switch { grid-column: 1 / -1; width: 100%; margin-top: 8px; }
+    }
+
+    @media (max-width: 760px) {
+      .masthead { padding: 8px 14px; }
+      .brand-name { font-size: 1rem; }
+      .local-status { font-size: .8rem; }
+      .journey-header { padding: 24px 18px; }
+      .journey-header h1 { font-size: 2.35rem; }
+      .primary-pane, .sidebar { padding: 24px 18px 64px; }
+      .task-options, .template-grid { grid-template-columns: 1fr; }
+      .task-card { min-height: 116px; }
+      .input-split { grid-template-columns: 1fr; }
+      .or-divider { grid-template-columns: 1fr auto 1fr; grid-template-rows: auto; }
+      .or-divider::before, .or-divider::after { width: 100%; height: 1px; }
+      .file-drop, .paste-zone { min-height: 230px; }
+      .column-main { grid-template-columns: 1fr auto; gap: 7px 12px; padding: 14px 6px; }
+      .column-main .action-name { grid-column: 1; }
+      .column-main .status { grid-column: 2; grid-row: 1 / span 2; }
+      .column-main .column-inline-preview { grid-column: 1 / -1; }
+      .column-main .chevron { grid-column: 2; grid-row: 3; }
+      .column-details { grid-template-columns: 1fr; }
+      .custom-column-row { grid-template-columns: 1fr; }
+      .review-action { align-items: stretch; flex-direction: column; }
+      .review-action .button { width: 100%; }
+      .result-summary { align-items: flex-start; flex-direction: column; gap: 10px; }
+      .result-summary div + div { padding-left: 0; border-left: 0; }
+      .column-chooser { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 480px) {
+      .brand-mark { width: 42px; height: 38px; }
+      .local-status { gap: 6px; font-size: .78rem; }
+      .journey-header h1 { font-size: 2rem; }
+      .step-label { font-size: .74rem; }
+      .task-card { grid-template-columns: 1fr; }
+      .task-icon { width: 48px; height: 48px; }
+      .task-icon svg { width: 46px; height: 46px; }
+      .review-summary { grid-template-columns: 1fr; }
+      .review-summary div + div { border-top: 1px solid var(--line); border-left: 0; }
+      .action-row { align-items: stretch; flex-direction: column-reverse; }
+      .action-row .button { width: 100%; }
+      .prototype-note { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!--
+  THESIS: Quick reveals one decision at a time and keeps the next action readable even in a reduced GIF.
+  OWN-WORLD: Warm paper, crisp ink rules, orange action, teal assurance, large task labels, and one continuous sidebar.
+  STORY: Choose a source or template, review only the columns that need judgment, then inspect and download the result.
+  FIRST VIEWPORT: A spacious task canvas occupies two thirds; concise defaults and the Advanced handoff occupy one third.
+  FORM: A Clean Canvas hierarchy combined with Compact Lab's split input workbench; isolated code-led prototype.
+  FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+  -->
+
+  <header class="masthead">
+    <a class="brand" href="#" aria-label="Dummy Data Lab prototype home">
+      <span class="brand-mark">D<i>/</i>D</span>
+      <span class="brand-name">Dummy Data Lab</span>
+    </a>
+    <div class="local-status"><span class="assurance-mark" aria-hidden="true"></span><span>Runs locally · no upload</span></div>
+    <div class="mode-switch" role="group" aria-label="Interface mode">
+      <button type="button" aria-pressed="true">Quick</button>
+      <button id="advanced-button" type="button" aria-pressed="false">Advanced</button>
+    </div>
+  </header>
+
+  <div id="advanced-notice" class="advanced-notice" role="status" hidden>
+    <span>Advanced is intentionally outside this prototype. Quick is being designed as the new experience standard.</span>
+    <button id="close-advanced-notice" type="button">Close</button>
+  </div>
+
+  <section class="journey-header" aria-labelledby="page-title">
+    <h1 id="page-title">Make useful test data in three clear steps</h1>
+    <ol class="stepper" aria-label="Quick workflow progress">
+      <li><button class="step-button is-available" type="button" data-step="choose" aria-current="step"><span class="step-number">1</span><span class="step-label">Choose</span></button></li>
+      <li><button class="step-button" type="button" data-step="review"><span class="step-number">2</span><span class="step-label">Review</span></button></li>
+      <li><button class="step-button" type="button" data-step="download"><span class="step-number">3</span><span class="step-label">Download</span></button></li>
+    </ol>
+  </section>
+
+  <main class="app-shell">
+    <div class="primary-pane">
+      <section id="step-choose" data-step-panel="choose">
+        <h2 class="section-title">What do you want to do?</h2>
+        <div class="task-options" role="group" aria-label="Quick task">
+          <button class="task-card" type="button" data-task="transform" aria-pressed="true">
+            <span class="task-icon" aria-hidden="true">
+              <svg viewBox="0 0 64 64"><rect x="8" y="9" width="39" height="46" rx="3"></rect><path d="M8 23h39M21 23v32M34 23v32M8 36h39M8 46h39M48 32h9M53 27l5 5-5 5"></path></svg>
+            </span>
+            <span><strong>Transform existing data</strong><small>Use a CSV, TSV, TXT file, or pasted spreadsheet cells.</small></span>
+          </button>
+          <button class="task-card" type="button" data-task="scratch" aria-pressed="false">
+            <span class="task-icon" aria-hidden="true">
+              <svg viewBox="0 0 64 64"><rect x="7" y="10" width="39" height="42" rx="3"></rect><path d="M7 23h39M20 23v29M33 23v18M7 35h32M50 38v20M40 48h20"></path></svg>
+            </span>
+            <span><strong>Generate one table</strong><small>Start from a simple one-table template.</small></span>
+          </button>
+        </div>
+
+        <section id="transform-workbench" class="workbench">
+          <div class="workbench-heading"><h2>Add your source table</h2><small>Choose your own data or start safely with a fictional sample.</small></div>
+          <div class="input-split">
+            <label id="file-drop" class="file-drop">
+              <input id="source-file" name="source_file" type="file" aria-label="Choose a CSV, TSV, or TXT file" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values,text/plain">
+              <span class="file-symbol" aria-hidden="true"></span>
+              <strong id="file-label">Drop a CSV, TSV, or TXT file here</strong>
+              <small id="file-help">The prototype records only the file name and does not read its contents.</small>
+              <span class="choose-file">Choose file</span>
+            </label>
+            <div class="or-divider" aria-hidden="true"><span>or</span></div>
+            <div class="paste-zone">
+              <label for="paste-input">Paste spreadsheet cells</label>
+              <textarea id="paste-input" name="pasted_cells" autocomplete="off" placeholder="Paste cells from Excel or another spreadsheet…"></textarea>
+            </div>
+          </div>
+          <div id="source-conflict" class="source-conflict" role="alert" hidden>
+            <span class="source-conflict__copy"><strong>Choose one source</strong><small>Quick analyses one table at a time. Nothing will be deleted.</small></span>
+            <span class="source-conflict__actions">
+              <button id="use-file-source" class="button" type="button">Use uploaded file</button>
+              <button id="use-paste-source" class="button" type="button">Use pasted data</button>
+            </span>
+          </div>
+          <div class="action-row">
+            <span id="source-status" class="source-status" role="status" aria-live="polite" hidden></span>
+            <button id="sample-data-button" class="button button--sample" type="button">Try sample data</button>
+            <button id="analyse-button" class="button button--primary" type="button">Analyse locally</button>
+          </div>
+        </section>
+
+        <section id="scratch-workbench" class="workbench" hidden>
+          <div class="workbench-heading"><h2>Start with a simple table</h2><small>Related tables stay in Advanced.</small></div>
+          <div class="template-grid" role="group" aria-label="Fields to combine in one table">
+            <button class="template-button" type="button" data-template="people" aria-pressed="true"><span class="template-selection-mark" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="m3 8 3 3 7-7"></path></svg></span><strong>People</strong><small>ID, name, email, phone, status</small></button>
+            <button class="template-button" type="button" data-template="orders" aria-pressed="false"><span class="template-selection-mark" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="m3 8 3 3 7-7"></path></svg></span><strong>Orders</strong><small>Order ID, customer ID, date, status, total</small></button>
+            <button class="template-button" type="button" data-template="support" aria-pressed="false"><span class="template-selection-mark" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="m3 8 3 3 7-7"></path></svg></span><strong>Support cases</strong><small>Case ID, subject, status, notes</small></button>
+          </div>
+          <div class="field-selection-heading"><strong>Choose fields</strong><small>Select one or more groups. All fields start on; turn off any you do not need.</small></div>
+          <div class="field-preview" id="field-preview" role="group" aria-label="Fields selected for this table"></div>
+          <div id="custom-column-list" class="custom-column-list" role="group" aria-label="Custom columns" hidden></div>
+          <button id="add-custom-column" class="add-custom-column" type="button">+ Add custom column</button>
+          <div class="action-row">
+            <small><strong id="selected-field-count">5</strong> fields selected</small>
+            <button id="scratch-review-button" class="button button--primary" type="button">Review fields</button>
+          </div>
+        </section>
+      </section>
+
+      <section id="step-review" data-step-panel="review" hidden>
+        <div class="review-summary" role="status" aria-label="Analysis summary">
+          <div><strong id="review-total">28</strong><small>columns found</small></div>
+          <div><strong id="review-ready">25</strong><small>ready</small></div>
+          <div class="needs-review"><strong id="review-needed">3</strong><small>suggested review</small></div>
+        </div>
+        <div class="review-toolbar">
+          <label class="search-control"><input id="column-search" name="column_search" type="search" autocomplete="off" aria-label="Search columns" placeholder="Find a column…"></label>
+          <div class="segmented-control" role="group" aria-label="Column status filter">
+            <button type="button" data-filter="all" aria-pressed="true">All 28</button>
+            <button type="button" data-filter="review" aria-pressed="false">Suggested review 3</button>
+          </div>
+        </div>
+        <div id="column-list" class="column-list" aria-live="polite"></div>
+        <div class="pagination">
+          <small id="page-summary">Showing columns 1-6 of 28</small>
+          <div class="pagination-buttons">
+            <button id="previous-page" class="button button--small" type="button">Previous</button>
+            <button id="next-page" class="button button--small" type="button">Next</button>
+          </div>
+        </div>
+        <div class="review-action">
+          <p id="review-confirmation-line" class="review-note"><span id="review-confirmation-label">Suggested reviews are highlighted. Generation is ready.</span></p>
+          <button id="generate-button" class="button button--primary" type="button" disabled>Generate test data</button>
+        </div>
+      </section>
+
+      <section id="step-download" data-step-panel="download" hidden>
+        <div class="result-summary" role="status" aria-label="Generation summary">
+          <div><strong id="result-row-count">200</strong><span>rows generated</span></div>
+          <div><strong id="result-column-count">28</strong><span>columns</span></div>
+        </div>
+        <div class="action-row result-actions">
+          <div class="result-secondary-actions">
+            <button id="start-another" class="button button--quiet" type="button">Start another</button>
+          </div>
+          <button id="download-button" class="button button--primary" type="button">Download CSV</button>
+        </div>
+        <div class="preview-toolbar">
+          <div class="preview-toolbar-left"><strong>Preview</strong><small id="visible-range">Columns 1-6 of 28</small></div>
+          <div class="preview-toolbar-right"><button id="columns-button" class="button button--small" type="button">Columns 28</button></div>
+        </div>
+        <div id="preview-table-wrap" class="preview-table-wrap" tabindex="0" aria-label="Generated data preview. Scroll horizontally to see more columns.">
+          <table id="preview-table" class="preview-table"></table>
+        </div>
+        <div class="preview-caption"><span>Showing 12 of 200 rows</span><span id="preview-scroll-hint">Scroll horizontally to view more columns.</span></div>
+      </section>
+    </div>
+
+    <aside class="sidebar">
+      <div id="sidebar-choose">
+        <section class="sidebar-section">
+          <h2>Quick defaults</h2>
+          <dl class="setting-list">
+            <div class="setting-row"><dt>Output</dt><dd>200 rows · change after review</dd></div>
+            <div class="setting-row"><dt>Export</dt><dd>CSV</dd></div>
+          </dl>
+          <div class="trust-message"><span class="assurance-mark" aria-hidden="true"></span><span><strong>Runs locally</strong><small>Everything stays in this browser session.</small></span></div>
+        </section>
+        <section class="sidebar-section">
+          <h3>Need related tables?</h3>
+          <p>Keys, links, detailed rules, and saved projects live in Advanced.</p>
+          <button class="text-link advanced-link" type="button">Open Advanced <span aria-hidden="true">&rarr;</span></button>
+        </section>
+        <section class="sidebar-section"><p>You can review every column before generating.</p></section>
+      </div>
+
+      <div id="sidebar-review" hidden>
+        <section class="sidebar-section">
+          <h2>Quick settings</h2>
+          <dl class="setting-list">
+            <div class="setting-row"><dt>Rows</dt><dd><select id="quick-row-count" name="output_rows" aria-label="Output rows"><option value="50">50</option><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option><option value="1000">1,000</option></select></dd></div>
+            <div class="setting-row"><dt>Columns</dt><dd id="quick-review-column-count">After analysis</dd></div>
+            <div class="setting-row"><dt>Export</dt><dd>CSV</dd></div>
+          </dl>
+          <div class="trust-message"><span class="assurance-mark" aria-hidden="true"></span><span>Recommended protection is active.</span></div>
+        </section>
+        <section class="sidebar-section"><div id="readiness" class="readiness" role="status" aria-live="polite"><strong>Ready to generate</strong><small>3 suggested reviews are highlighted.</small></div></section>
+      </div>
+
+      <div id="sidebar-download" hidden>
+        <section class="sidebar-section">
+          <h2>Quality check</h2>
+          <div class="quality-status" role="status" aria-live="polite"><span class="quality-mark" aria-hidden="true">OK</span><span><strong>Output checks passed</strong><small>Structure, row count, and values</small></span></div>
+          <div id="quality-review-item" class="quality-item"><strong>SUGGESTED REVIEW — Free text</strong><p>Inspect the Notes column before sharing.</p></div>
+          <p class="boundary-note">This is not a privacy certification.</p>
+          <div class="trust-message"><span class="assurance-mark" aria-hidden="true"></span><span><strong>Runs locally</strong><small>Everything stays in this browser session.</small></span></div>
+        </section>
+        <section class="sidebar-section">
+          <h3>Export</h3>
+          <dl class="setting-list"><div class="setting-row"><dt>Format</dt><dd>CSV</dd></div><div class="setting-row"><dt>Encoding</dt><dd>UTF-8</dd></div><div class="setting-row"><dt>Spreadsheet safety</dt><dd>On</dd></div></dl>
+        </section>
+      </div>
+    </aside>
+  </main>
+
+  <dialog id="columns-dialog" aria-labelledby="columns-dialog-title">
+    <div class="dialog-header"><h2 id="columns-dialog-title">Choose preview columns</h2><button id="close-columns-dialog" class="button button--small" type="button">Close</button></div>
+    <div class="dialog-body">
+      <div class="dialog-toolbar"><input id="column-choice-search" name="preview_column_search" type="search" autocomplete="off" aria-label="Search preview columns" placeholder="Find a column…"><button id="show-all-columns" class="button button--small" type="button">Show all</button></div>
+      <div id="column-chooser" class="column-chooser"></div>
+      <div class="dialog-footer"><button id="done-columns" class="button button--primary" type="button">Done</button></div>
+    </div>
+  </dialog>
+
+  <div class="prototype-note">Interactive prototype - fictional data only</div>
+
+  <script>
+    const columnDefinitions = [
+      ['Customer name', 'Name', 'Replace', 'ready'],
+      ['Email', 'Email address', 'Replace', 'ready'],
+      ['Order date', 'Date', 'Shift date', 'ready'],
+      ['Notes', 'Free text', 'Sanitise text', 'review'],
+      ['Customer ID', 'Identifier', 'Replace', 'ready'],
+      ['Phone', 'Phone number', 'Replace', 'ready'],
+      ['Street address', 'Address', 'Replace', 'ready'],
+      ['City', 'Text', 'Replace', 'ready'],
+      ['State', 'Category', 'Resample', 'ready'],
+      ['Postcode', 'Identifier', 'Pattern replace', 'review'],
+      ['Country', 'Category', 'Keep', 'ready'],
+      ['Order ID', 'Identifier', 'Pattern replace', 'ready'],
+      ['Product', 'Category', 'Resample', 'ready'],
+      ['SKU', 'Identifier', 'Pattern replace', 'ready'],
+      ['Quantity', 'Number', 'Resample', 'ready'],
+      ['Unit price', 'Currency', 'Resample', 'ready'],
+      ['Discount', 'Percentage', 'Resample', 'ready'],
+      ['Tax', 'Currency', 'Resample', 'ready'],
+      ['Total', 'Currency', 'Resample', 'ready'],
+      ['Status', 'Category', 'Resample', 'ready'],
+      ['Sales channel', 'Category', 'Resample', 'ready'],
+      ['Store', 'Category', 'Replace', 'ready'],
+      ['Salesperson', 'Name', 'Replace', 'ready'],
+      ['Created at', 'Date and time', 'Shift date', 'ready'],
+      ['Updated at', 'Date and time', 'Shift date', 'ready'],
+      ['Loyalty tier', 'Category', 'Resample', 'ready'],
+      ['Reference code', 'Identifier', 'Pattern replace', 'review'],
+      ['Active', 'Boolean', 'Resample', 'ready']
+    ];
+
+    const templates = {
+      people: ['Full name', 'Email', 'Phone', 'Street address', 'City', 'Postcode'],
+      orders: ['Order ID', 'Order date', 'Product', 'Quantity', 'Unit price', 'Status'],
+      support: ['Case ID', 'Created date', 'Subject', 'Priority', 'Status', 'Notes']
+    };
+
+    const previewRows = [
+      ['Taylor Test','taylor.test@example.com','14 Aug 2026','Follow-up cleared','CUS-1042','0400 555 014','18 Sample Street','Harbourview','NSW','2000','Australia','ORD-2401','Desk lamp','SKU-0021','2','49.00','0','4.90','102.90','Packed','Web','Central','Jordan Demo','14 Aug 2026 09:20','14 Aug 2026 10:05','Silver','REF-8821','True'],
+      ['Jordan Sample','jordan.sample@example.com','09 Aug 2026','Payment confirmed','CUS-1043','0400 555 028','7 Fiction Avenue','Northfield','VIC','3000','Australia','ORD-2402','Cable set','SKU-0104','1','19.95','5','1.80','16.75','Complete','Store','North','Casey Test','09 Aug 2026 11:40','09 Aug 2026 12:10','Gold','REF-8822','True'],
+      ['Casey Demo','casey.demo@example.com','02 Aug 2026','Awaiting shipment','CUS-1044','0400 555 031','42 Prototype Road','Westhaven','QLD','4000','Australia','ORD-2403','Notebook','SKU-0210','5','8.50','0','4.25','46.75','Pending','Phone','West','Morgan Sample','02 Aug 2026 08:12','02 Aug 2026 08:30','Bronze','REF-8823','False'],
+      ['Morgan Trial','morgan.trial@example.com','28 Jul 2026','Priority customer','CUS-1045','0400 555 047','11 Example Lane','Lakeside','SA','5000','Australia','ORD-2404','Monitor stand','SKU-0308','1','79.00','10','6.40','75.50','Packed','Web','South','Riley Demo','28 Jul 2026 15:05','28 Jul 2026 15:50','Gold','REF-8824','True'],
+      ['Riley Test','riley.test@example.com','21 Jul 2026','Return approved','CUS-1046','0400 555 052','29 Testing Parade','Eastport','WA','6000','Australia','ORD-2405','Keyboard','SKU-0411','1','89.00','0','8.90','97.90','Returned','Store','East','Taylor Sample','21 Jul 2026 10:10','21 Jul 2026 10:44','Silver','REF-8825','False'],
+      ['Avery Sample','avery.sample@example.com','18 Jul 2026','Gift order','CUS-1047','0400 555 066','5 Dummy Court','Hillview','TAS','7000','Australia','ORD-2406','Mouse pad','SKU-0502','3','12.00','0','3.60','39.60','Complete','Web','Central','Jordan Test','18 Jul 2026 12:00','18 Jul 2026 12:22','Bronze','REF-8826','True'],
+      ['Quinn Demo','quinn.demo@example.com','11 Jul 2026','Address checked','CUS-1048','0400 555 073','70 Sample Way','Bayview','NT','0800','Australia','ORD-2407','USB hub','SKU-0620','2','34.00','5','6.12','70.72','Packed','Phone','North','Casey Demo','11 Jul 2026 14:35','11 Jul 2026 14:58','Gold','REF-8827','True'],
+      ['Sam Trial','sam.trial@example.com','04 Jul 2026','No special handling','CUS-1049','0400 555 089','13 Prototype Place','Riverbend','ACT','2600','Australia','ORD-2408','Headset','SKU-0714','1','65.00','0','6.50','71.50','Pending','Web','West','Morgan Test','04 Jul 2026 09:08','04 Jul 2026 09:40','Silver','REF-8828','False'],
+      ['Alex Test','alex.test@example.com','28 Jun 2026','Invoice sent','CUS-1050','0400 555 091','88 Example Street','Meadowview','NSW','2150','Australia','ORD-2409','Webcam','SKU-0819','1','74.00','0','7.40','81.40','Complete','Store','South','Riley Sample','28 Jun 2026 16:20','28 Jun 2026 16:31','Gold','REF-8829','True'],
+      ['Jamie Sample','jamie.sample@example.com','20 Jun 2026','Replacement item','CUS-1051','0400 555 105','24 Fiction Road','Stonebridge','VIC','3120','Australia','ORD-2410','Laptop sleeve','SKU-0901','2','29.00','10','4.64','56.84','Packed','Web','East','Avery Demo','20 Jun 2026 11:17','20 Jun 2026 11:55','Bronze','REF-8830','True'],
+      ['Drew Demo','drew.demo@example.com','12 Jun 2026','Manual check complete','CUS-1052','0400 555 118','6 Testing Lane','Glenview','QLD','4210','Australia','ORD-2411','Charging cable','SKU-1007','4','15.00','0','6.00','66.00','Complete','Phone','Central','Quinn Test','12 Jun 2026 13:01','12 Jun 2026 13:45','Silver','REF-8831','False'],
+      ['Cameron Trial','cameron.trial@example.com','03 Jun 2026','Delivery window set','CUS-1053','0400 555 123','39 Dummy Avenue','Parkside','SA','5063','Australia','ORD-2412','Desk organiser','SKU-1122','1','42.00','0','4.20','46.20','Pending','Web','North','Sam Demo','03 Jun 2026 10:27','03 Jun 2026 10:49','Gold','REF-8832','True']
+    ];
+
+    const scratchConfigurations = {
+      people: {
+        definitions: [
+          ['Full name', 'Name', 'Generate', 'ready'],
+          ['Email', 'Email address', 'Generate', 'ready'],
+          ['Phone', 'Phone number', 'Generate', 'ready'],
+          ['Street address', 'Address', 'Generate', 'ready'],
+          ['City', 'Text', 'Generate', 'ready'],
+          ['Postcode', 'Identifier', 'Pattern generate', 'review']
+        ],
+        rows: previewRows.map(function(row) { return [row[0], row[1], row[5], row[6], row[7], row[9]]; })
+      },
+      orders: {
+        definitions: [
+          ['Order ID', 'Identifier', 'Pattern generate', 'ready'],
+          ['Order date', 'Date', 'Generate', 'ready'],
+          ['Product', 'Category', 'Generate', 'ready'],
+          ['Quantity', 'Number', 'Generate', 'ready'],
+          ['Unit price', 'Currency', 'Generate', 'ready'],
+          ['Status', 'Category', 'Generate', 'ready']
+        ],
+        rows: previewRows.map(function(row) { return [row[11], row[2], row[12], row[14], row[15], row[19]]; })
+      },
+      support: {
+        definitions: [
+          ['Case ID', 'Identifier', 'Pattern generate', 'ready'],
+          ['Created date', 'Date', 'Generate', 'ready'],
+          ['Subject', 'Free text', 'Generate safely', 'review'],
+          ['Priority', 'Category', 'Generate', 'ready'],
+          ['Status', 'Category', 'Generate', 'ready'],
+          ['Notes', 'Free text', 'Generate safely', 'review']
+        ],
+        rows: [
+          ['CASE-2001','14 Aug 2026','Login help','High','Open','Customer cannot access the test account'],
+          ['CASE-2002','13 Aug 2026','Invoice question','Normal','Pending','Waiting for a fictional invoice reference'],
+          ['CASE-2003','12 Aug 2026','Address update','Low','Resolved','Sample address corrected'],
+          ['CASE-2004','11 Aug 2026','Delivery timing','Normal','Open','Requested a later sample window'],
+          ['CASE-2005','10 Aug 2026','Password reset','High','Resolved','Reset link tested successfully'],
+          ['CASE-2006','09 Aug 2026','Product query','Low','Pending','Needs a fictional product detail'],
+          ['CASE-2007','08 Aug 2026','Return request','Normal','Open','Demo return is under review'],
+          ['CASE-2008','07 Aug 2026','Account change','Normal','Resolved','Sample profile updated'],
+          ['CASE-2009','06 Aug 2026','Payment check','High','Pending','Testing a fictional payment state'],
+          ['CASE-2010','05 Aug 2026','Export help','Low','Resolved','CSV example shared'],
+          ['CASE-2011','04 Aug 2026','Status question','Normal','Open','Waiting for a demo status update'],
+          ['CASE-2012','03 Aug 2026','General feedback','Low','Resolved','Prototype feedback recorded']
+        ]
+      }
+    };
+
+    let activeDefinitions = columnDefinitions;
+    let activePreviewRows = previewRows;
+
+    const state = {
+      step: 'choose',
+      task: 'transform',
+      template: 'people',
+      filter: 'all',
+      search: '',
+      page: 0,
+      pageSize: 6,
+      outputRows: 200,
+      openColumn: 3,
+      hiddenColumns: new Set(),
+      columnActions: new Map(),
+      droppedColumns: new Set()
+    };
+
+    function activeReviewCount() {
+      return activeDefinitions.filter(function(definition) { return definition[3] === 'review'; }).length;
+    }
+
+    function prepareActiveData() {
+      if (state.task === 'scratch') {
+        activeDefinitions = scratchConfigurations[state.template].definitions;
+        activePreviewRows = scratchConfigurations[state.template].rows;
+      } else {
+        activeDefinitions = columnDefinitions;
+        activePreviewRows = previewRows;
+      }
+
+      const reviewCount = activeReviewCount();
+      const readyCount = activeDefinitions.length - reviewCount;
+      const firstReview = activeDefinitions.findIndex(function(definition) { return definition[3] === 'review'; });
+      state.page = 0;
+      state.filter = 'all';
+      state.search = '';
+      state.openColumn = firstReview;
+      state.hiddenColumns.clear();
+      state.columnActions.clear();
+      state.droppedColumns.clear();
+
+      document.querySelector('#column-search').value = '';
+      document.querySelectorAll('[data-filter]').forEach(function(button) {
+        const isAll = button.dataset.filter === 'all';
+        button.setAttribute('aria-pressed', String(isAll));
+        button.textContent = isAll ? 'All ' + activeDefinitions.length : 'Suggested review ' + reviewCount;
+      });
+      document.querySelector('#review-total').textContent = String(activeDefinitions.length);
+      document.querySelector('#quick-review-column-count').textContent = String(activeDefinitions.length);
+      document.querySelector('#review-ready').textContent = String(readyCount);
+      document.querySelector('#review-needed').textContent = String(reviewCount);
+      document.querySelector('#result-column-count').textContent = String(activeDefinitions.length);
+      document.querySelector('#quick-row-count').value = String(state.outputRows);
+
+      const confirmationLine = document.querySelector('#review-confirmation-line');
+      confirmationLine.hidden = reviewCount === 0;
+      document.querySelector('#generate-button').disabled = false;
+      document.querySelector('#review-confirmation-label').textContent = reviewCount === 1
+        ? '1 suggested review is highlighted. Generation is ready.'
+        : reviewCount + ' suggested reviews are highlighted. Generation is ready.';
+
+      const readiness = document.querySelector('#readiness');
+      readiness.querySelector('strong').textContent = 'Ready to generate';
+      readiness.querySelector('small').textContent = reviewCount
+        ? reviewCount + ' suggested review' + (reviewCount === 1 ? ' is' : 's are') + ' highlighted.'
+        : 'All six template fields have clear defaults.';
+
+      const reviewItem = document.querySelector('#quality-review-item');
+      const reviewDefinitions = activeDefinitions.filter(function(definition) { return definition[3] === 'review'; });
+      reviewItem.hidden = reviewDefinitions.length === 0;
+      if (reviewDefinitions.length) {
+        const reviewNames = reviewDefinitions.map(function(definition) { return definition[0]; });
+        const readableNames = reviewNames.length === 1
+          ? reviewNames[0]
+          : reviewNames.slice(0, -1).join(', ') + ' and ' + reviewNames[reviewNames.length - 1];
+        reviewItem.querySelector('strong').textContent = reviewNames.length === 1 ? 'SUGGESTED REVIEW — 1 field' : 'SUGGESTED REVIEW — ' + reviewNames.length + ' fields';
+        reviewItem.querySelector('p').textContent = 'Inspect ' + readableNames + ' before sharing.';
+      }
+    }
+
+    const stepOrder = ['choose', 'review', 'download'];
+    const titleByStep = {
+      choose: 'Make useful test data in three clear steps',
+      review: 'Review how each column will change',
+      download: 'Your test data is ready'
+    };
+
+    const panels = Array.from(document.querySelectorAll('[data-step-panel]'));
+    const sidebarPanels = {
+      choose: document.querySelector('#sidebar-choose'),
+      review: document.querySelector('#sidebar-review'),
+      download: document.querySelector('#sidebar-download')
+    };
+
+    function setStep(step) {
+      const previousStep = state.step;
+      state.step = step;
+      document.querySelector('#page-title').textContent = titleByStep[step];
+      panels.forEach(function(panel) { panel.hidden = panel.dataset.stepPanel !== step; });
+      Object.keys(sidebarPanels).forEach(function(key) { sidebarPanels[key].hidden = key !== step; });
+      const activeIndex = stepOrder.indexOf(step);
+      document.querySelectorAll('.step-button').forEach(function(button, index) {
+        button.removeAttribute('aria-current');
+        button.classList.toggle('is-complete', index < activeIndex);
+        button.classList.toggle('is-available', index <= activeIndex);
+        button.disabled = index > activeIndex;
+        button.querySelector('.step-number').textContent = index < activeIndex ? 'OK' : String(index + 1);
+        if (index === activeIndex) button.setAttribute('aria-current', 'step');
+      });
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' });
+      if (step === 'download') {
+        renderPreviewTable();
+        setTimeout(updateVisibleRange, 0);
+      }
+      if (step !== previousStep) {
+        setTimeout(function() {
+          const title = document.querySelector('#page-title');
+          title.setAttribute('tabindex', '-1');
+          title.focus({ preventScroll: true });
+        }, 0);
+      }
+    }
+
+    document.querySelectorAll('.step-button').forEach(function(button) {
+      button.addEventListener('click', function() {
+        if (!button.disabled) setStep(button.dataset.step);
+      });
+    });
+
+    document.querySelector('#quick-row-count').addEventListener('change', function(event) {
+      state.outputRows = Number(event.currentTarget.value);
+      document.querySelector('#result-row-count').textContent = String(state.outputRows);
+      document.querySelector('.preview-caption span').textContent = 'Showing 12 of ' + state.outputRows + ' rows';
+    });
+
+    document.querySelectorAll('.task-card').forEach(function(button) {
+      button.addEventListener('click', function() {
+        state.task = button.dataset.task;
+        document.querySelectorAll('.task-card').forEach(function(item) { item.setAttribute('aria-pressed', String(item === button)); });
+        document.querySelector('#transform-workbench').hidden = state.task !== 'transform';
+        document.querySelector('#scratch-workbench').hidden = state.task !== 'scratch';
+      });
+    });
+
+    function renderTemplateFields() {
+      const target = document.querySelector('#field-preview');
+      target.replaceChildren();
+      templates[state.template].forEach(function(name) {
+        const chip = document.createElement('span');
+        chip.className = 'field-chip';
+        chip.textContent = name;
+        target.append(chip);
+      });
+    }
+
+    document.querySelectorAll('.template-button').forEach(function(button) {
+      button.addEventListener('click', function() {
+        state.template = button.dataset.template;
+        document.querySelectorAll('.template-button').forEach(function(item) { item.setAttribute('aria-pressed', String(item === button)); });
+        renderTemplateFields();
+      });
+    });
+
+    renderTemplateFields();
+
+    const fileDrop = document.querySelector('#file-drop');
+    const fileInput = document.querySelector('#source-file');
+    const pasteInput = document.querySelector('#paste-input');
+    const prototypeSampleData = [
+      'order_id,customer_name,email,phone,order_placed,delivery_due,product,quantity,unit_price,status,delivery_address,customer_note',
+      'ORD-AU-10481,Ava Morgan,ava.morgan@example.test,0400 555 014,2026-07-02 09:15,2026-07-04 13:00,Ceramic travel mug,2,34.95,Delivered,18 Wattle Lane Carlton VIC 3053,Leave at reception',
+      'ORD-AU-10482,Lucas Chen,lucas.chen@example.test,0400 555 027,2026-07-02 10:42,2026-07-05 16:00,Desk cable organiser,3,18.50,Delivered,7 Harbour View Pyrmont NSW 2009,Call on arrival',
+      'ORD-AU-10483,Mia Bennett,mia.bennett@example.test,0400 555 031,2026-07-02 13:08,2026-07-06 12:00,Linen notebook set,1,27.00,Packed,42 Banksia Road New Farm QLD 4005,Gift order',
+      'ORD-AU-10484,Noah Williams,noah.williams@example.test,0400 555 046,2026-07-03 08:37,2026-07-06 17:00,Portable reading light,2,42.75,Processing,9 Jacaranda Street Norwood SA 5067,Safe to leave'
+    ].join('\n');
+    let prototypeFileName = '';
+    let prototypeSourcePreference = null;
+    function prototypeIsSample() { return pasteInput.value.trim() === prototypeSampleData; }
+    function prototypeSourceKind() {
+      const hasPaste = pasteInput.value.trim() !== '';
+      const sample = prototypeIsSample();
+      if (prototypeFileName && hasPaste && !sample && !['FILE', 'PASTE'].includes(prototypeSourcePreference)) return 'CONFLICT';
+      if (prototypeFileName && (sample || prototypeSourcePreference === 'FILE')) return 'FILE';
+      if (hasPaste && (sample || ['PASTE', 'SAMPLE'].includes(prototypeSourcePreference))) return sample ? 'SAMPLE' : 'PASTE';
+      if (prototypeFileName) return 'FILE';
+      if (hasPaste) return 'PASTE';
+      return 'NONE';
+    }
+    function setPrototypeSourceStatus(title, detail, kind) {
+      const status = document.querySelector('#source-status');
+      status.dataset.kind = kind || 'info';
+      status.innerHTML = '<strong></strong>';
+      status.querySelector('strong').textContent = title;
+      if (detail) status.append(document.createTextNode(' · ' + detail));
+      status.hidden = false;
+    }
+    function renderPrototypeSourceState() {
+      const kind = prototypeSourceKind();
+      document.querySelector('#source-conflict').hidden = kind !== 'CONFLICT';
+      document.querySelector('#use-file-source').textContent = prototypeFileName ? 'Use ' + prototypeFileName : 'Use uploaded file';
+      document.querySelector('.paste-zone').dataset.source = prototypeIsSample() ? 'sample' : '';
+      if (kind === 'CONFLICT') document.querySelector('#source-status').hidden = true;
+      else if (kind === 'FILE') setPrototypeSourceStatus('Using ' + prototypeFileName, prototypeIsSample() ? 'Sample data is not used' : 'Ready to analyse locally');
+      else if (kind === 'SAMPLE') setPrototypeSourceStatus('Sample loaded', 'Fictional retail orders · 12 columns');
+      else if (kind === 'PASTE') setPrototypeSourceStatus('Using pasted data', 'Ready to analyse locally');
+      else document.querySelector('#source-status').hidden = true;
+      return kind;
+    }
+    fileInput.addEventListener('change', function() {
+      if (!fileInput.files.length) return;
+      prototypeFileName = fileInput.files[0].name;
+      prototypeSourcePreference = pasteInput.value.trim() && !prototypeIsSample() ? null : 'FILE';
+      document.querySelector('#file-label').textContent = prototypeFileName;
+      document.querySelector('#file-help').textContent = 'Selected for prototype flow. File contents are not read.';
+      renderPrototypeSourceState();
+    });
+    ['dragenter','dragover'].forEach(function(type) { fileDrop.addEventListener(type, function(event) { event.preventDefault(); fileDrop.classList.add('is-dragging'); }); });
+    fileDrop.addEventListener('dragleave', function(event) { event.preventDefault(); fileDrop.classList.remove('is-dragging'); });
+    fileDrop.addEventListener('drop', function(event) {
+      event.preventDefault();
+      fileDrop.classList.remove('is-dragging');
+      const droppedFile = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+      if (!droppedFile) return;
+      prototypeFileName = droppedFile.name;
+      prototypeSourcePreference = pasteInput.value.trim() && !prototypeIsSample() ? null : 'FILE';
+      document.querySelector('#file-label').textContent = prototypeFileName;
+      document.querySelector('#file-help').textContent = 'Dropped for prototype flow. File contents are not read.';
+      renderPrototypeSourceState();
+    });
+    pasteInput.addEventListener('input', function() {
+      if (!pasteInput.value.trim()) prototypeSourcePreference = prototypeFileName ? 'FILE' : null;
+      else if (prototypeIsSample()) prototypeSourcePreference = prototypeFileName ? 'FILE' : 'SAMPLE';
+      else if (!prototypeFileName || prototypeSourcePreference === 'PASTE') prototypeSourcePreference = 'PASTE';
+      else prototypeSourcePreference = null;
+      renderPrototypeSourceState();
+    });
+    document.querySelector('#sample-data-button').addEventListener('click', function() {
+      if ((prototypeFileName || (pasteInput.value.trim() && !prototypeIsSample()))
+        && !window.confirm('Replace the current input choice with the fictional retail-orders sample?')) return;
+      prototypeFileName = '';
+      fileInput.value = '';
+      document.querySelector('#file-label').textContent = 'Drop a CSV, TSV, or TXT file here';
+      document.querySelector('#file-help').textContent = 'The prototype records only the file name and does not read its contents.';
+      pasteInput.value = prototypeSampleData;
+      pasteInput.scrollTop = 0;
+      prototypeSourcePreference = 'SAMPLE';
+      renderPrototypeSourceState();
+      pasteInput.focus();
+      pasteInput.setSelectionRange(0, 0);
+    });
+    document.querySelector('#use-file-source').addEventListener('click', function() { prototypeSourcePreference = 'FILE'; renderPrototypeSourceState(); });
+    document.querySelector('#use-paste-source').addEventListener('click', function() { prototypeSourcePreference = 'PASTE'; renderPrototypeSourceState(); });
+
+    function runLoading(button, label, callback) {
+      const original = button.textContent;
+      button.disabled = true;
+      button.innerHTML = '<span class="loading-label">' + label + '</span>';
+      setTimeout(function() {
+        button.textContent = original;
+        button.disabled = false;
+        callback();
+      }, 650);
+    }
+
+    document.querySelector('#analyse-button').addEventListener('click', function(event) {
+      const sourceKind = renderPrototypeSourceState();
+      if (sourceKind === 'NONE') {
+        setPrototypeSourceStatus('Add a source table', 'Upload a file, paste spreadsheet cells, or try the sample data', 'error');
+        document.querySelector('#sample-data-button').focus();
+        return;
+      }
+      if (sourceKind === 'CONFLICT') {
+        document.querySelector('#use-file-source').focus();
+        return;
+      }
+      runLoading(event.currentTarget, 'Analysing', function() { prepareActiveData(); renderColumnList(); setStep('review'); });
+    });
+    document.querySelector('#scratch-review-button').addEventListener('click', function(event) {
+      runLoading(event.currentTarget, 'Preparing', function() { prepareActiveData(); renderColumnList(); setStep('review'); });
+    });
+
+    function filteredColumns() {
+      return activeDefinitions.map(function(item, index) { return { item: item, index: index }; }).filter(function(entry) {
+        const matchesFilter = state.filter === 'all' || entry.item[3] === 'review';
+        const haystack = entry.item.join(' ').toLowerCase();
+        return matchesFilter && haystack.includes(state.search.toLowerCase());
+      });
+    }
+
+    function renderColumnList() {
+      const list = document.querySelector('#column-list');
+      const filtered = filteredColumns();
+      const maxPage = Math.max(0, Math.ceil(filtered.length / state.pageSize) - 1);
+      state.page = Math.min(state.page, maxPage);
+      const start = state.page * state.pageSize;
+      const pageItems = filtered.slice(start, start + state.pageSize);
+      list.replaceChildren();
+
+      pageItems.forEach(function(entry) {
+        const data = entry.item;
+        const row = document.createElement('article');
+        row.className = 'column-row' + (state.openColumn === entry.index ? ' is-open' : '');
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'column-main';
+        button.dataset.columnIndex = String(entry.index);
+        button.setAttribute('aria-expanded', String(state.openColumn === entry.index));
+        const currentAction = state.columnActions.get(entry.index) || data[2];
+        button.innerHTML =
+          '<span class="column-name"><strong>' + data[0] + '</strong><small>' + data[1] + '</small></span>' +
+          '<span class="action-name">' + currentAction + '</span>' +
+          '<span class="status status--' + data[3] + '">' + (data[3] === 'review' ? 'Review' : 'Ready') + '</span>' +
+          '<span class="chevron" aria-hidden="true"></span>';
+        button.addEventListener('click', function() {
+          state.openColumn = state.openColumn === entry.index ? -1 : entry.index;
+          renderColumnList();
+          const restoredButton = document.querySelector('.column-main[data-column-index="' + entry.index + '"]');
+          if (restoredButton) restoredButton.focus();
+        });
+        row.append(button);
+
+        if (state.openColumn === entry.index) {
+          const details = document.createElement('div');
+          details.className = 'column-details';
+          const reviewCopy = data[3] === 'review'
+            ? 'Quick found a pattern that deserves a human check before generation.'
+            : 'The recommended action is ready. Change it only if your test needs differ.';
+          details.innerHTML =
+            '<p><strong>' + (data[3] === 'review' ? 'Review this recommendation' : 'Recommendation ready') + '</strong><small>' + reviewCopy + '</small></p>';
+          const actionLabel = document.createElement('label');
+          const actionSelect = document.createElement('select');
+          actionSelect.setAttribute('aria-label', 'Action for ' + data[0]);
+          actionSelect.dataset.columnIndex = String(entry.index);
+          Array.from(new Set([data[2], 'Replace', 'Keep', 'Clear', 'Drop'])).forEach(function(action) {
+            const option = document.createElement('option');
+            option.value = action;
+            option.textContent = action;
+            actionSelect.append(option);
+          });
+          actionSelect.value = currentAction;
+          actionSelect.addEventListener('change', function() {
+            state.columnActions.set(entry.index, actionSelect.value);
+            if (actionSelect.value === 'Drop') state.droppedColumns.add(entry.index); else state.droppedColumns.delete(entry.index);
+            document.querySelector('#result-column-count').textContent = String(outputColumnIndexes().length);
+            renderColumnList();
+            const restoredSelect = document.querySelector('.column-details select[data-column-index="' + entry.index + '"]');
+            if (restoredSelect) restoredSelect.focus();
+          });
+          actionLabel.append(actionSelect);
+          details.append(actionLabel);
+          row.append(details);
+        }
+        list.append(row);
+      });
+
+      const end = Math.min(start + pageItems.length, filtered.length);
+      document.querySelector('#page-summary').textContent = filtered.length ? 'Showing columns ' + (start + 1) + '-' + end + ' of ' + filtered.length : 'No columns match';
+      document.querySelector('#previous-page').disabled = state.page === 0;
+      document.querySelector('#next-page').disabled = state.page >= maxPage;
+    }
+
+    document.querySelector('#column-search').addEventListener('input', function(event) { state.search = event.target.value; state.page = 0; renderColumnList(); });
+    document.querySelectorAll('[data-filter]').forEach(function(button) {
+      button.addEventListener('click', function() {
+        state.filter = button.dataset.filter;
+        state.page = 0;
+        document.querySelectorAll('[data-filter]').forEach(function(item) { item.setAttribute('aria-pressed', String(item === button)); });
+        renderColumnList();
+      });
+    });
+    document.querySelector('#previous-page').addEventListener('click', function() { state.page -= 1; renderColumnList(); });
+    document.querySelector('#next-page').addEventListener('click', function() { state.page += 1; renderColumnList(); });
+
+    document.querySelector('#generate-button').addEventListener('click', function(event) {
+      runLoading(event.currentTarget, 'Generating', function() { setStep('download'); });
+    });
+
+    function outputColumnIndexes() {
+      return activeDefinitions.map(function(_, index) { return index; }).filter(function(index) { return !state.droppedColumns.has(index); });
+    }
+
+    function visibleColumnIndexes() {
+      return outputColumnIndexes().filter(function(index) { return !state.hiddenColumns.has(index); });
+    }
+
+    function outputValue(rowData, index) {
+      return state.columnActions.get(index) === 'Clear' ? '' : rowData[index];
+    }
+
+    function renderPreviewTable() {
+      const table = document.querySelector('#preview-table');
+      const indexes = visibleColumnIndexes();
+      const previewRows = activePreviewRows.slice(0, 12);
+      const displayUnits = function(value) {
+        return Array.from(String(value ?? '')).reduce(function(total, character) {
+          return total + (/[^\u0000-\u00ff]/u.test(character) ? 2 : 1);
+        }, 0);
+      };
+      const widths = indexes.map(function(index) {
+        const longest = Math.max(
+          displayUnits(activeDefinitions[index][0]),
+          ...previewRows.map(function(row) { return displayUnits(outputValue(row, index)); })
+        );
+        return Math.max(88, Math.min(176, Math.round((longest * 7.2) + 24)));
+      });
+      const colgroup = document.createElement('colgroup');
+      widths.forEach(function(width) {
+        const column = document.createElement('col');
+        column.style.width = width + 'px';
+        colgroup.append(column);
+      });
+      const thead = document.createElement('thead');
+      const headRow = document.createElement('tr');
+      indexes.forEach(function(index) {
+        const th = document.createElement('th');
+        th.scope = 'col';
+        th.textContent = activeDefinitions[index][0];
+        th.dataset.columnIndex = String(index);
+        headRow.append(th);
+      });
+      thead.append(headRow);
+
+      const tbody = document.createElement('tbody');
+      previewRows.forEach(function(rowData) {
+        const tr = document.createElement('tr');
+        indexes.forEach(function(index) {
+          const td = document.createElement('td');
+          const value = outputValue(rowData, index);
+          td.textContent = value;
+          td.title = value;
+          tr.append(td);
+        });
+        tbody.append(tr);
+      });
+      table.replaceChildren(colgroup, thead, tbody);
+      table.classList.add('is-content-fit');
+      table.style.width = widths.reduce(function(total, width) { return total + width; }, 0) + 'px';
+      document.querySelector('#result-column-count').textContent = String(outputColumnIndexes().length);
+      document.querySelector('#columns-button').textContent = 'Columns ' + indexes.length;
+      renderColumnChooser();
+      setTimeout(updateVisibleRange, 0);
+    }
+
+    function updateVisibleRange() {
+      const wrap = document.querySelector('#preview-table-wrap');
+      const headers = Array.from(document.querySelectorAll('#preview-table th'));
+      if (!headers.length) {
+        document.querySelector('#visible-range').textContent = 'No preview columns';
+        return;
+      }
+      const isScrollable = wrap.scrollWidth > wrap.clientWidth;
+      document.querySelector('#preview-scroll-hint').textContent = isScrollable ? 'Scroll horizontally to view more columns.' : 'All columns are visible.';
+      const left = wrap.scrollLeft;
+      const right = left + wrap.clientWidth;
+      const inView = headers.filter(function(th) { return th.offsetLeft + th.offsetWidth > left && th.offsetLeft < right; });
+      const first = inView.length ? headers.indexOf(inView[0]) + 1 : 1;
+      const last = inView.length ? headers.indexOf(inView[inView.length - 1]) + 1 : Math.min(headers.length, 6);
+      document.querySelector('#visible-range').textContent = 'Columns ' + first + '-' + last + ' of ' + headers.length;
+    }
+
+    document.querySelector('#preview-table-wrap').addEventListener('scroll', updateVisibleRange, { passive: true });
+
+    function renderColumnChooser() {
+      const target = document.querySelector('#column-chooser');
+      const query = document.querySelector('#column-choice-search').value.toLowerCase();
+      target.replaceChildren();
+      activeDefinitions.forEach(function(data, index) {
+        if (state.droppedColumns.has(index) || !data[0].toLowerCase().includes(query)) return;
+        const label = document.createElement('label');
+        label.className = 'column-choice';
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.dataset.columnIndex = String(index);
+        input.checked = !state.hiddenColumns.has(index);
+        input.addEventListener('change', function() {
+          if (input.checked) state.hiddenColumns.delete(index); else state.hiddenColumns.add(index);
+          renderPreviewTable();
+          const restoredInput = document.querySelector('#column-chooser input[data-column-index="' + index + '"]');
+          if (restoredInput) restoredInput.focus();
+        });
+        const text = document.createElement('span');
+        text.textContent = data[0];
+        label.append(input, text);
+        target.append(label);
+      });
+    }
+
+    const columnsDialog = document.querySelector('#columns-dialog');
+    document.querySelector('#columns-button').addEventListener('click', function() { renderColumnChooser(); columnsDialog.showModal(); });
+    document.querySelector('#close-columns-dialog').addEventListener('click', function() { columnsDialog.close(); });
+    document.querySelector('#done-columns').addEventListener('click', function() { columnsDialog.close(); });
+    document.querySelector('#column-choice-search').addEventListener('input', renderColumnChooser);
+    document.querySelector('#show-all-columns').addEventListener('click', function() { state.hiddenColumns.clear(); renderPreviewTable(); });
+
+    document.querySelector('#start-another').addEventListener('click', function() {
+      confirmation.checked = false;
+      document.querySelector('#generate-button').disabled = true;
+      state.hiddenColumns.clear();
+      state.columnActions.clear();
+      state.droppedColumns.clear();
+      state.search = '';
+      state.filter = 'all';
+      state.page = 0;
+      document.querySelector('#column-search').value = '';
+      setStep('choose');
+    });
+
+    document.querySelector('#download-button').addEventListener('click', function() {
+      const allRows = [];
+      for (let i = 0; i < 200; i += 1) allRows.push(activePreviewRows[i % activePreviewRows.length]);
+      const indexes = outputColumnIndexes();
+      const escapeCsv = function(value) { return '"' + String(value).replace(/"/g, '""') + '"'; };
+      const lines = [indexes.map(function(index) { return escapeCsv(activeDefinitions[index][0]); }).join(',')];
+      allRows.forEach(function(row) { lines.push(indexes.map(function(index) { return escapeCsv(outputValue(row, index)); }).join(',')); });
+      const blob = new Blob([String.fromCharCode(0xFEFF) + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'quick-mode-prototype-data.csv';
+      link.click();
+      setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+    });
+
+    function showAdvancedNotice() {
+      const notice = document.querySelector('#advanced-notice');
+      notice.hidden = false;
+      notice.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    document.querySelector('#advanced-button').addEventListener('click', showAdvancedNotice);
+    document.querySelectorAll('.advanced-link').forEach(function(button) { button.addEventListener('click', showAdvancedNotice); });
+    document.querySelector('#close-advanced-notice').addEventListener('click', function() { document.querySelector('#advanced-notice').hidden = true; });
+
+    renderColumnList();
+    renderPreviewTable();
+    setStep('choose');
+  </script>
+</body>
+</html>

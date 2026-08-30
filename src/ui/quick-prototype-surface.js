@@ -1,5 +1,10 @@
 import quickPrototypeHtml from '../../prototypes/quick-mode/quick-mode-prototype.html';
 import { TRANSFORM_SAMPLE, isTransformSampleText } from '../examples/transform-sample.js';
+import {
+  previewCellModel,
+  previewColumnIndexes,
+  previewColumnLayout,
+} from './preview-layout.js';
 
 const STEP_ORDER = Object.freeze(['choose', 'review', 'download']);
 const TITLE_BY_STEP = Object.freeze({
@@ -47,6 +52,9 @@ const EXTRA_CSS = [
   '.setting-list, .setting-row, .setting-row select { font-family: var(--font-ui); }',
   '.column-inline-preview__source, .column-inline-preview__result, .preview-table th, .preview-table td, .review-summary strong, .result-summary strong, .setting-row dd, .step-number, .preview-caption { font-family: var(--font-numeric); font-variant-numeric: lining-nums tabular-nums; font-feature-settings: "onum" 0, "lnum" 1, "tnum" 1; }',
   '.result-summary strong { font: 800 2rem/1 var(--font-ui); }',
+  '.preview-cell-value, .preview-heading-value { display: block; min-width: 0; overflow: hidden; white-space: nowrap; }',
+  '.preview-cell-value.is-truncated, .preview-heading-value.is-truncated { cursor: help; }',
+  '.preview-cell-value.is-truncated:focus-visible, .preview-heading-value.is-truncated:focus-visible { border-radius: 4px; outline: 3px solid var(--teal); outline-offset: 2px; }',
   '@media (max-width: 720px) { .column-parameter { grid-template-columns: 1fr; } }',
   '@media (prefers-reduced-motion: reduce) { .quick-root button[aria-busy="true"]::after { animation: none; border-top-color: currentColor; opacity: .55; } }',
 ].join('\n');
@@ -579,14 +587,21 @@ export function mountQuickPrototypeSurface(host, handlers) {
   function renderReview(resetView = false) { renderReviewSummary(resetView); renderColumnList(); }
   function visibleColumnIndexes() {
     const headers = view.snapshot?.result?.headers ?? [];
-    return headers.map((_, index) => index).filter((index) => !view.hiddenColumns.has(index));
+    const rows = view.snapshot?.result?.rows ?? [];
+    return previewColumnIndexes(headers, rows, {
+      excludedIndexes: view.snapshot?.result?.previewExcludedColumnIndexes ?? [],
+    }).filter((index) => !view.hiddenColumns.has(index));
   }
   function renderColumnChooser() {
     const chooser = query('#column-chooser');
     chooser.replaceChildren();
     const headers = view.snapshot?.result?.headers ?? [];
     const needle = query('#column-choice-search').value.trim().toLocaleLowerCase();
+    const previewable = new Set(previewColumnIndexes(headers, view.snapshot?.result?.rows ?? [], {
+      excludedIndexes: view.snapshot?.result?.previewExcludedColumnIndexes ?? [],
+    }));
     headers.forEach((header, index) => {
+      if (!previewable.has(index)) return;
       if (needle && !String(header).toLocaleLowerCase().includes(needle)) return;
       const label = documentRef.createElement('label');
       const input = documentRef.createElement('input');
@@ -612,9 +627,12 @@ export function mountQuickPrototypeSurface(host, handlers) {
     const right = left + wrap.clientWidth;
     const visible = headers.map((cell, position) => ({ cell, sourceIndex: visibleIndexes[position] }))
       .filter(({ cell }) => cell.offsetLeft + cell.offsetWidth > left && cell.offsetLeft < right);
-    const first = (visible[0]?.sourceIndex ?? visibleIndexes[0]) + 1;
-    const last = (visible.at(-1)?.sourceIndex ?? visibleIndexes.at(-1)) + 1;
-    query('#visible-range').textContent = 'Columns ' + first + '-' + last + ' of ' + (view.snapshot?.result?.headers.length ?? 0);
+    const first = Math.max(1, visibleIndexes.indexOf(visible[0]?.sourceIndex ?? visibleIndexes[0]) + 1);
+    const last = Math.max(first, visibleIndexes.indexOf(visible.at(-1)?.sourceIndex ?? visibleIndexes.at(-1)) + 1);
+    query('#visible-range').textContent = 'Columns ' + first + '-' + last + ' of ' + visibleIndexes.length;
+    query('#preview-scroll-hint').textContent = wrap.scrollWidth > wrap.clientWidth
+      ? 'Scroll horizontally to view more columns.'
+      : 'Every preview column is visible.';
   }
   function renderQuality() {
     const result = view.snapshot?.result;
@@ -644,30 +662,57 @@ export function mountQuickPrototypeSurface(host, handlers) {
     table.style.width = '';
     table.replaceChildren();
     const previewRows = result.rows.slice(0, 12);
+    const layouts = previewColumnLayout({ headers: result.headers, rows: result.rows, indexes });
     const colgroup = documentRef.createElement('colgroup');
-    const displayUnits = (value) => [...String(value ?? '')]
-      .reduce((total, character) => total + (/[^\u0000-\u00ff]/u.test(character) ? 2 : 1), 0);
-    const widths = indexes.map((index) => {
-      const longest = Math.max(
-        displayUnits(result.headers[index]),
-        ...previewRows.map((row) => displayUnits(row[index])),
-      );
-      return Math.max(88, Math.min(176, Math.round((longest * 7.2) + 24)));
-    });
-    widths.forEach((width) => {
+    layouts.forEach((layout) => {
       const column = documentRef.createElement('col');
-      column.style.width = width + 'px';
+      column.style.width = layout.width + 'px';
       colgroup.append(column);
     });
-    table.style.width = widths.reduce((total, width) => total + width, 0) + 'px';
+    table.style.width = layouts.reduce((total, layout) => total + layout.width, 0) + 'px';
     const head = documentRef.createElement('thead');
     const headRow = documentRef.createElement('tr');
-    indexes.forEach((index) => headRow.append(textElement(documentRef, 'th', result.headers[index])));
+    layouts.forEach((layout) => {
+      const header = result.headers[layout.index];
+      const cell = documentRef.createElement('th');
+      const model = previewCellModel(header, {
+        header,
+        characterBudget: layout.characterBudget,
+        peerValues: layout.peerValues,
+      });
+      const value = textElement(documentRef, 'span', model.displayValue, 'preview-heading-value');
+      if (model.truncated) {
+        value.classList.add('is-truncated');
+        value.title = model.fullValue;
+        value.tabIndex = 0;
+        value.setAttribute('aria-label', model.fullValue);
+      }
+      cell.append(value);
+      headRow.append(cell);
+    });
     head.append(headRow);
     const body = documentRef.createElement('tbody');
     previewRows.forEach((rowData) => {
       const row = documentRef.createElement('tr');
-      indexes.forEach((index) => row.append(textElement(documentRef, 'td', String(rowData[index] ?? ''))));
+      layouts.forEach((layout) => {
+        const header = result.headers[layout.index];
+        const model = previewCellModel(rowData[layout.index], {
+          header,
+          characterBudget: layout.characterBudget,
+          peerValues: layout.peerValues,
+        });
+        const cell = documentRef.createElement('td');
+        const value = textElement(documentRef, 'span', model.displayValue, 'preview-cell-value');
+        if (model.truncated) {
+          value.classList.add('is-truncated');
+          value.title = model.fullValue;
+          value.tabIndex = 0;
+          value.setAttribute('aria-label', model.fullValue);
+          value.dataset.truncation = model.truncation;
+        }
+        cell.append(value);
+        row.append(cell);
+      });
       body.append(row);
     });
     table.append(colgroup, head, body);
@@ -675,8 +720,6 @@ export function mountQuickPrototypeSurface(host, handlers) {
     query('#result-column-count').textContent = String(result.headers.length);
     query('#columns-button').textContent = 'Columns ' + indexes.length;
     query('.preview-caption span').textContent = 'Showing ' + Math.min(12, result.rows.length) + ' of ' + result.rows.length + ' rows';
-    query('#preview-scroll-hint').textContent = result.headers.length > 6
-      ? 'Scroll horizontally to view more columns.' : 'Every generated column is shown.';
     renderColumnChooser();
     renderQuality();
     queueMicrotask(updateVisibleRange);

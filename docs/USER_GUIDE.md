@@ -1,8 +1,8 @@
-# Dummy Data Lab V1.71 user guide
+# Dummy Data Lab V1.74 user guide
 
 ## Before you begin
 
-Download **Dummy-Data-Lab-v1.71.html** from the GitHub Release and verify its
+Download **Dummy-Data-Lab-v1.74.html** from the GitHub Release and verify its
 SHA-256 checksum before use. Open the file locally in a current Chrome or Edge
 browser. The application is self-contained and does not require a server,
 account, or runtime installation.
@@ -96,8 +96,8 @@ remain. Review the output carefully.
 
 ## Business-pattern levels
 
-- **Flexible** prioritises varied rows and coverage. Source order and consecutive
-  grouping may change.
+- **Independent** prioritises varied rows and coverage without preserving inferred
+  grouping, ordering, or cross-field structure.
 - **Balanced** is the default compromise between fidelity, coverage, and privacy
   guardrails. It can preserve common shapes, stable mappings, bounded source
   blocks, and user-confirmed relationships.
@@ -158,12 +158,12 @@ stable code-to-description mapping or compatible ordered dates. A candidate does
 nothing until the user confirms it.
 
 Column names alone never activate business logic. For example, city, state, and
-postcode fields remain independent unless the data contains suitable evidence
-and the user deliberately confirms a rule.
+postcode fields remain independent unless strong row-level evidence establishes
+a supported narrow rule or the user deliberately confirms a rule.
 
-Confirmed relationships can guide generation and be validated in the output.
-Unconfirmed relationships may be shown as pending evidence or reported as NOT
-EVALUATED.
+Strongly evidenced narrow rules and confirmed relationships can guide generation
+and be validated in the output. Ambiguous candidates remain pending and may be
+reported as NOT EVALUATED.
 
 Use a Consistent Mapping Group when the same entity appears in more than one
 identifier column. Use a Shift Group for related dates or sequences.

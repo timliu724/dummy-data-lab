@@ -15,7 +15,7 @@
   OWN-WORLD: Warm paper, crisp ink rules, orange action, teal assurance, large task labels, and one continuous sidebar, isolated from Advanced styles.
   STORY: Choose a source or one-table template, review only the real decisions that need judgment, then inspect and download the validated result.
   FIRST VIEWPORT: The original prototype occupies the complete Quick canvas; production controls remain hidden and serve only as an engine host.
-  FORM: V1.71 improves Advanced responsiveness without changing Quick or the data engine.
+  FORM: V1.74 improves readable output and preserves evidence-backed structure.
   FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
   -->
   <div id="quick-surface-host" aria-label="Quick mode"></div>
@@ -33,7 +33,7 @@
       <button type="button" data-interface-mode="BASIC" aria-pressed="true">Quick</button>
       <button type="button" data-interface-mode="ADVANCED" aria-pressed="false">Advanced</button>
     </div>
-    <span id="app-version" class="version-badge" hidden>V1.71</span>
+    <span id="app-version" class="version-badge" hidden>V1.74</span>
   </header>
 
   <main id="top" class="shell advanced-surface-only">
@@ -227,7 +227,7 @@
               </button>
             </legend>
             <div class="business-fidelity-options" role="radiogroup" aria-label="Structure match level">
-              <label title="Coverage-first mixing with freedom to resize. Row order and consecutive groups may change."><input type="radio" name="business-fidelity" value="FLEXIBLE"><span><span class="fidelity-choice-heading"><strong>Flexible</strong></span><small>Coverage first</small></span></label>
+              <label title="Generates columns independently by default. Cross-field consistency, row order, and consecutive groups may change."><input type="radio" name="business-fidelity" value="FLEXIBLE"><span><span class="fidelity-choice-heading"><strong>Independent</strong></span><small>Columns separate</small></span></label>
               <label title="Recommended default. Keeps ordered source blocks, stable repeat mappings, formats, blanks, and confirmed rules where safe."><input type="radio" name="business-fidelity" value="BALANCED" checked><span><span class="fidelity-choice-heading"><strong>Balanced</strong></span><small>Keep useful structure</small></span></label>
               <label title="Uses the complete source row sequence and source row count. Confirmed relationship rules are also preserved. Highest structural match and disclosure risk."><input type="radio" name="business-fidelity" value="HIGH"><span><span class="fidelity-choice-heading"><strong>High match</strong></span><small>Mirror source order</small></span></label>
             </div>

@@ -16,7 +16,7 @@ const DIRECT_TYPES = new Set([
 const SENSITIVE_HEADER = /(^|_)(diagnosis|condition|health|medical|medication|disability|religion|ethnicity|race|salary|income|wage|credit|criminal|offence|biometric|genetic|sexual|union)(_|$)/;
 const QUASI_HEADER = /(^|_)(birth|dob|age|gender|sex|postcode|postal|zip|suburb|city|state|country|occupation|job_title|profession|nationality|marital)(_|$)/;
 const PERSON_CONTEXT = /(^|_)(customer|client|employee|patient|member|person|user|contact|applicant|resident)(_|$)/;
-const DIRECT_HEADER = /(^|_)(identifier|passport|licence|license|medicare|tfn|email|phone|mobile|account_number|member_number|customer_number|employee_number|patient_number|created_by|updated_by|modified_by|last_modified_by|entered_by|submitted_by|assigned_to|assignee|record_owner)(_|$)/;
+const DIRECT_HEADER = /(^|_)(identifier|passport|licence|license|medicare|tfn|email|phone|mobile|account_number|member_number|customer_number|employee_number|employee_resp|employee_responsible|patient_number|created_by|updated_by|modified_by|last_modified_by|entered_by|submitted_by|assigned_to|assignee|record_owner)(_|$)/;
 const PERSON_ENTITY_ID_HEADER = /^(customer|consumer|employee|engineer|technician|member|patient|applicant|resident|user)$/;
 const PERSON_ENTITY_ID_TYPES = new Set(['INTEGER', 'DECIMAL', 'NUMERIC_ID', 'ALPHANUMERIC_CODE', 'GENERAL_TEXT']);
 
