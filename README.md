@@ -10,7 +10,7 @@ The online version is served by GitHub Pages; source data is still processed loc
 
 **Quick mode:** turn source data into downloadable test data in a few guided steps.
 
-![Dummy Data Lab Quick mode demo: load fictional sample data, analyse it locally, and generate downloadable test data](docs/assets/dummy-data-lab-demo-v1.71-focused.gif)
+![Dummy Data Lab Quick mode demo: load fictional sample data, analyse it locally, and generate downloadable test data](docs/assets/dummy-data-lab-demo-v1.74-focused.gif)
 
 ## Quick start
 
