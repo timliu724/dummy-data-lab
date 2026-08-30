@@ -629,6 +629,19 @@
       const viewport = document.getElementById("appViewport");
       const frame = document.getElementById("appFrame");
 
+      if (!window.location.hash && "scrollRestoration" in history) {
+        history.scrollRestoration = "manual";
+      }
+
+      const keepInitialViewAtTop = () => {
+        if (!window.location.hash) {
+          window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+      };
+
+      window.addEventListener("pageshow", keepInitialViewAtTop, { once: true });
+      frame.addEventListener("load", keepInitialViewAtTop, { once: true });
+
       const fitEmbeddedApp = () => {
         const availableWidth = viewport.clientWidth;
         const scale = Math.min(1, availableWidth / baseWidth);
