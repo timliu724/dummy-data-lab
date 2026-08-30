@@ -317,6 +317,10 @@
       margin-bottom: 30px;
     }
 
+    .mode-heading {
+      grid-template-columns: 1fr;
+    }
+
     .section-kicker {
       color: var(--orange-dark);
       font-size: 12px;
@@ -447,15 +451,8 @@
       font-size: 16px;
     }
 
-    .mode-card.advanced {
-      color: var(--white);
-      background: var(--teal);
-      border-color: var(--teal);
-    }
-
-    .mode-card.advanced strong,
-    .mode-card.advanced p {
-      color: #dff1ec;
+    .mode-card.advanced strong {
+      color: var(--teal);
     }
 
     .footer {
@@ -602,8 +599,7 @@
 
     <section id="how">
       <div class="shell">
-        <div class="section-heading">
-          <div class="section-kicker">Two ways to work</div>
+        <div class="section-heading mode-heading">
           <h2>Choose Quick or Advanced</h2>
         </div>
         <div class="modes">
