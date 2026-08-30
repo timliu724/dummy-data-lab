@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dummy Data Lab — Private test data, made locally</title>
   <meta name="description" content="Transform CSV or TXT into dummy data and generate linked test datasets. Runs locally in your browser—no install, no upload.">
+  <meta name="theme-color" content="#f7f2e8">
   <link rel="canonical" href="https://timliu724.github.io/dummy-data-lab/">
   <meta property="og:title" content="Dummy Data Lab">
   <meta property="og:description" content="Useful test data. Nothing uploaded.">
@@ -35,6 +36,7 @@
 
     body {
       margin: 0;
+      overflow-x: hidden;
       color: var(--ink);
       background:
         linear-gradient(rgba(32, 35, 33, .045) 1px, transparent 1px),
@@ -43,9 +45,15 @@
       background-size: 28px 28px;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       line-height: 1.55;
+      touch-action: manipulation;
     }
 
     a { color: inherit; }
+
+    a:focus-visible {
+      outline: 3px solid var(--orange);
+      outline-offset: 3px;
+    }
 
     img { max-width: 100%; }
 
@@ -64,7 +72,7 @@
     }
 
     .topbar .shell {
-      min-height: 68px;
+      min-height: 64px;
       display: flex;
       align-items: center;
       gap: 24px;
@@ -81,17 +89,19 @@
     }
 
     .brand-mark {
-      width: 34px;
-      height: 34px;
+      width: 40px;
+      height: 36px;
       display: grid;
       place-items: center;
       border: 2px solid var(--ink);
-      border-radius: 9px 4px 9px 4px;
-      color: var(--white);
-      background: var(--orange);
-      box-shadow: 3px 3px 0 var(--ink);
-      font-size: 13px;
-      letter-spacing: -.06em;
+      border-radius: 7px 3px 7px 3px;
+      color: var(--ink);
+      background: var(--white);
+      box-shadow: 3px 3px 0 var(--orange);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 18px;
+      font-style: italic;
+      letter-spacing: -.11em;
     }
 
     nav {
@@ -126,10 +136,10 @@
     }
 
     .hero {
-      padding: 92px 0 64px;
+      padding: 68px 0 54px;
       display: grid;
-      grid-template-columns: 1.08fr .92fr;
-      gap: 64px;
+      grid-template-columns: 1.06fr .94fr;
+      gap: 52px;
       align-items: center;
     }
 
@@ -156,10 +166,16 @@
       max-width: 750px;
       margin: 0;
       font-family: Georgia, "Times New Roman", serif;
-      font-size: clamp(49px, 7vw, 88px);
-      line-height: .94;
-      letter-spacing: -.06em;
+      font-size: clamp(46px, 5vw, 66px);
+      line-height: 1.01;
+      letter-spacing: -.045em;
       font-weight: 700;
+      text-wrap: balance;
+    }
+
+    h1 .headline-line {
+      display: block;
+      white-space: nowrap;
     }
 
     h1 em {
@@ -169,10 +185,11 @@
 
     .lede {
       max-width: 650px;
-      margin: 28px 0 0;
+      margin: 22px 0 0;
       color: #4d514d;
-      font-size: clamp(18px, 2vw, 22px);
+      font-size: clamp(17px, 1.7vw, 20px);
       line-height: 1.55;
+      text-wrap: pretty;
     }
 
     .actions {
@@ -220,12 +237,13 @@
 
     .preview-card {
       position: relative;
+      width: min(100%, 540px);
+      justify-self: end;
       padding: 14px;
       border: 2px solid var(--ink);
       border-radius: 22px 8px 22px 8px;
       background: var(--white);
       box-shadow: 13px 13px 0 var(--teal);
-      transform: rotate(1.2deg);
     }
 
     .preview-card::before {
@@ -243,6 +261,8 @@
     }
 
     .preview-card img {
+      width: 100%;
+      height: auto;
       display: block;
       border-radius: 12px 4px 12px 4px;
     }
@@ -253,7 +273,7 @@
     }
 
     .trust-strip .shell {
-      min-height: 78px;
+      min-height: 66px;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       align-items: center;
@@ -280,15 +300,15 @@
     }
 
     section {
-      padding: 84px 0;
+      padding: 68px 0;
     }
 
     .section-heading {
       display: grid;
-      grid-template-columns: 180px 1fr;
-      gap: 32px;
+      grid-template-columns: 150px 1fr;
+      gap: 26px;
       align-items: start;
-      margin-bottom: 34px;
+      margin-bottom: 30px;
     }
 
     .section-kicker {
@@ -301,11 +321,17 @@
 
     h2 {
       margin: 0;
-      max-width: 800px;
+      max-width: 940px;
       font-family: Georgia, "Times New Roman", serif;
-      font-size: clamp(38px, 5vw, 61px);
-      line-height: 1.03;
-      letter-spacing: -.045em;
+      font-size: clamp(34px, 4vw, 50px);
+      line-height: 1.08;
+      letter-spacing: -.035em;
+      text-wrap: balance;
+    }
+
+    .app-shell {
+      width: min(1480px, calc(100% - 32px));
+      margin: 0 auto;
     }
 
     .live-frame {
@@ -314,6 +340,13 @@
       border-radius: 18px 6px 18px 6px;
       background: var(--white);
       box-shadow: var(--shadow);
+    }
+
+    .app-viewport {
+      position: relative;
+      overflow: hidden;
+      height: 780px;
+      background: #fff;
     }
 
     .frame-bar {
@@ -361,11 +394,14 @@
     }
 
     iframe {
-      width: 100%;
-      height: min(820px, 82vh);
+      position: absolute;
+      inset: 0 auto auto 0;
+      width: 1360px;
+      height: 860px;
       display: block;
       border: 0;
       background: #fff;
+      transform-origin: top left;
     }
 
     .modes {
@@ -466,10 +502,12 @@
       .github-link { padding: 8px 11px; }
       .hero {
         grid-template-columns: 1fr;
-        padding-top: 60px;
-        gap: 50px;
+        padding-top: 48px;
+        gap: 42px;
       }
-      .preview-card { transform: none; }
+      h1 { font-size: clamp(38px, 11vw, 54px); }
+      h1 .headline-line { white-space: normal; }
+      .preview-card { justify-self: start; }
       .trust-strip .shell {
         grid-template-columns: 1fr;
         padding-block: 20px;
@@ -486,7 +524,8 @@
       .privacy { padding: 30px 24px; }
       .frame-bar { align-items: flex-start; }
       .frame-actions { flex-direction: column; gap: 2px; }
-      iframe { height: 76vh; }
+      .app-shell { width: calc(100% - 16px); }
+      .app-viewport { height: 640px; }
       .footer .shell { flex-wrap: wrap; }
       .footer .push { margin-left: 0; width: 100%; }
     }
@@ -501,12 +540,11 @@
   <header class="topbar">
     <div class="shell">
       <a class="brand" href="#top" aria-label="Dummy Data Lab home">
-        <span class="brand-mark">DDL</span>
+        <span class="brand-mark" aria-hidden="true">D/D</span>
         <span>Dummy Data Lab</span>
       </a>
       <nav aria-label="Primary navigation">
         <a href="#how">Quick &amp; Advanced</a>
-        <a href="https://github.com/timliu724" target="_blank" rel="noopener">Built by Tim Liu</a>
         <a class="github-link" href="https://github.com/timliu724/dummy-data-lab" target="_blank" rel="noopener">★ Star on GitHub</a>
       </nav>
     </div>
@@ -516,7 +554,7 @@
     <div class="shell hero">
       <div>
         <p class="eyebrow">Local-first test data tool</p>
-        <h1>Useful test data.<br><em>Nothing uploaded.</em></h1>
+        <h1><span class="headline-line">Useful test data.</span><em class="headline-line">Nothing uploaded.</em></h1>
         <p class="lede">Transform CSV or TXT into dummy data, or generate linked test datasets, in one browser-based tool. No account, server, or installation.</p>
         <div class="actions">
           <a class="button primary" href="#live-app">Try it online ↓</a>
@@ -525,7 +563,7 @@
         <p class="microcopy">Open source under the MIT License · Your source data stays in your browser</p>
       </div>
       <div class="preview-card">
-        <img src="docs/assets/dummy-data-lab-demo.gif" alt="Dummy Data Lab Quick mode transforming sample data" width="960" height="540">
+        <img src="docs/assets/dummy-data-lab-demo.gif" alt="Dummy Data Lab Quick mode transforming sample data" width="1000" height="760" fetchpriority="high">
       </div>
     </div>
 
@@ -538,7 +576,7 @@
     </div>
 
     <section id="live-app">
-      <div class="shell">
+      <div class="app-shell">
         <div class="section-heading">
           <div class="section-kicker">Live app</div>
           <h2>Start with sample data, or bring your own.</h2>
@@ -552,11 +590,14 @@
               <a href="https://github.com/timliu724/dummy-data-lab" target="_blank" rel="noopener">★ Star the project</a>
             </span>
           </div>
-          <iframe
-            src="Dummy-Data-Lab-v1.70.html"
-            title="Dummy Data Lab V1.70 online app"
-            allow="clipboard-write"
-          ></iframe>
+          <div class="app-viewport" id="appViewport">
+            <iframe
+              id="appFrame"
+              src="Dummy-Data-Lab-v1.70.html"
+              title="Dummy Data Lab V1.70 online app"
+              allow="clipboard-write"
+            ></iframe>
+          </div>
         </div>
       </div>
     </section>
@@ -593,10 +634,30 @@
   <footer class="footer">
     <div class="shell">
       <strong>Dummy Data Lab</strong>
-      <span>Built by <a href="https://github.com/timliu724" target="_blank" rel="noopener">Tim Liu</a></span>
       <a class="push" href="https://github.com/timliu724/dummy-data-lab" target="_blank" rel="noopener">Source &amp; Star on GitHub ↗</a>
       <a href="https://github.com/timliu724/dummy-data-lab/releases/tag/v1.70" target="_blank" rel="noopener">V1.70 Release ↗</a>
     </div>
   </footer>
+  <script>
+    (() => {
+      const baseWidth = 1360;
+      const baseHeight = 860;
+      const viewport = document.getElementById("appViewport");
+      const frame = document.getElementById("appFrame");
+
+      const fitEmbeddedApp = () => {
+        const availableWidth = viewport.clientWidth;
+        const scale = Math.min(1, availableWidth / baseWidth);
+        frame.style.width = `${Math.max(baseWidth, availableWidth)}px`;
+        frame.style.height = `${baseHeight}px`;
+        frame.style.transform = `scale(${scale})`;
+        viewport.style.height = `${Math.round(baseHeight * scale)}px`;
+      };
+
+      const observer = new ResizeObserver(fitEmbeddedApp);
+      observer.observe(viewport);
+      fitEmbeddedApp();
+    })();
+  </script>
 </body>
 </html>
