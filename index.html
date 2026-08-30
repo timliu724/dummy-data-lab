@@ -452,27 +452,6 @@
       color: #dff1ec;
     }
 
-    .privacy {
-      display: grid;
-      grid-template-columns: 1fr .9fr;
-      gap: 44px;
-      align-items: center;
-      padding: 46px;
-      border: 2px solid var(--ink);
-      border-radius: 26px 8px 26px 8px;
-      background: #ffd66b;
-      box-shadow: 10px 10px 0 var(--ink);
-    }
-
-    .privacy h2 {
-      font-size: clamp(38px, 5vw, 64px);
-    }
-
-    .privacy p {
-      margin: 0;
-      font-size: 18px;
-    }
-
     .footer {
       padding: 32px 0 44px;
       border-top: 1px solid var(--line);
@@ -517,11 +496,9 @@
         grid-template-columns: 1fr;
         gap: 10px;
       }
-      .modes,
-      .privacy {
+      .modes {
         grid-template-columns: 1fr;
       }
-      .privacy { padding: 30px 24px; }
       .frame-bar { align-items: flex-start; }
       .frame-actions { flex-direction: column; gap: 2px; }
       .app-shell { width: calc(100% - 16px); }
@@ -558,9 +535,9 @@
         <p class="lede">Transform CSV or TXT into dummy data, or generate linked test datasets, in one browser-based tool. No account, server, or installation.</p>
         <div class="actions">
           <a class="button primary" href="#live-app">Try it online ↓</a>
-          <a class="button secondary" href="https://github.com/timliu724/dummy-data-lab/releases/download/v1.70/Dummy-Data-Lab-v1.70.html">Download V1.70</a>
+          <a class="button secondary" href="https://github.com/timliu724/dummy-data-lab/releases/download/v1.70/Dummy-Data-Lab-v1.70.html">Download HTML</a>
         </div>
-        <p class="microcopy">Open source under the MIT License · Your source data stays in your browser</p>
+        <p class="microcopy">Runs locally in your browser · Download the standalone HTML file for offline use</p>
       </div>
       <div class="preview-card">
         <img src="docs/assets/dummy-data-lab-demo.gif" alt="Dummy Data Lab Quick mode transforming sample data" width="1000" height="760" fetchpriority="high">
@@ -623,19 +600,13 @@
       </div>
     </section>
 
-    <section>
-      <div class="shell privacy">
-        <h2>Private by architecture, not by promise.</h2>
-        <p>The online copy is delivered by GitHub Pages, but the work happens locally in your browser. Prefer a file you can keep? Download the standalone V1.70 HTML and run it offline.</p>
-      </div>
-    </section>
   </main>
 
   <footer class="footer">
     <div class="shell">
       <strong>Dummy Data Lab</strong>
       <a class="push" href="https://github.com/timliu724/dummy-data-lab" target="_blank" rel="noopener">Source &amp; Star on GitHub ↗</a>
-      <a href="https://github.com/timliu724/dummy-data-lab/releases/tag/v1.70" target="_blank" rel="noopener">V1.70 Release ↗</a>
+      <a href="https://github.com/timliu724/dummy-data-lab/releases/tag/v1.70" target="_blank" rel="noopener">Latest release ↗</a>
     </div>
   </footer>
   <script>
