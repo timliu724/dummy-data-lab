@@ -46,8 +46,19 @@ export async function generateFromAnalysis({
   const totalStartedAt = now();
   const fidelity = normaliseBusinessFidelity(businessFidelity);
   const fidelitySettings = normaliseBusinessFidelitySettings(fidelity, businessFidelitySettings ?? {});
+  // Automatic source evidence must yield to the current field decisions.
+  // Explicitly selected relationship rules retain their existing contract.
+  const unchangedAutomaticColumns = new Set(policies.flatMap((policy, index) => {
+    const original = analysis.policies?.[index];
+    return original && !policy.userOverride
+      && policy.selectedAction === original.selectedAction
+      && JSON.stringify(policy.actionParams) === JSON.stringify(original.actionParams)
+      ? [policy.columnName]
+      : [];
+  }));
+  const automaticRuleCompatible = (rule) => rule.columnNames.every((name) => unchangedAutomaticColumns.has(name));
   const detectedAndSelectedRules = [
-    ...(analysis.autoRelationshipRules ?? []),
+    ...(analysis.autoRelationshipRules ?? []).filter(automaticRuleCompatible),
     ...relationshipRules,
   ].filter((rule, index, rules) => rules.findIndex((candidate) => candidate.id === rule.id) === index);
   const effectiveRelationshipRules = Object.freeze(detectedAndSelectedRules.filter((rule) => (
@@ -56,7 +67,7 @@ export async function generateFromAnalysis({
       : fidelitySettings.preserveRelationships
   )));
   const effectiveJointSamplingGroups = fidelitySettings.preserveRelationships
-    ? (analysis.jointSamplingGroups ?? [])
+    ? (analysis.jointSamplingGroups ?? []).filter(automaticRuleCompatible)
     : [];
   const safeTemplateSignature = (policy) => {
     if (policy?.selectedAction === 'GENERALISE') {

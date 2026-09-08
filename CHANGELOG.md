@@ -2,6 +2,13 @@
 
 This is a user-facing summary of product evolution.
 
+## V1.75
+
+- Quick uses its selected source even when Advanced previously had a file loaded; Start Another clears both input surfaces.
+- Returning from Advanced refreshes Quick's current preview and download availability.
+- Automatic source relationships yield to explicitly selected field actions and parameters.
+- Three or more source columns with reliably equal identifiers share one mapping scope.
+
 ## V1.74
 
 - Made generated names, email addresses, identifiers, places, and other fictional values easier to read while remaining clearly non-production data.

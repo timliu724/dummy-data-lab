@@ -2086,10 +2086,11 @@ async function analyse(inputOverride = null) {
   try {
     const pastedText = inputOverride?.pastedText ?? elements.pasteInput.value;
     const selected = selectInputValue({
-      file: inputOverride?.file ?? elements.fileInput.files?.[0] ?? null,
+      file: elements.fileInput.files?.[0] ?? null,
       pastedText,
-      sourcePreference: inputOverride?.sourcePreference ?? state.inputSourcePreference,
-      pastedTextIsSample: inputOverride?.pastedTextIsSample ?? isTransformSampleText(pastedText),
+      sourcePreference: state.inputSourcePreference,
+      pastedTextIsSample: isTransformSampleText(pastedText),
+      ...inputOverride,
     });
     const parseOptions = parseOptionsFromControls({
       delimiterMode: elements.delimiterMode.value,
@@ -2774,6 +2775,11 @@ function quickDownload() {
 }
 
 function quickStartAnother() {
+  elements.fileInput.value = '';
+  elements.fileName.textContent = 'No file selected';
+  elements.pasteInput.value = '';
+  state.inputSourcePreference = null;
+  renderAdvancedSourceState();
   state.workflow = 'IDLE';
   state.input = null;
   state.inputKind = null;
@@ -3048,6 +3054,7 @@ for (const button of elements.interfaceModeButtons) {
     }
     state.interfaceMode = nextMode;
     renderInterfaceMode();
+    if (nextMode === 'BASIC') quickSurface?.refresh(quickSurfaceSnapshot());
     scheduleSafeDraftSave();
   });
 }

@@ -1,7 +1,7 @@
-export const APP_VERSION = 'V1.74';
+export const APP_VERSION = 'V1.75';
 
 export const APP_RELEASE = Object.freeze({
   version: APP_VERSION,
-  name: 'Readable output and evidence-backed structure',
+  name: 'Input, preview and automatic relationship fixes',
   schemaVersion: 1,
 });

@@ -309,8 +309,15 @@ export function createJointSourceEvidenceProfiler({
         });
       });
 
-      const sameIdRules = sameIdStates.flatMap((state) => {
-        if (state.support < MIN_SUPPORT || state.matches !== state.support || !state.distinct) return [];
+      const matchingSameIdStates = sameIdStates.filter((state) => (
+        state.support >= MIN_SUPPORT && state.matches === state.support && state.distinct
+      ));
+      const sameIdScopes = new Map();
+      for (const columnIndexes of connectedComponents(matchingSameIdStates)) {
+        const scope = 'auto-evidence:same-id:' + columnIndexes.join(':');
+        for (const columnIndex of columnIndexes) sameIdScopes.set(columnIndex, scope);
+      }
+      const sameIdRules = matchingSameIdStates.flatMap((state) => {
         const leftName = headers[state.left];
         const rightName = headers[state.right];
         const id = 'auto-evidence:same-id:' + state.left + ':' + state.right;
@@ -325,7 +332,7 @@ export function createJointSourceEvidenceProfiler({
           enabled: true,
           evidence: [leftName + ' and ' + rightName + ' contained the same non-empty identifier in all ' + state.support.toLocaleString() + ' complete source records.'],
           source: 'DETECTED',
-          mappingScope: id,
+          mappingScope: sameIdScopes.get(state.left),
           reviewRequired: false,
           options: { sourceEvidence: 'EXACT_EQUALITY' },
         })];

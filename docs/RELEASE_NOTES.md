@@ -1,14 +1,10 @@
-# Dummy Data Lab V1.74
+# Dummy Data Lab V1.75
 
-V1.74 improves the readability and usefulness of generated test data while keeping the application self-contained and browser-local.
+- Quick uses its selected source even when Advanced previously had a file loaded; Start Another clears both input surfaces.
+- Returning from Advanced refreshes Quick's current preview and download availability.
+- Automatic source relationships yield to explicitly selected field actions and parameters.
+- Three or more source columns with reliably equal identifiers share one mapping scope.
 
-## What's new
-
-- Fictional names, email addresses, identifiers, places, and similar values are easier to scan and remain clearly non-production data.
-- Independent mode processes fields without preserving inferred cross-field structure.
-- Balanced and High match can preserve supported row-level structure when the source provides strong evidence.
-- Compact previews use available width more effectively while retaining meaningful differences.
-- Ragged input rows receive safer handling and clearer output-quality checks.
-- Quick and Advanced keep their existing workflows, downloads, and offline privacy boundary.
+Quick remains a single-table workflow. Independent, Balanced and High match keep their existing evidence and preservation boundaries. Repeated values remain stable within the applicable generation scope; subsequent generations can vary.
 
 Earlier releases remain available from the Releases page.

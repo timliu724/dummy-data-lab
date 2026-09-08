@@ -726,6 +726,8 @@ export function mountQuickPrototypeSurface(host, handlers) {
   }
   function applySnapshot(snapshot, resetView = false) {
     view.snapshot = snapshot;
+    query('#download-button').disabled = !snapshot?.result;
+    if (!snapshot?.result) query('#preview-table').replaceChildren();
     if (!snapshot) return;
     view.task = snapshot.task;
     updateTaskButtons();
@@ -904,7 +906,10 @@ export function mountQuickPrototypeSurface(host, handlers) {
   setStep('choose');
   host.dataset.quickMounted = 'true';
   const controller = Object.freeze({
-    refresh(snapshot) { applySnapshot(snapshot, false); },
+    refresh(snapshot) {
+      applySnapshot(snapshot, false);
+      setStep(snapshot?.result ? 'download' : snapshot?.columns?.length ? 'review' : 'choose');
+    },
     get step() { return view.step; },
     get shadowRoot() { return shadow; },
   });
