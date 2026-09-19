@@ -1,8 +1,8 @@
-# Dummy Data Lab V1.75 user guide
+# Dummy Data Lab V1.78 user guide
 
 ## Before you begin
 
-Download **Dummy-Data-Lab-v1.75.html** from the GitHub Release and verify its
+Download **Dummy-Data-Lab-v1.78.html** from the GitHub Release and verify its
 SHA-256 checksum before use. Open the file locally in a current Chrome or Edge
 browser. The application is self-contained and does not require a server,
 account, or runtime installation.
@@ -197,6 +197,18 @@ data cells is prefixed during export so spreadsheet software treats it as text.
 If protection is disabled, the application reports risky header and cell counts
 and asks for confirmation before downloading. Ordinary negative numbers remain
 numeric.
+
+## Switching views and starting again
+
+Quick and Advanced share the current task. Current source choices and single-table
+field settings carry across; adding another field does not reset existing choices.
+If you change the input, analyse it again before generating or downloading.
+Returning to Review without a configuration change keeps the existing output.
+
+Quick saves the latest general settings and fictional Scratch fields in the current
+tab, including edits made before Review. Refreshing a source-data task requires you
+to provide the source again. **Start another** resets the task and parsing options;
+Advanced **Start over** clears the current in-tab draft.
 
 ## Configuration and browser storage
 

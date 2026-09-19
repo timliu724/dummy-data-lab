@@ -15,7 +15,7 @@ import {
 } from './performance/size-policy.js';
 import { formulaRiskSummary } from './export/excel-safety.js';
 import { coverageNotice, renderCoverageSummary } from './ui/coverage-summary.js';
-import { delimiterFromControl, parseOptionsFromControls, parseRecognitionAllowlist, requiresHeaderConfirmation, selectInputValue } from './ui/input-panel.js';
+import { delimiterFromControl, parseOptionsFromControls, parseIssueNotice, parseRecognitionAllowlist, requiresHeaderConfirmation, selectInputValue } from './ui/input-panel.js';
 import { createUiMessage, mergeUiMessage, renderMessages } from './ui/messages.js';
 import { summarizeGenerationWarnings, summarizeValidationIssues } from './ui/generation-feedback.js';
 import { resolveRequestedRowCount, sameAsInputModel } from './ui/output-settings.js';
@@ -79,6 +79,7 @@ import {
   defaultBusinessFidelitySettings,
   normaliseBusinessFidelitySettings,
 } from './business/fidelity.js';
+import { describeQuickScratch, preserveQuickColumn } from './ui/quick-scratch-state.js';
 import { mountQuickPrototypeSurface } from './ui/quick-prototype-surface.js';
 import {
   businessFidelityImpactModel,
@@ -764,6 +765,7 @@ function currentUnconfiguredShifts() {
 function updateGenerateAvailability() {
   const busy = state.workflow === 'ANALYSING' || state.workflow === 'GENERATING';
   const sourceMissing = state.workflowKind === 'TRANSFORM' && !state.analysis;
+  const inputNotice = state.workflowKind === 'TRANSFORM' ? parseIssueNotice(state.analysis?.parseResult) : null;
   const headerAmbiguous = state.workflowKind === 'TRANSFORM' && requiresHeaderConfirmation(state.analysis?.parseResult);
   const schemaMissing = state.workflowKind === 'SCRATCH'
     ? state.scratchStructure === 'MULTI'
@@ -773,7 +775,7 @@ function updateGenerateAvailability() {
       : state.generatedColumns.length === 0
     : false;
   const headerBlocked = state.workflowKind === 'TRANSFORM'
-    ? sourceMissing || headerAmbiguous
+    ? sourceMissing || headerAmbiguous || inputNotice?.blocked
     : state.scratchStructure === 'MULTI'
       ? state.datasetTables.length === 0 || state.datasetTables.some((table) => table.id === state.activeDatasetTableId
           ? state.generatedColumns.length === 0
@@ -806,6 +808,10 @@ function updateGenerateAvailability() {
   } else if (schemaMissing) {
     heading = 'Choose at least one field';
     detail = 'Add a template or field before generating.';
+    readinessState = 'BLOCKED';
+  } else if (inputNotice?.blocked) {
+    heading = inputNotice.title;
+    detail = inputNotice.recovery.replace('Return to Choose to fix or replace the input', 'Fix or replace the input');
     readinessState = 'BLOCKED';
   } else if (headerAmbiguous) {
     heading = 'Confirm the header row';
@@ -2082,7 +2088,9 @@ async function toggleSourceComparison() {
   }
 }
 
+let inputRevision = 0;
 async function analyse(inputOverride = null) {
+  const revision = inputRevision;
   try {
     const pastedText = inputOverride?.pastedText ?? elements.pasteInput.value;
     const selected = selectInputValue({
@@ -2114,17 +2122,20 @@ async function analyse(inputOverride = null) {
         recognitionOptions: { allowlist: recognitionAllowlist },
         requestedRowCount: state.requestedRowCount,
       });
+      if (revision !== inputRevision) return false;
       state.analysis = response.analysis;
       state.usingWorker = true;
     } else {
       assertSafeFallback(state.sizePolicy);
-      state.analysis = await analyseInput({
+      const analysis = await analyseInput({
         input: state.input,
         parseOptions,
         recognitionOptions: { allowlist: recognitionAllowlist },
         requestedRowCount: state.requestedRowCount,
         onProgress: (update) => progress(update),
       });
+      if (revision !== inputRevision) return false;
+      state.analysis = analysis;
       state.usingWorker = false;
     }
     state.policies = [...state.analysis.policies];
@@ -2237,6 +2248,11 @@ async function buildScratchOutput(requestedRowCount) {
 }
 
 async function generate() {
+  const inputNotice = state.workflowKind === 'TRANSFORM' ? parseIssueNotice(state.analysis?.parseResult) : null;
+  if (inputNotice?.blocked) {
+    addMessage('error', inputNotice.recovery, { replace: true });
+    return false;
+  }
   if (state.workflowKind === 'TRANSFORM' && !state.analysis) return false;
   if (state.workflowKind === 'TRANSFORM' && requiresHeaderConfirmation(state.analysis.parseResult)) {
     addMessage('error', 'Generation is blocked because the header is ambiguous. Choose Yes or No under Header row, then analyse again.');
@@ -2331,6 +2347,11 @@ async function generate() {
 }
 
 async function probeGeneration() {
+  const inputNotice = state.workflowKind === 'TRANSFORM' ? parseIssueNotice(state.analysis?.parseResult) : null;
+  if (inputNotice?.blocked) {
+    addMessage('error', inputNotice.recovery, { replace: true });
+    return false;
+  }
   if (state.workflowKind === 'TRANSFORM' && !state.analysis) return;
   if (state.workflowKind === 'TRANSFORM' && requiresHeaderConfirmation(state.analysis.parseResult)) {
     addMessage('error', 'The test run is blocked until the header choice is confirmed.');
@@ -2423,6 +2444,7 @@ function exportResult(format) {
 function quickTemplateFields(templateId) {
   return getDatasetTemplate(templateId).columns
     .map((column) => Object.freeze({
+      id: column.id,
       name: column.name,
       generatorType: column.generatorType,
     }));
@@ -2437,13 +2459,18 @@ function quickCustomColumnTypes() {
 
 function quickResultWarnings() {
   if (!state.generationResult) return [];
-  const warnings = [...summarizeGenerationWarnings(state.generationResult.warnings)];
+  const warnings = [...summarizeGenerationWarnings(state.generationResult.warnings, Infinity)];
+  const inputNotice = state.workflowKind === 'TRANSFORM' ? parseIssueNotice(state.analysis?.parseResult) : null;
+  if (inputNotice) warnings.unshift(inputNotice.title + ': ' + inputNotice.recovery);
   if (state.generationResult.validation.valid === false) {
     warnings.push('Validation: ' + summarizeValidationIssues(
       state.generationResult.issues,
       4,
       state.generationResult.rows.length,
     ));
+  }
+  for (const zone of state.qualityReport?.zones ?? []) {
+    if (['REVIEW', 'FAIL'].includes(zone.status)) warnings.push(zone.title + ': ' + zone.summary);
   }
   return warnings;
 }
@@ -2478,6 +2505,8 @@ function applyQuickShiftDefaults() {
 
 function quickBlockers() {
   const blockers = [];
+  const inputNotice = state.workflowKind === 'TRANSFORM' ? parseIssueNotice(state.analysis?.parseResult) : null;
+  if (inputNotice?.blocked) blockers.push(inputNotice);
   if (state.workflowKind === 'TRANSFORM' && state.analysis
     && requiresHeaderConfirmation(state.analysis.parseResult)) {
     blockers.push(Object.freeze({
@@ -2579,6 +2608,7 @@ function quickSurfaceSnapshot() {
       }))
     : state.generatedColumns.map((column) => Object.freeze({
         task,
+        id: column.id,
         name: column.name,
         detectedType: String(column.generatorType ?? 'generated field').replaceAll('-', ' '),
         detectedTypeKey: String(column.generatorType ?? 'GENERATED_FIELD').toUpperCase().replaceAll('-', '_'),
@@ -2594,6 +2624,7 @@ function quickSurfaceSnapshot() {
         headers: Object.freeze([...state.generationResult.headers]),
         rows: Object.freeze(state.generationResult.rows.map((row) => Object.freeze([...row]))),
         validationValid: state.generationResult.validation.valid,
+        qualityStatus: state.qualityReport?.overallStatus ?? null,
         warnings: Object.freeze(quickResultWarnings()),
         previewExcludedColumnIndexes: previewExcludedOutputColumnIndexes(),
       })
@@ -2601,11 +2632,16 @@ function quickSurfaceSnapshot() {
   return Object.freeze({
     task,
     columns: Object.freeze(columns),
+    // Source drafts stay in memory; safeDraftPayload deliberately excludes them.
+    sourceDraft: { file: elements.fileInput.files?.[0] ?? null, pastedText: elements.pasteInput.value, sourcePreference: state.inputSourcePreference },
+    scratchColumns: task === 'scratch' ? state.generatedColumns : null,
     variation: generationVariationModel(columns),
     blockers: quickBlockers(),
+    inputNotice: task === 'transform' ? parseIssueNotice(state.analysis?.parseResult) : null,
     reviewPreview: quickReviewPreview(task),
     requestedRowCount: state.requestedRowCount,
     inputRowCount: state.analysis?.parseResult.rowCount ?? null,
+    rowCountLocked: task === 'transform' && state.businessFidelity === 'HIGH',
     result,
   });
 }
@@ -2635,11 +2671,27 @@ function quickTaskChanged(task) {
   if (kind !== state.workflowKind) setWorkflowKind(kind);
   if (kind === 'SCRATCH' && state.scratchStructure !== 'SINGLE') setScratchStructure('SINGLE');
   applyQuickDefaults();
+  scheduleSafeDraftSave();
+}
+
+function syncQuickSourceToAdvanced({ file = null, pastedText = '', sourcePreference = null }) {
+  if (file) {
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    elements.fileInput.files = transfer.files;
+  } else {
+    elements.fileInput.value = '';
+  }
+  elements.fileName.textContent = file?.name ?? 'No file selected';
+  elements.pasteInput.value = pastedText;
+  state.inputSourcePreference = sourcePreference;
+  renderAdvancedSourceState();
 }
 
 async function quickAnalyse({ file = null, pastedText = '', sourcePreference = null } = {}) {
+  syncQuickSourceToAdvanced({ file, pastedText, sourcePreference });
   if (state.workflowKind !== 'TRANSFORM') setWorkflowKind('TRANSFORM');
-  applyQuickDefaults();
+  if (state.analysis) return quickSurfaceSnapshot();
   const succeeded = await analyse({
     file,
     pastedText,
@@ -2657,33 +2709,36 @@ function quickPrepareScratch(templateId, {
   enabledTemplateFields = null,
   templates = null,
   customColumns = [],
+  columnOrder = [],
 } = {}) {
   if (state.workflowKind !== 'SCRATCH') setWorkflowKind('SCRATCH');
   if (state.scratchStructure !== 'SINGLE') setScratchStructure('SINGLE');
-  applyQuickDefaults();
-  const requestedTemplates = Array.isArray(templates) && templates.length > 0
+  const requestedTemplates = Array.isArray(templates)
     ? templates
     : [{ templateId, enabledFields: enabledTemplateFields }];
-  state.templateId = getDatasetTemplate(requestedTemplates[0].templateId).id;
-  state.templateBlockSequence = 0;
+  const previousColumns = state.generatedColumns;
+  const previousDraft = describeQuickScratch(previousColumns, ['people', 'orders', 'support'].map(id => ({ templateId: id, fields: quickTemplateFields(id) })));
+  const byId = new Map(previousColumns.map(column => [column.id, column]));
+  state.templateId = getDatasetTemplate(requestedTemplates[0]?.templateId ?? 'blank').id;
   state.generatedColumns = [];
   state.expandedGeneratedGroups.clear();
   state.sourceOutputSchema = createSourceOutputSchema();
   for (const requested of requestedTemplates) {
     const template = getDatasetTemplate(requested.templateId);
-    state.templateBlockSequence += 1;
-    const appended = appendDatasetTemplateBlock({
-      existingColumns: state.generatedColumns,
-      templateId: template.id,
-      blockSequence: state.templateBlockSequence,
-    });
+    const retained = requested.fieldColumns ?? previousDraft.templates.find(entry => entry.templateId === requested.templateId)?.fieldColumns ?? [];
+    const appended = retained.length === template.columns.length && retained.every(Boolean)
+      ? retained : appendDatasetTemplateBlock({
+          existingColumns: state.generatedColumns,
+          templateId: template.id,
+          blockSequence: ++state.templateBlockSequence,
+        });
     const enabledNames = Array.isArray(requested.enabledFields)
       ? new Set(requested.enabledFields.map((name) => String(name)))
       : new Set(template.columns.map((column) => column.name));
     state.generatedColumns = [
       ...state.generatedColumns,
       ...appended.map((column, index) => Object.freeze({
-        ...column,
+        ...(retained[index] ? (byId.get(retained[index].id) ?? retained[index]) : column),
         enabled: enabledNames.has(template.columns[index].name),
       })),
     ];
@@ -2692,27 +2747,30 @@ function quickPrepareScratch(templateId, {
   for (const customColumn of customColumns) {
     const name = String(customColumn?.name ?? '').trim();
     if (!name) continue;
-    const generatorType = allowedGeneratorTypes.has(customColumn?.generatorType)
-      ? customColumn.generatorType
-      : 'category';
-    const sequence = nextGeneratedSequence();
-    state.generatedColumns = [
-      ...state.generatedColumns,
-      newGeneratedColumn(
-        sequence,
-        state.generatedColumns.length,
-        generatorType,
-        uniqueGeneratedName(name),
-      ),
-    ];
+    const existing = byId.get(customColumn.id) ?? (customColumn.settings ? customColumn : null);
+    const generatorType = allowedGeneratorTypes.has(customColumn?.generatorType) || existing?.generatorType === customColumn.generatorType
+      ? customColumn.generatorType : 'category';
+    const column = existing
+      ? preserveQuickColumn(existing, { name, generatorType, enabled: customColumn.enabled !== false }, defaultGeneratorSettings)
+      : { ...newGeneratedColumn(nextGeneratedSequence(), state.generatedColumns.length, generatorType, uniqueGeneratedName(name)),
+          id: customColumn.id ?? 'quick-custom-' + state.generatedColumnSequence, enabled: customColumn.enabled !== false };
+    state.generatedColumns = [...state.generatedColumns, Object.freeze(column)];
   }
-  state.generatedColumns = reindexGeneratedColumns(state.generatedColumns);
+  const order = new Map(columnOrder.map((id, index) => [id, index]));
+  state.generatedColumns = reindexGeneratedColumns([...state.generatedColumns].sort((left, right) =>
+    (order.get(left.id) ?? Infinity) - (order.get(right.id) ?? Infinity)));
+  if (previousColumns.length > 0 && JSON.stringify(previousColumns) === JSON.stringify(state.generatedColumns)) {
+    scheduleSafeDraftSave();
+    return quickSurfaceSnapshot();
+  }
+  if (state.workflow === 'IDLE') setWorkflow('READY');
   focusLatestGeneratedGroup();
   syncOutputSchema();
   invalidateGeneratedResult();
   renderTemplatePicker();
   renderGeneratedColumns();
   updateGenerateAvailability();
+  scheduleSafeDraftSave();
   return quickSurfaceSnapshot();
 }
 
@@ -2737,6 +2795,7 @@ function quickChangeColumnAction(columnIndex, action) {
     updateGenerateAvailability();
   }
   elements.reviewConfirm.checked = false;
+  scheduleSafeDraftSave();
   return quickSurfaceSnapshot();
 }
 
@@ -2759,6 +2818,7 @@ function quickChangeRowCount(rowCount) {
   if (!allowed.has(rowCount)) throw new RangeError('Quick rows must be 50, 100, 200, 500, or 1,000.');
   invalidateGeneratedResult();
   setRequestedRowControls(rowCount);
+  scheduleSafeDraftSave();
   updateGenerateAvailability();
   return quickSurfaceSnapshot();
 }
@@ -2774,7 +2834,37 @@ function quickDownload() {
   exportResult('csv');
 }
 
+function quickInvalidateDraft(scratchDraft = null) {
+  if (scratchDraft && state.workflowKind === 'SCRATCH') {
+    quickPrepareScratch(scratchDraft.templateId, scratchDraft);
+    return;
+  }
+  inputRevision += 1;
+  workerClient?.cancel('Input changed. Analyse the current input again.');
+  state.analysis = null;
+  state.input = null;
+  state.inputKind = null;
+  state.policies = [];
+  state.relationships = [];
+  state.generatedColumns = [];
+  state.sourceOutputSchema = null;
+  state.outputSchema = null;
+  state.outputPlan = null;
+  state.workflow = 'IDLE';
+  invalidateGeneratedResult();
+  for (const panel of [elements.policyTable, elements.parseSummary, elements.relationshipPanel]) {
+    panel.classList.add('empty-panel');
+    panel.textContent = 'Analyse the current input to review it.';
+  }
+  renderGeneratedColumns();
+  updateGenerateAvailability();
+}
+
 function quickStartAnother() {
+  elements.headerMode.value = 'auto';
+  elements.delimiterMode.value = 'auto';
+  elements.customDelimiter.value = '';
+  elements.customDelimiterWrap.hidden = true;
   elements.fileInput.value = '';
   elements.fileName.textContent = 'No file selected';
   elements.pasteInput.value = '';
@@ -2812,13 +2902,16 @@ function quickStartAnother() {
   renderDatasetWorkspace();
   renderGeneratedColumns();
   updateGenerateAvailability();
+  undoStack.length = 0;
+  scheduleSafeDraftSave();
   addMessage('info', 'Choose a file, paste spreadsheet cells, or generate one fictional table.', {
     replace: true,
     scope: 'WORKFLOW_KIND',
   });
 }
 
-function quickOpenAdvanced(scratchDraft = null) {
+function quickOpenAdvanced(scratchDraft = null, sourceDraft = null) {
+  if (sourceDraft) syncQuickSourceToAdvanced(sourceDraft);
   if (scratchDraft?.templateId && state.workflowKind === 'SCRATCH') {
     quickPrepareScratch(scratchDraft.templateId, scratchDraft);
   }
@@ -2882,6 +2975,7 @@ function loadAdvancedTransformSample() {
   elements.pasteInput.scrollTop = 0;
   state.inputSourcePreference = 'SAMPLE';
   renderAdvancedSourceState();
+  advancedInputChanged();
   elements.pasteInput.focus();
   elements.pasteInput.setSelectionRange(0, 0);
 }
@@ -2908,6 +3002,15 @@ elements.delimiterMode.addEventListener('change', () => {
   elements.customDelimiterWrap.hidden = elements.delimiterMode.value !== 'custom';
   if (elements.delimiterMode.value !== 'custom') elements.customDelimiter.value = '';
 });
+function advancedInputChanged() {
+  if (state.workflowKind !== 'TRANSFORM') return;
+  quickInvalidateDraft();
+}
+for (const [control, event] of [
+  [elements.fileInput, 'change'], [elements.pasteInput, 'input'],
+  [elements.headerMode, 'change'], [elements.delimiterMode, 'change'], [elements.customDelimiter, 'input'],
+  [elements.advancedUseFileSource, 'click'], [elements.advancedUsePasteSource, 'click'],
+]) control.addEventListener(event, advancedInputChanged);
 elements.advancedSampleData.addEventListener('click', loadAdvancedTransformSample);
 elements.advancedUseFileSource.addEventListener('click', () => {
   state.inputSourcePreference = 'FILE';
@@ -3077,6 +3180,7 @@ elements.undoConfig.addEventListener('click', () => {
 elements.clearWork.addEventListener('click', () => {
   const confirmed = globalThis.confirm('Start over and clear the current in-tab draft? Download a config first if you may need these rules again.');
   if (!confirmed) return;
+  globalThis.clearTimeout(draftSaveTimer);
   globalThis.sessionStorage?.removeItem(RECOVERY_DRAFT_KEY);
   globalThis.location.reload();
 });
@@ -3104,6 +3208,7 @@ quickSurface = mountQuickPrototypeSurface(elements.quickSurfaceHost, {
   templateFields: quickTemplateFields,
   customColumnTypes: quickCustomColumnTypes,
   taskChanged: quickTaskChanged,
+  invalidateDraft: quickInvalidateDraft,
   analyse: quickAnalyse,
   prepareScratch: quickPrepareScratch,
   changeColumnAction: quickChangeColumnAction,
@@ -3114,9 +3219,7 @@ quickSurface = mountQuickPrototypeSurface(elements.quickSurfaceHost, {
   startAnother: quickStartAnother,
   openAdvanced: quickOpenAdvanced,
 });
-if (state.analysis || state.generatedColumns.length > 0 || state.generationResult) {
-  quickSurface.refresh(quickSurfaceSnapshot());
-}
+quickSurface.refresh(quickSurfaceSnapshot());
 
 // Kept as a small public surface for automated browser verification only; it
 // exposes status and counts, never source rows, profiles, mappings, or samples.

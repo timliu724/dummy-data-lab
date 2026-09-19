@@ -1,3 +1,4 @@
+import { describeQuickScratch } from './quick-scratch-state.js';
 import quickPrototypeHtml from '../../prototypes/quick-mode/quick-mode-prototype.html';
 import { TRANSFORM_SAMPLE, isTransformSampleText } from '../examples/transform-sample.js';
 import {
@@ -99,7 +100,8 @@ export function mountQuickPrototypeSurface(host, handlers) {
   const view = {
     step: 'choose', task: 'transform', filter: 'all',
     search: '', page: 0, pageSize: 6, openColumn: -1,
-    hiddenColumns: new Set(), snapshot: null, file: null, sourcePreference: null,
+    hiddenColumns: new Set(), snapshot: null, file: null, sourcePreference: null, sourceDirty: false,
+    draftRevision: 0, preparedSource: null, templateColumns: new Map(), columnOrder: [],
     selectedTemplates: new Set(['people']),
     templateSelections: new Map(), customColumns: [], customColumnSequence: 0,
   };
@@ -174,9 +176,29 @@ export function mountQuickPrototypeSurface(host, handlers) {
     }
     return kind;
   }
+  function invalidateDraft() {
+    view.draftRevision += 1;
+    const hadSnapshot = Boolean(view.snapshot);
+    applySnapshot(null);
+    updateStepAvailability();
+    handlers.invalidateDraft?.(view.task === 'scratch' ? scratchDraft() : null);
+    hideNotice();
+    if (hadSnapshot) showNotice(view.task === 'transform'
+      ? 'Input changed. Analyse the current input before generating or downloading.'
+      : 'Fields changed. Review the current fields before generating or downloading.');
+  }
+  function sourceChanged() {
+    view.sourceDirty = true;
+    const previous = view.preparedSource;
+    const kind = currentSourceKind();
+    const unchanged = view.snapshot?.task === 'transform' && previous && kind === previous.kind && (kind === 'FILE'
+      ? view.file === previous.file : pasteInput.value === previous.pastedText);
+    if (!unchanged) invalidateDraft();
+  }
   function acceptFile(file) {
     view.file = file ?? null;
     if (!view.file) {
+      sourceChanged();
       renderSourceState();
       return;
     }
@@ -184,6 +206,7 @@ export function mountQuickPrototypeSurface(host, handlers) {
     query('#file-help').textContent = 'Ready to analyse locally. File contents stay in this browser.';
     const hasUserPaste = pasteInput.value.trim() !== '' && !isTransformSampleText(pasteInput.value);
     view.sourcePreference = hasUserPaste ? null : 'FILE';
+    sourceChanged();
     renderSourceState();
   }
   function loadSampleData() {
@@ -197,6 +220,7 @@ export function mountQuickPrototypeSurface(host, handlers) {
     pasteInput.value = TRANSFORM_SAMPLE.text;
     pasteInput.scrollTop = 0;
     view.sourcePreference = 'SAMPLE';
+    sourceChanged();
     renderSourceState();
     pasteInput.focus();
     pasteInput.setSelectionRange(0, 0);
@@ -239,17 +263,20 @@ export function mountQuickPrototypeSurface(host, handlers) {
       templates: Object.freeze(selected.map((templateId) => Object.freeze({
         templateId,
         enabledFields: Object.freeze([...selectionForTemplate(templateId)]),
+        fieldColumns: view.templateColumns.get(templateId) ?? null,
       }))),
+      columnOrder: view.columnOrder,
       customColumns: Object.freeze(view.customColumns.map((column) => Object.freeze({
-        name: column.name.trim(),
+        ...column, name: column.name.trim(),
         generatorType: column.generatorType,
+        enabled: column.enabled !== false,
       }))),
     });
   }
   function updateScratchFieldCount() {
     const selectedCount = selectedTemplateIds()
       .reduce((total, templateId) => total + selectionForTemplate(templateId).size, 0)
-      + view.customColumns.length;
+      + view.customColumns.filter((column) => column.enabled !== false).length;
     query('#selected-field-count').textContent = String(selectedCount);
     query('#scratch-review-button').disabled = selectedCount === 0;
   }
@@ -272,7 +299,8 @@ export function mountQuickPrototypeSurface(host, handlers) {
       const controls = documentRef.createElement('div');
       controls.className = 'template-field-group__fields';
       fields.forEach((field) => {
-        const control = textElement(documentRef, 'button', field.name, 'field-chip');
+        const existing = view.templateColumns.get(templateId)?.[fields.indexOf(field)];
+        const control = textElement(documentRef, 'button', existing?.name ?? field.name, 'field-chip');
         control.type = 'button';
         control.dataset.fieldName = field.name;
         control.dataset.templateId = templateId;
@@ -283,6 +311,7 @@ export function mountQuickPrototypeSurface(host, handlers) {
         control.addEventListener('click', () => {
           if (selected.has(field.name)) selected.delete(field.name);
           else selected.add(field.name);
+          invalidateDraft();
           renderTemplateFields();
         });
         controls.append(control);
@@ -296,7 +325,7 @@ export function mountQuickPrototypeSurface(host, handlers) {
     const target = query('#custom-column-list');
     const types = handlers.customColumnTypes?.() ?? [];
     target.replaceChildren();
-    view.customColumns.forEach((column) => {
+    view.customColumns.filter((column) => column.enabled !== false).forEach((column) => {
       const row = documentRef.createElement('div');
       row.className = 'custom-column-row';
       const name = documentRef.createElement('input');
@@ -305,23 +334,26 @@ export function mountQuickPrototypeSurface(host, handlers) {
       name.name = 'custom_column_name_' + column.id;
       name.autocomplete = 'off';
       name.setAttribute('aria-label', 'Custom column name');
-      name.addEventListener('input', () => { column.name = name.value; });
+      name.addEventListener('input', () => { if (column.name !== name.value) { column.name = name.value; invalidateDraft(); } });
       const type = documentRef.createElement('select');
       type.name = 'custom_column_type_' + column.id;
       type.setAttribute('aria-label', 'Custom column type for ' + column.name);
-      types.forEach((entry) => {
+      const availableTypes = types.some(entry => entry.id === column.generatorType) ? types
+        : [...types, { id: column.generatorType, label: column.generatorType }];
+      availableTypes.forEach((entry) => {
         const option = documentRef.createElement('option');
         option.value = entry.id;
         option.textContent = entry.label;
         option.selected = entry.id === column.generatorType;
         type.append(option);
       });
-      type.addEventListener('change', () => { column.generatorType = type.value; });
+      type.addEventListener('change', () => { if (column.generatorType !== type.value) { column.generatorType = type.value; invalidateDraft(); } });
       const remove = textElement(documentRef, 'button', 'Remove', 'custom-column-remove');
       remove.type = 'button';
       remove.setAttribute('aria-label', 'Remove custom column ' + column.name);
       remove.addEventListener('click', () => {
         view.customColumns = view.customColumns.filter((entry) => entry.id !== column.id);
+        invalidateDraft();
         renderCustomColumns();
       });
       row.append(name, type, remove);
@@ -329,6 +361,17 @@ export function mountQuickPrototypeSurface(host, handlers) {
     });
     target.hidden = view.customColumns.length === 0;
     updateScratchFieldCount();
+  }
+  function updateStepAvailability() {
+    const available = {
+      choose: true,
+      review: Boolean(view.snapshot?.columns?.length),
+      download: Boolean(view.snapshot?.result),
+    };
+    queryAll('.step-button').forEach((button) => {
+      button.disabled = !available[button.dataset.step];
+      button.classList.toggle('is-available', !button.disabled);
+    });
   }
   function setStep(step) {
     if (!STEP_ORDER.includes(step)) return;
@@ -341,11 +384,10 @@ export function mountQuickPrototypeSurface(host, handlers) {
     queryAll('.step-button').forEach((button, index) => {
       button.removeAttribute('aria-current');
       button.classList.toggle('is-complete', index < activeIndex);
-      button.classList.toggle('is-available', index <= activeIndex);
-      button.disabled = index > activeIndex;
       button.querySelector('.step-number').textContent = index < activeIndex ? 'OK' : String(index + 1);
       if (index === activeIndex) button.setAttribute('aria-current', 'step');
     });
+    updateStepAvailability();
     const reducedMotion = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
     host.scrollIntoView({ block: 'start', behavior: reducedMotion ? 'auto' : 'smooth' });
     if (step === 'review') renderReview(false);
@@ -397,6 +439,9 @@ export function mountQuickPrototypeSurface(host, handlers) {
     if (blocker) {
       readiness.querySelector('strong').textContent = blocker.title;
       readiness.querySelector('small').textContent = blocker.recovery;
+    } else if (view.snapshot?.inputNotice) {
+      readiness.querySelector('strong').textContent = view.snapshot.inputNotice.title;
+      readiness.querySelector('small').textContent = view.snapshot.inputNotice.recovery;
     } else if (count > 0) {
       readiness.querySelector('strong').textContent = 'Ready to generate';
       readiness.querySelector('small').textContent = count + ' suggested review' + (count === 1 ? ' is' : 's are')
@@ -427,14 +472,23 @@ export function mountQuickPrototypeSurface(host, handlers) {
       button.setAttribute('aria-pressed', String(button.dataset.filter === view.filter));
       button.textContent = all ? 'All ' + columns.length : 'Suggested review ' + count;
     });
-    query('#review-confirmation-line').hidden = count === 0;
+    query('#review-confirmation-line').hidden = count === 0 || Boolean(view.snapshot?.blockers?.length);
     query('#review-confirmation-label').textContent = count === 1
       ? '1 suggested review is highlighted. Generation is ready.'
       : count + ' suggested reviews are highlighted. Generation is ready.';
     const rowCount = String(view.snapshot?.requestedRowCount ?? 200);
-    if ([...query('#quick-row-count').options].some((option) => option.value === rowCount)) {
-      query('#quick-row-count').value = rowCount;
+    const rowSelect = query('#quick-row-count');
+    rowSelect.querySelector('[data-current-row-count]')?.remove();
+    if (![...rowSelect.options].some((option) => option.value === rowCount)) {
+      const option = textElement(documentRef, 'option', Number(rowCount).toLocaleString());
+      option.value = rowCount;
+      option.dataset.currentRowCount = 'true';
+      rowSelect.append(option);
     }
+    rowSelect.value = rowCount;
+    rowSelect.disabled = view.snapshot?.rowCountLocked === true;
+    rowSelect.title = rowSelect.disabled ? 'High match uses the source row count.' : '';
+    updateStepAvailability();
     updateReadiness();
   }
   function addShiftControls(details, column, index) {
@@ -565,7 +619,7 @@ export function mountQuickPrototypeSurface(host, handlers) {
         select.addEventListener('change', async () => {
           const next = await handlers.changeColumnAction?.(index, select.value);
           if (next) {
-            view.snapshot = next; view.openColumn = index;
+            applySnapshot(next); view.openColumn = index;
             renderReview(false);
             query('.column-main[data-column-index="' + index + '"]')?.focus();
           }
@@ -636,17 +690,30 @@ export function mountQuickPrototypeSurface(host, handlers) {
   }
   function renderQuality() {
     const result = view.snapshot?.result;
-    const valid = result?.validationValid === true;
-    const qualityStatus = query('.quality-status');
-    qualityStatus.querySelector('.quality-mark').textContent = valid ? 'OK' : '!';
-    qualityStatus.querySelector('strong').textContent = valid ? 'Output checks passed' : 'Check the output';
-    qualityStatus.querySelector('small').textContent = valid ? 'Structure, row count, and values' : 'One or more checks need attention';
-    const reviewItem = query('#quality-review-item');
     const warnings = result?.warnings ?? [];
+    const valid = result?.validationValid === true && result?.qualityStatus !== 'FAIL';
+    const needsReview = result?.qualityStatus === 'REVIEW' || warnings.length > 0;
+    const qualityStatus = query('.quality-status');
+    qualityStatus.querySelector('.quality-mark').textContent = valid && !needsReview ? 'OK' : '!';
+    qualityStatus.querySelector('strong').textContent = !valid ? 'Check the output'
+      : needsReview ? 'Structure checks passed — review needed' : 'Output checks passed';
+    qualityStatus.querySelector('small').textContent = !valid ? 'One or more checks need attention'
+      : needsReview ? 'Review the warnings before using the output.' : 'Structure, row count, and values';
+    const reviewItem = query('#quality-review-item');
+    reviewItem.querySelector('details')?.remove();
     reviewItem.hidden = warnings.length === 0;
     if (warnings.length) {
       reviewItem.querySelector('strong').textContent = 'SUGGESTED REVIEW — ' + warnings.length + ' warning' + (warnings.length === 1 ? '' : 's');
       reviewItem.querySelector('p').textContent = warnings.slice(0, 2).join(' ');
+      if (warnings.length > 2) {
+        const details = documentRef.createElement('details');
+        details.id = 'quality-all-warnings';
+        details.append(textElement(documentRef, 'summary', 'View all ' + warnings.length + ' warnings'));
+        const list = documentRef.createElement('ul');
+        warnings.forEach((warning) => list.append(textElement(documentRef, 'li', warning)));
+        details.append(list);
+        reviewItem.append(details);
+      }
     }
     const variation = view.snapshot?.variation;
     resultVariation.hidden = !variation?.text;
@@ -724,7 +791,47 @@ export function mountQuickPrototypeSurface(host, handlers) {
     renderQuality();
     queueMicrotask(updateVisibleRange);
   }
+  function syncScratchChoices(snapshot) {
+    if (snapshot?.task !== 'scratch' || !snapshot.scratchColumns) return;
+    const definitions = queryAll('.template-button').map(button => ({
+      templateId: button.dataset.template, fields: templateFieldDefinitions(button.dataset.template),
+    }));
+    const draft = describeQuickScratch(snapshot.scratchColumns, definitions);
+    view.selectedTemplates = new Set(draft.templates.map(template => template.templateId));
+    view.templateSelections.clear();
+    view.templateColumns.clear();
+    for (const template of draft.templates) {
+      view.templateSelections.set(template.templateId, new Set(template.enabledFields));
+      view.templateColumns.set(template.templateId, template.fieldColumns);
+    }
+    view.customColumns = draft.customColumns.map(column => ({ ...column }));
+    view.columnOrder = draft.columnOrder;
+    for (const column of view.customColumns) {
+      const number = /^quick-custom-(\d+)$/.exec(column.id)?.[1];
+      if (number) view.customColumnSequence = Math.max(view.customColumnSequence, Number(number));
+    }
+    updateTemplateButtons();
+    renderTemplateFields();
+    renderCustomColumns();
+  }
+  function syncSourceDraft(snapshot) {
+    if (!snapshot?.sourceDraft) return;
+    const source = snapshot.sourceDraft;
+    view.file = source.file;
+    pasteInput.value = source.pastedText;
+    view.sourcePreference = source.sourcePreference;
+    view.sourceDirty = false;
+    fileInput.value = '';
+    query('#file-label').textContent = view.file?.name ?? 'Drop a CSV, TSV, or TXT file here';
+    query('#file-help').textContent = view.file
+      ? 'Ready to analyse locally. File contents stay in this browser.'
+      : 'Choose a local file. Its contents are never uploaded.';
+    renderSourceState();
+    view.preparedSource = snapshot.columns?.length && snapshot.task === 'transform'
+      ? { kind: currentSourceKind(), file: view.file, pastedText: pasteInput.value } : null;
+  }
   function applySnapshot(snapshot, resetView = false) {
+    syncScratchChoices(snapshot);
     view.snapshot = snapshot;
     query('#download-button').disabled = !snapshot?.result;
     if (!snapshot?.result) query('#preview-table').replaceChildren();
@@ -732,6 +839,7 @@ export function mountQuickPrototypeSurface(host, handlers) {
     view.task = snapshot.task;
     updateTaskButtons();
     if (view.step === 'review') renderReview(resetView);
+    else if (resetView) renderReviewSummary(true);
     if (view.step === 'download') renderPreview();
   }
 
@@ -740,7 +848,8 @@ export function mountQuickPrototypeSurface(host, handlers) {
   });
   queryAll('.task-card').forEach((button) => {
     button.addEventListener('click', () => {
-      view.task = button.dataset.task; updateTaskButtons(); handlers.taskChanged?.(view.task);
+      if (view.task === button.dataset.task) return;
+      view.task = button.dataset.task; invalidateDraft(); updateTaskButtons(); handlers.taskChanged?.(view.task);
     });
   });
   queryAll('.template-button').forEach((button) => {
@@ -751,6 +860,7 @@ export function mountQuickPrototypeSurface(host, handlers) {
         view.selectedTemplates.add(templateId);
         selectionForTemplate(templateId);
       }
+      invalidateDraft();
       updateTemplateButtons();
       renderTemplateFields();
     });
@@ -758,10 +868,11 @@ export function mountQuickPrototypeSurface(host, handlers) {
   query('#add-custom-column').addEventListener('click', () => {
     view.customColumnSequence += 1;
     view.customColumns.push({
-      id: view.customColumnSequence,
+      id: 'quick-custom-' + view.customColumnSequence,
       name: 'custom_column_' + view.customColumnSequence,
       generatorType: 'category',
     });
+    invalidateDraft();
     renderCustomColumns();
     query('#custom-column-list .custom-column-row:last-child input')?.select();
   });
@@ -786,15 +897,18 @@ export function mountQuickPrototypeSurface(host, handlers) {
     else if (sample) view.sourcePreference = view.file ? 'FILE' : 'SAMPLE';
     else if (!view.file || view.sourcePreference === 'PASTE') view.sourcePreference = 'PASTE';
     else view.sourcePreference = null;
+    sourceChanged();
     renderSourceState();
   });
   query('#sample-data-button').addEventListener('click', loadSampleData);
   query('#use-file-source').addEventListener('click', () => {
     view.sourcePreference = 'FILE';
+    sourceChanged();
     renderSourceState();
   });
   query('#use-paste-source').addEventListener('click', () => {
     view.sourcePreference = 'PASTE';
+    sourceChanged();
     renderSourceState();
   });
   query('#analyse-button').addEventListener('click', async (event) => {
@@ -809,14 +923,19 @@ export function mountQuickPrototypeSurface(host, handlers) {
       query('#use-file-source').focus();
       return;
     }
+    const revision = view.draftRevision;
     const snapshot = await runBusy(event.currentTarget, 'Analysing…', () => handlers.analyse?.({
       file: view.file, pastedText: pasteInput.value, sourcePreference: view.sourcePreference,
     }));
+    if (revision !== view.draftRevision) { invalidateDraft(); return; }
     if (!snapshot) return;
+    view.preparedSource = { kind: sourceKind, file: view.file, pastedText: pasteInput.value };
+    view.sourceDirty = false;
     view.hiddenColumns.clear();
     applySnapshot(snapshot, true);
     setStep('review');
     if (snapshot.blockers?.length) showNotice(snapshot.blockers[0].recovery, 'error');
+    else if (snapshot.inputNotice) showNotice(snapshot.inputNotice.recovery);
     else showNotice('Analysis complete. Check the highlighted columns.', 'success');
   });
   query('#scratch-review-button').addEventListener('click', async (event) => {
@@ -848,7 +967,9 @@ export function mountQuickPrototypeSurface(host, handlers) {
     if (snapshot) applySnapshot(snapshot, false);
   });
   query('#generate-button').addEventListener('click', async (event) => {
+    const revision = view.draftRevision;
     const snapshot = await runBusy(event.currentTarget, 'Generating…', () => handlers.generate?.());
+    if (revision !== view.draftRevision) { invalidateDraft(); return; }
     if (!snapshot?.result) return;
     applySnapshot(snapshot);
     setStep('download');
@@ -858,7 +979,9 @@ export function mountQuickPrototypeSurface(host, handlers) {
     snapshot.result.validationValid ? 'success' : 'error');
   });
   regenerateButton.addEventListener('click', async (event) => {
+    const revision = view.draftRevision;
     const snapshot = await runBusy(event.currentTarget, 'Generating…', () => handlers.generate?.());
+    if (revision !== view.draftRevision) { invalidateDraft(); return; }
     if (!snapshot?.result) return;
     applySnapshot(snapshot);
     showNotice(snapshot.variation?.kind === 'repeatable'
@@ -876,7 +999,8 @@ export function mountQuickPrototypeSurface(host, handlers) {
   query('#download-button').addEventListener('click', () => handlers.download?.());
   query('#start-another').addEventListener('click', () => {
     handlers.startAnother?.();
-    view.snapshot = null; view.file = null; view.sourcePreference = null; view.hiddenColumns.clear(); view.openColumn = -1;
+    view.preparedSource = null; view.templateColumns.clear(); view.columnOrder = []; view.draftRevision += 1;
+    view.snapshot = null; view.file = null; view.sourcePreference = null; view.sourceDirty = false; view.hiddenColumns.clear(); view.openColumn = -1;
     view.task = 'transform'; view.selectedTemplates = new Set(['people']);
     view.templateSelections.clear(); view.customColumns = []; view.customColumnSequence = 0;
     fileInput.value = ''; pasteInput.value = '';
@@ -886,9 +1010,16 @@ export function mountQuickPrototypeSurface(host, handlers) {
     updateTaskButtons(); renderTemplateFields(); renderCustomColumns();
     hideNotice(); setStep('choose');
   });
-  const openAdvanced = () => handlers.openAdvanced?.(
-    view.task === 'scratch' && view.step === 'choose' ? scratchDraft() : null,
-  );
+  const openAdvanced = () => {
+    const sourceDraft = view.task === 'transform' && view.step === 'choose' && view.sourceDirty
+      ? { file: view.file, pastedText: pasteInput.value, sourcePreference: view.sourcePreference }
+      : null;
+    handlers.openAdvanced?.(
+      view.task === 'scratch' && view.step === 'choose' ? scratchDraft() : null,
+      sourceDraft,
+    );
+    if (sourceDraft) view.sourceDirty = false;
+  };
   query('#advanced-button').addEventListener('click', openAdvanced);
   queryAll('.advanced-link').forEach((button) => button.addEventListener('click', openAdvanced));
   query('#close-advanced-notice').addEventListener('click', hideNotice);
@@ -907,6 +1038,7 @@ export function mountQuickPrototypeSurface(host, handlers) {
   host.dataset.quickMounted = 'true';
   const controller = Object.freeze({
     refresh(snapshot) {
+      syncSourceDraft(snapshot);
       applySnapshot(snapshot, false);
       setStep(snapshot?.result ? 'download' : snapshot?.columns?.length ? 'review' : 'choose');
     },

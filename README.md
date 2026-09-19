@@ -2,7 +2,7 @@
 
 **Turn existing CSV, TSV, or delimited TXT data into controlled dummy datasets—or generate new test data—in one offline HTML file.**
 
-[**Use Dummy Data Lab online**](https://timliu724.github.io/dummy-data-lab/) · [**Download Dummy Data Lab V1.75**](https://github.com/timliu724/dummy-data-lab/releases/download/v1.75/Dummy-Data-Lab-v1.75.html)
+[**Use Dummy Data Lab online**](https://timliu724.github.io/dummy-data-lab/) · [**Download Dummy Data Lab V1.78**](https://github.com/timliu724/dummy-data-lab/releases/download/v1.78/Dummy-Data-Lab-v1.78.html)
 
 **No installation · No data upload · Runs locally in current Chrome or Edge**
 
@@ -12,9 +12,13 @@ The online version is served by GitHub Pages; source data is still processed loc
 
 ![Dummy Data Lab Quick mode demo: load fictional sample data, analyse it locally, and generate downloadable test data](docs/assets/dummy-data-lab-demo-v1.74-focused.gif)
 
+## V1.78 update
+
+Current inputs and field choices now stay consistent across Quick, Advanced and refresh recovery. This release also improves parsing feedback, row-count handling and readable replacements. See the [release notes](docs/RELEASE_NOTES.md). Existing screenshots and demo GIFs are retained.
+
 ## Quick start
 
-1. Open the [online version](https://timliu724.github.io/dummy-data-lab/), or download `Dummy-Data-Lab-v1.75.html` for offline use.
+1. Open the [online version](https://timliu724.github.io/dummy-data-lab/), or download `Dummy-Data-Lab-v1.78.html` for offline use.
 2. If downloaded, open the HTML file in Chrome or Edge.
 3. Choose **Quick** for an existing table or a new single table, or **Advanced** for detailed controls and related tables.
 4. Upload or paste data, or select **Try sample data**, then choose **Analyse locally**.
@@ -77,7 +81,7 @@ Sample files are available in [`demo/`](demo/).
 - [Security and Privacy](docs/SECURITY_PRIVACY.md)
 - [Known Limitations](docs/KNOWN_LIMITATIONS.md)
 - [Release Notes](docs/RELEASE_NOTES.md)
-- [V1.75 Release Verification](docs/V1.75_RELEASE_VERIFICATION.md)
+- [V1.78 Release Verification](docs/V1.78_RELEASE_VERIFICATION.md)
 - [Offline Security Audit](docs/OFFLINE_SECURITY_AUDIT.md)
 - [Changelog](CHANGELOG.md)
 - [Third-party Licenses](docs/THIRD_PARTY_LICENSES.md)

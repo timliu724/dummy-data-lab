@@ -67,3 +67,21 @@ export function parseRecognitionAllowlist(value, { maximumEntries = 100, maximum
 export function requiresHeaderConfirmation(parseResult) {
   return parseResult?.headerDetection?.decision === 'ambiguous';
 }
+
+export function parseIssueNotice(parseResult) {
+  const issues = parseResult?.issues ?? [];
+  if (issues.length === 0) return null;
+  const error = issues.find((issue) => issue.severity === 'ERROR');
+  const issue = error ?? issues[0];
+  const position = Number.isInteger(issue.position) ? ' near character ' + (issue.position + 1) : '';
+  const description = issue.code === 'MissingQuotes'
+    ? 'A quoted field is not closed' + position + '. Some rows may have been combined.'
+    : String(issue.message || 'The input could not be read reliably.');
+  return Object.freeze({
+    blocked: Boolean(error),
+    title: error ? 'Fix the source data' : 'Review the input warnings',
+    recovery: error
+      ? description + ' Return to Choose to fix or replace the input, then analyse again.'
+      : issues.length + ' input warning(s): ' + description + ' Check the parse summary in Advanced before using the output.',
+  });
+}

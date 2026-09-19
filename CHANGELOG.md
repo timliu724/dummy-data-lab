@@ -2,6 +2,16 @@
 
 This is a user-facing summary of product evolution.
 
+## V1.78
+
+- Keep the current file, pasted data and selected source when switching between Quick and Advanced. Changing input invalidates previous analysis and downloads.
+- Preserve renamed fields, generator types, ranges, omitted columns and row counts when returning to Quick or adding another field.
+- Restore the latest fictional schema and general settings after a refresh. Starting another task clears the previous draft; source rows are never stored in the recovery draft.
+- Keep generated results available when returning to review without changing settings.
+- Show blocking parse errors and recoverable input warnings clearly, and reset parsing options for a new task.
+- Improve replacement of ordinary prose containing numbers, without changing explicit pattern replacement or supported identifier formats.
+- Show the actual output row count and all non-routine warning groups, including results that need structural review.
+
 ## V1.75
 
 - Quick uses its selected source even when Advanced previously had a file loaded; Start Another clears both input surfaces.

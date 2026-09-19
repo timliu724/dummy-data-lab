@@ -24,7 +24,9 @@ function codeStructure(value, { detectedType, columnName }) {
   if (!text || text.length > 80 || NON_CODE_TYPES.has(detectedType)) return null;
   const semanticHeader = /(?:^|[_\s-])(id|code|no|number|batch|model|sku|serial|ref|reference|job|order|postcode|postal|zip)(?:$|[_\s-])/i.test(columnName);
   const recognisedCode = ['ALPHANUMERIC_CODE', 'NUMERIC_ID'].includes(detectedType);
-  const structuralCode = /\p{N}/u.test(text) && (/[._/-]/.test(text) || /\p{Lu}/u.test(text));
+  // Incidental numbers in prose are not evidence of a code format.
+  const structuralCode = /^[\p{L}\p{N}_./-]+$/u.test(text)
+    && /\p{N}/u.test(text) && (/[._/-]/.test(text) || /\p{Lu}/u.test(text));
   const numericReference = semanticHeader && /^\d+$/u.test(text);
   if (!numericReference && !recognisedCode && !structuralCode) return null;
   const prefix = text.match(/^([A-Za-z]{1,8})(?=[0-9._/-])/)?.[1] ?? null;
