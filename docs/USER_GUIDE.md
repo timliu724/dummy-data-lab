@@ -1,8 +1,8 @@
-# Dummy Data Lab V1.78 user guide
+# Dummy Data Lab V1.79 user guide
 
 ## Before you begin
 
-Download **Dummy-Data-Lab-v1.78.html** from the GitHub Release and verify its
+Download **Dummy-Data-Lab-v1.79.html** from the GitHub Release and verify its
 SHA-256 checksum before use. Open the file locally in a current Chrome or Edge
 browser. The application is self-contained and does not require a server,
 account, or runtime installation.
@@ -209,6 +209,8 @@ Quick saves the latest general settings and fictional Scratch fields in the curr
 tab, including edits made before Review. Refreshing a source-data task requires you
 to provide the source again. **Start another** resets the task and parsing options;
 Advanced **Start over** clears the current in-tab draft.
+
+Changing **Ignore known test identifiers** now invalidates the previous analysis and download. Analyse the current input again to apply the new list. **Start another** and confirmed **Start over** clear the list so exceptions do not carry into a new task.
 
 ## Configuration and browser storage
 

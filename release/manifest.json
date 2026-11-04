@@ -1,8 +1,8 @@
 {
   "product": "Dummy Data Lab",
-  "version": "V1.78",
-  "artifact": "Dummy-Data-Lab-v1.78.html",
-  "sizeBytes": 1030727,
-  "sha256": "b05897d9559c5ebc830e0050a61c475911a9a5e19f6b3d811a4377dc2fa9291c",
+  "version": "V1.79",
+  "artifact": "Dummy-Data-Lab-v1.79.html",
+  "sizeBytes": 1031134,
+  "sha256": "80e3fff53b13688f65dca7b5f5696b1dc98d58660c818fd5884997c22b9aae76",
   "offlineStandalone": true
 }

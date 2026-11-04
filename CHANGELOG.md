@@ -2,6 +2,10 @@
 
 This is a user-facing summary of product evolution.
 
+## V1.79
+
+Changing **Ignore known test identifiers** now invalidates the previous analysis and download. Analyse the current input again to apply the new list. **Start another** and confirmed **Start over** clear the list so exceptions do not carry into a new task.
+
 ## V1.78
 
 - Keep the current file, pasted data and selected source when switching between Quick and Advanced. Changing input invalidates previous analysis and downloads.

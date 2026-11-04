@@ -764,6 +764,7 @@ function currentUnconfiguredShifts() {
 
 function updateGenerateAvailability() {
   const busy = state.workflow === 'ANALYSING' || state.workflow === 'GENERATING';
+  elements.recognitionAllowlist.disabled = busy;
   const sourceMissing = state.workflowKind === 'TRANSFORM' && !state.analysis;
   const inputNotice = state.workflowKind === 'TRANSFORM' ? parseIssueNotice(state.analysis?.parseResult) : null;
   const headerAmbiguous = state.workflowKind === 'TRANSFORM' && requiresHeaderConfirmation(state.analysis?.parseResult);
@@ -2834,7 +2835,7 @@ function quickDownload() {
   exportResult('csv');
 }
 
-function quickInvalidateDraft(scratchDraft = null) {
+function quickInvalidateDraft(scratchDraft = null, { preserveGeneratedColumns = false } = {}) {
   if (scratchDraft && state.workflowKind === 'SCRATCH') {
     quickPrepareScratch(scratchDraft.templateId, scratchDraft);
     return;
@@ -2846,7 +2847,7 @@ function quickInvalidateDraft(scratchDraft = null) {
   state.inputKind = null;
   state.policies = [];
   state.relationships = [];
-  state.generatedColumns = [];
+  if (!preserveGeneratedColumns) state.generatedColumns = [];
   state.sourceOutputSchema = null;
   state.outputSchema = null;
   state.outputPlan = null;
@@ -2861,6 +2862,7 @@ function quickInvalidateDraft(scratchDraft = null) {
 }
 
 function quickStartAnother() {
+  elements.recognitionAllowlist.value = '';
   elements.headerMode.value = 'auto';
   elements.delimiterMode.value = 'auto';
   elements.customDelimiter.value = '';
@@ -3011,6 +3013,11 @@ for (const [control, event] of [
   [elements.headerMode, 'change'], [elements.delimiterMode, 'change'], [elements.customDelimiter, 'input'],
   [elements.advancedUseFileSource, 'click'], [elements.advancedUsePasteSource, 'click'],
 ]) control.addEventListener(event, advancedInputChanged);
+elements.recognitionAllowlist.addEventListener('input', () => {
+  if (state.workflowKind !== 'TRANSFORM' || !state.analysis) return;
+  quickInvalidateDraft(null, { preserveGeneratedColumns: true });
+  addMessage('info', 'Ignored test identifiers changed. Analyse the current input again before generating or downloading.', { replace: true });
+});
 elements.advancedSampleData.addEventListener('click', loadAdvancedTransformSample);
 elements.advancedUseFileSource.addEventListener('click', () => {
   state.inputSourcePreference = 'FILE';
@@ -3180,6 +3187,7 @@ elements.undoConfig.addEventListener('click', () => {
 elements.clearWork.addEventListener('click', () => {
   const confirmed = globalThis.confirm('Start over and clear the current in-tab draft? Download a config first if you may need these rules again.');
   if (!confirmed) return;
+  elements.recognitionAllowlist.value = '';
   globalThis.clearTimeout(draftSaveTimer);
   globalThis.sessionStorage?.removeItem(RECOVERY_DRAFT_KEY);
   globalThis.location.reload();
