@@ -1,7 +1,8 @@
 import { ACTION_VALUES, ATTRIBUTE_ROLE_VALUES } from '../core/constants.js';
 import { validatePolicySelection } from '../policy/policy-validation.js';
-import { defaultActionParams, normaliseActionParams } from '../policy/action-parameters.js';
+import { defaultActionParams, normaliseActionParams, validateActionParams } from '../policy/action-parameters.js';
 import { patternSegments } from '../generation/pattern-generator.js';
+import { listNumericSegments } from '../generation/fixed-shift.js';
 import { ATTRIBUTE_ROLE_LABELS, normalizeAttributeRole } from '../privacy/attribute-roles.js';
 import { GENERALISATION_STRATEGY_VALUES, generalisationDescription } from '../generation/generalisation-rules.js';
 
@@ -72,27 +73,30 @@ export function policyTableRows({ profiles, detections, policies, actionPreviews
   }));
 }
 
-export function updatePolicyAction({ policies, detections, columnIndex, action }) {
+function withPolicyAction(policy, detection, action, userOverride) {
   if (!ACTION_VALUES.includes(action)) throw new RangeError('Unknown policy action.');
-  const policy = policies[columnIndex];
-  if (!policy) throw new RangeError('Column policy was not found.');
   const validation = validatePolicySelection({
     columnName: policy.columnName,
     riskAssessment: policy.riskAssessment,
-    detection: detections[columnIndex],
+    detection,
     recommendedAction: policy.recommendedAction,
     selectedAction: action,
   });
-  const updated = Object.freeze({
+  return Object.freeze({
     ...policy,
     selectedAction: action,
     actionParams: action === policy.recommendedAction
       ? policy.recommendedActionParams ?? defaultActionParams(action, policy.detectedType)
       : defaultActionParams(action, policy.detectedType),
-    userOverride: action !== policy.recommendedAction,
+    userOverride,
     warnings: validation.warnings,
     reviewRequired: validation.reviewRequired,
   });
+}
+
+export function updatePolicyAction({ policies, detections, columnIndex, action }) {
+  if (!policies[columnIndex]) throw new RangeError('Column policy was not found.');
+  const updated = withPolicyAction(policies[columnIndex], detections[columnIndex], action, true);
   return Object.freeze(policies.map((entry, index) => index === columnIndex ? updated : entry));
 }
 
@@ -132,21 +136,56 @@ export function updatePolicyAttributeRole({ policies, columnIndex, role }) {
 }
 
 export function keepAllPolicies({ policies, detections }) {
-  return Object.freeze(policies.map((policy, columnIndex) => updatePolicyAction({
-    policies: [policy],
-    detections: [detections[columnIndex]],
-    columnIndex: 0,
-    action: 'KEEP',
-  })[0]));
+  return Object.freeze(policies.map((policy, index) => withPolicyAction(policy, detections[index], 'KEEP', true)));
 }
 
 export function applyRecommendedPolicies({ policies, detections }) {
-  return Object.freeze(policies.map((policy, columnIndex) => updatePolicyAction({
-    policies: [policy],
-    detections: [detections[columnIndex]],
-    columnIndex: 0,
-    action: policy.recommendedAction,
-  })[0]));
+  return Object.freeze(policies.map((policy, index) => withPolicyAction(policy, detections[index], policy.recommendedAction, false)));
+}
+
+function shiftFitsChangedType(detectedType, params, sampleValues) {
+  if (params.shiftKind !== defaultActionParams('SHIFT', detectedType).shiftKind
+    || !validateActionParams({ action: 'SHIFT', detectedType, params }).valid) return false;
+  if (params.shiftKind !== 'NUMBER_SEQUENCE') return true;
+  return sampleValues.length > 0
+    && sampleValues.every((value) => listNumericSegments(value).length > params.segmentIndex);
+}
+
+export function restoreConfiguredPolicy(policy, detection, saved, { sampleValues = [], onIncompatible = () => {} } = {}) {
+  if (saved.attributeRoleSource === 'USER' && ATTRIBUTE_ROLE_VALUES.includes(saved.attributeRole)) {
+    [policy] = updatePolicyAttributeRole({ policies: [policy], columnIndex: 0, role: saved.attributeRole });
+  }
+  const action = saved.selectedAction;
+  // Old configs without an override flag still distinguish a changed final action from their recommendation.
+  const explicit = saved.userOverride === true
+    || (saved.userOverride == null && Boolean(saved.recommendedAction) && action !== saved.recommendedAction);
+  const sameType = saved.detectedType === policy.detectedType;
+  // Quick applies its default SHIFT offset without marking the field as a user override.
+  const quickOffset = sameType && action === 'SHIFT' && policy.selectedAction === action && saved.actionParams?.offsetValue != null;
+  if ((explicit || action != null) && !ACTION_VALUES.includes(action)) {
+    onIncompatible(policy.columnName);
+    return policy;
+  }
+  if (!explicit && !quickOffset) return policy;
+  const restored = withPolicyAction(policy, detection, action, explicit);
+  const oldDefaults = action === saved.recommendedAction ? saved.recommendedActionParams : null;
+  const previous = { ...defaultActionParams(action, saved.detectedType), ...oldDefaults };
+  const params = { ...restored.actionParams };
+  const savedParams = saved.actionParams ?? {};
+  // Apply settings that differed from the old defaults. Inferred prefixes, suffixes and other
+  // pattern evidence that belonged to the old table therefore come from the new recommendation.
+  for (const key of Object.keys(params)) {
+    if (!Object.hasOwn(savedParams, key)) continue;
+    if (action === 'SHIFT' || JSON.stringify(savedParams[key]) !== JSON.stringify(previous[key])) {
+      params[key] = savedParams[key];
+    }
+  }
+  const actionParams = normaliseActionParams({ action, detectedType: policy.detectedType, params });
+  if (action === 'SHIFT' && !sameType && !shiftFitsChangedType(policy.detectedType, actionParams, sampleValues)) {
+    onIncompatible(policy.columnName);
+    return policy;
+  }
+  return Object.freeze({ ...restored, actionParams });
 }
 
 const ACTION_LABELS = Object.freeze({

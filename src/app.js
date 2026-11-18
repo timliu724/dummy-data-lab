@@ -18,12 +18,13 @@ import { coverageNotice, renderCoverageSummary } from './ui/coverage-summary.js'
 import { delimiterFromControl, parseOptionsFromControls, parseIssueNotice, parseRecognitionAllowlist, requiresHeaderConfirmation, selectInputValue } from './ui/input-panel.js';
 import { createUiMessage, mergeUiMessage, renderMessages } from './ui/messages.js';
 import { summarizeGenerationWarnings, summarizeValidationIssues } from './ui/generation-feedback.js';
-import { resolveRequestedRowCount, sameAsInputModel } from './ui/output-settings.js';
+import { resolveRequestedRowCount, sameAsInputModel, syncAnalysedRowControls } from './ui/output-settings.js';
 import { renderParseSummary } from './ui/parse-summary.js';
 import {
   applyRecommendedPolicies,
   keepAllPolicies,
   renderPolicyTable,
+  restoreConfiguredPolicy,
   updatePolicyAction,
   updatePolicyActionParams,
   updatePolicyAttributeRole,
@@ -38,6 +39,7 @@ import {
   renderMappingGroupBuilder,
   renderRelationshipPanel,
   renderShiftGroupBuilder,
+  restoreConfiguredRelationships,
   setRelationshipEnabled,
 } from './ui/relationship-panel.js';
 import { transitionWorkflow } from './ui/workflow-state.js';
@@ -328,16 +330,6 @@ function sizePolicyForInput(input) {
 function currentRequestedRowCount() {
   const selected = document.querySelector('input[name="row-count"]:checked');
   return resolveRequestedRowCount({ preset: selected?.value, customValue: elements.customRowCount.value });
-}
-
-function syncSameAsInputControl() {
-  const model = sameAsInputModel(state.analysis?.parseResult?.rowCount ?? null);
-  elements.sameAsInputRows.disabled = !model.available;
-  elements.sameAsInputRows.textContent = model.label;
-  elements.sameAsInputRows.title = model.note;
-  elements.sameAsInputNote.textContent = model.note;
-  if (model.available) elements.customRowCount.value = String(model.rowCount);
-  return model;
 }
 
 function updateModeBoundary() {
@@ -1725,32 +1717,28 @@ function sourceConfigMatches(headers, sourceConfig) {
 
 function applyPendingSourceConfig() {
   const pending = state.pendingSourceConfig;
-  if (!pending || !state.analysis) return false;
+  if (!pending || !state.analysis) return null;
   if (!sourceConfigMatches(state.analysis.headers, pending)) {
-    addMessage('warning', 'The saved source-column rules were not applied because this table has different column names or order. Generated columns were still restored.', { scope: 'CONFIG_SOURCE' });
-    return false;
+    return 'The saved source-column rules were not applied because this table has different column names or order. Other configuration settings were loaded.';
   }
   const policiesCompatible = pending.policies.length === state.analysis.headers.length
     && pending.policies.every((policy, index) => policy?.columnName === state.analysis.headers[index]);
   if (!policiesCompatible) {
-    addMessage('warning', 'The saved source-column rules are incomplete for this table, so the current recommendations remain active.', { scope: 'CONFIG_SOURCE' });
-    return false;
+    return 'The saved source-column rules are incomplete for this table. The current field decisions remain active.';
   }
-  state.policies = pending.policies.map((policy, index) => Object.freeze({
-    ...state.analysis.policies[index],
-    ...policy,
-    attributeRole: policy.attributeRole ?? state.analysis.policies[index].attributeRole,
-    attributeRoleConfidence: policy.attributeRoleConfidence ?? state.analysis.policies[index].attributeRoleConfidence,
-    attributeRoleReason: policy.attributeRoleReason ?? state.analysis.policies[index].attributeRoleReason,
-    attributeRoleSource: policy.attributeRoleSource ?? state.analysis.policies[index].attributeRoleSource,
-    inferredAttributeRole: state.analysis.policies[index].inferredAttributeRole,
-    inferredAttributeRoleConfidence: state.analysis.policies[index].inferredAttributeRoleConfidence,
-    inferredAttributeRoleReason: state.analysis.policies[index].inferredAttributeRoleReason,
-  }));
-  state.relationships = [...pending.relationships];
+  const incompatible = [];
+  state.policies = state.analysis.policies.map((policy, index) => restoreConfiguredPolicy(
+    policy, state.analysis.detections[index], pending.policies[index], {
+      sampleValues: state.analysis.tableProfile.columns[index].sampleValues,
+      onIncompatible: (name) => incompatible.push(name),
+    },
+  ));
+  state.relationships = restoreConfiguredRelationships(state.analysis.relationshipProposals, pending.relationships, incompatible);
   state.pendingSourceConfig = null;
-  addMessage('success', 'Restored the saved source-column decisions after confirming an exact header match.', { scope: 'CONFIG_SOURCE' });
-  return true;
+  elements.reviewConfirm.checked = false;
+  return incompatible.length > 0
+    ? `Saved actions that do not fit this table were skipped for: ${incompatible.join(', ')}. Review the current recommendations.`
+    : null;
 }
 
 function exportConfiguration() {
@@ -1786,18 +1774,25 @@ function currentGenerationConfig() {
   });
 }
 
+let configReadRevision = 0;
 async function importConfiguration(file) {
   if (!file) return;
+  const revision = ++configReadRevision;
   try {
     if (file.size > 1_000_000) throw new RangeError('Configuration files must be 1 MB or smaller.');
-    const config = parseGenerationConfig(await file.text());
+    const text = await file.text();
+    if (revision !== configReadRevision) return;
+    const config = parseGenerationConfig(text);
     if (config.workflowKind !== state.workflowKind) setWorkflowKind(config.workflowKind);
     state.templateId = config.templateId;
     state.mode = config.mode;
     elements.modeSelect.value = config.mode;
     state.businessFidelity = config.businessFidelity;
     state.businessFidelitySettings = config.businessFidelitySettings;
-    setRequestedRowControls(config.requestedRowCount);
+    const inputRows = config.workflowKind === 'TRANSFORM' ? state.analysis?.parseResult.rowCount : null;
+    const useSourceCount = inputRows > 0
+      && businessFidelityModel(config.businessFidelity, config.businessFidelitySettings).requiresInputRowCount;
+    setRequestedRowControls(useSourceCount ? inputRows : config.requestedRowCount);
     state.pendingSourceConfig = config.workflowKind === 'TRANSFORM' ? config.source : null;
     if (state.workflowKind === 'SCRATCH') {
       state.scratchStructure = config.scratch?.structure ?? 'SINGLE';
@@ -1821,7 +1816,7 @@ async function importConfiguration(file) {
     focusLatestGeneratedGroup();
     syncOutputSchema();
     invalidateGeneratedResult();
-    applyPendingSourceConfig();
+    const sourceWarning = applyPendingSourceConfig();
     updateModeBoundary();
     renderBusinessFidelity();
     renderTemplatePicker();
@@ -1839,10 +1834,13 @@ async function importConfiguration(file) {
         ? 'related-table project'
         : 'standalone';
     addMessage('success', `Loaded a ${configKind} configuration created with ${config.appVersion}.`, { replace: true, scope: 'CONFIG_STATE' });
+    if (sourceWarning) addMessage('warning', sourceWarning, { scope: 'CONFIG_SOURCE' });
   } catch (error) {
-    addMessage('error', `Configuration not loaded: ${error.message}`, { replace: true, scope: 'CONFIG_STATE' });
+    if (revision === configReadRevision) {
+      addMessage('error', `Configuration not loaded: ${error.message}`, { replace: true, scope: 'CONFIG_STATE' });
+    }
   } finally {
-    elements.configFile.value = '';
+    if (revision === configReadRevision) elements.configFile.value = '';
   }
 }
 
@@ -2147,19 +2145,17 @@ async function analyse(inputOverride = null) {
     } else if ((recognitionSummary?.allowlistedValueCount ?? 0) > 0) {
       addMessage('info', `${recognitionSummary.allowlistedValueCount} in-memory PII allowlist value${recognitionSummary.allowlistedValueCount === 1 ? '' : 's'} were applied during recognition.`, { scope: 'PII_RECOGNITION' });
     }
-    applyPendingSourceConfig();
+    const sourceWarning = applyPendingSourceConfig();
     state.outputPlan = state.analysis.outputPlan;
     state.sourceOutputSchema = createSourceOutputSchema({
       headers: state.analysis.headers,
       detections: state.analysis.detections,
     });
     syncOutputSchema();
-    const exactStructure = businessFidelityModel(state.businessFidelity, state.businessFidelitySettings).requiresInputRowCount;
-    if (exactStructure) elements.customRowPreset.checked = true;
-    const inputCount = syncSameAsInputControl();
-    if (elements.customRowPreset.checked && inputCount.available) {
-      elements.customRowCount.disabled = false;
-      state.requestedRowCount = inputCount.rowCount;
+    const requiredRowCount = syncAnalysedRowControls(elements, state.analysis.parseResult.rowCount,
+      businessFidelityModel(state.businessFidelity, state.businessFidelitySettings));
+    if (requiredRowCount !== null && requiredRowCount !== state.requestedRowCount) {
+      state.requestedRowCount = requiredRowCount;
       state.outputPlan = state.usingWorker
         ? (await workerClient.replan({ requestedRowCount: state.requestedRowCount })).outputPlan
         : replanCoverage(state.analysis, state.requestedRowCount);
@@ -2172,6 +2168,7 @@ async function analyse(inputOverride = null) {
     renderBasicJourney();
     progress({ phase: 'READY', message: 'Analysis complete.', current: 1, total: 1 }, false);
     addMessage('success', `Analysis complete: ${state.analysis.parseResult.rowCount.toLocaleString()} input rows, ${state.analysis.headers.length} columns, ${state.analysis.extraction.scenarios.length} test scenarios.`, { replace: true });
+    if (sourceWarning) addMessage('warning', sourceWarning, { scope: 'CONFIG_SOURCE' });
     if (state.analysis.parseResult.headerDetection.autoFallback) {
       if (state.analysis.parseResult.headerDetection.decision === 'yes') {
         addMessage('warning', 'Header Auto-detect was uncertain, but the title evidence was stronger, so the first row was used as column names. If those values are actually data, choose No under Input options and analyse again.');
@@ -2862,6 +2859,9 @@ function quickInvalidateDraft(scratchDraft = null, { preserveGeneratedColumns = 
 }
 
 function quickStartAnother() {
+  configReadRevision += 1;
+  elements.configFile.value = '';
+  state.pendingSourceConfig = null;
   elements.recognitionAllowlist.value = '';
   elements.headerMode.value = 'auto';
   elements.delimiterMode.value = 'auto';

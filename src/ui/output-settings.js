@@ -23,6 +23,19 @@ export function sameAsInputModel(inputRowCount = null) {
   });
 }
 
+export function syncAnalysedRowControls(elements, inputRowCount, { requiresInputRowCount }) {
+  const model = sameAsInputModel(inputRowCount);
+  elements.sameAsInputRows.disabled = !model.available;
+  elements.sameAsInputRows.textContent = model.label;
+  elements.sameAsInputRows.title = model.note;
+  elements.sameAsInputNote.textContent = model.note;
+  if (!requiresInputRowCount || !model.available) return null;
+  elements.customRowPreset.checked = true;
+  elements.customRowCount.disabled = false;
+  elements.customRowCount.value = String(model.rowCount);
+  return model.rowCount;
+}
+
 export function selectedOutputModel(requestedRowCount, outputPlan = null) {
   return Object.freeze({
     requestedRowCount,

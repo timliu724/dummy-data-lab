@@ -16,6 +16,20 @@ export function setRelationshipEnabled(rules, index, enabled) {
     : rule));
 }
 
+export function restoreConfiguredRelationships(proposals, savedRules, incompatibleColumns = []) {
+  const compatible = savedRules.filter((rule) => Array.isArray(rule?.columnNames)
+    && !rule.columnNames.some((name) => incompatibleColumns.includes(name)));
+  const confirmed = new Map(compatible.filter((rule) => rule.source === 'DETECTED'
+    && (rule.confirmed || rule.status === 'CONFIRMED' || rule.enabled)).map((rule) => [rule.id, rule]));
+  const detected = proposals.map((proposal) => {
+    const saved = confirmed.get(proposal.id);
+    if (!saved || saved.kind !== proposal.kind || proposal.status === 'UNSUPPORTED') return proposal;
+    // Retain the user's decision on this proposal, using evidence and settings from the current table.
+    return Object.freeze({ ...proposal, enabled: saved.enabled, confirmed: true, status: 'CONFIRMED', reviewRequired: false });
+  });
+  return [...detected, ...compatible.filter((rule) => rule.source === 'USER')];
+}
+
 export function addShiftGroup(rules, configuration) {
   const rule = createShiftGroup(configuration);
   if (rules.some((existing) => existing.id === rule.id)) throw new RangeError('A relationship with this ID already exists.');

@@ -1,8 +1,8 @@
-# Dummy Data Lab V1.79 user guide
+# Dummy Data Lab V1.80 user guide
 
 ## Before you begin
 
-Download **Dummy-Data-Lab-v1.79.html** from the GitHub Release and verify its
+Download **Dummy-Data-Lab-v1.80.html** from the GitHub Release and verify its
 SHA-256 checksum before use. Open the file locally in a current Chrome or Edge
 browser. The application is self-contained and does not require a server,
 account, or runtime installation.
@@ -25,7 +25,7 @@ spreadsheet.
 2. Leave delimiter and header detection on Auto unless the preview is wrong.
 3. Select **Analyse locally**.
 4. Review the detected columns and recommended actions.
-5. Choose the output row count and business-pattern level.
+5. Choose the output row count and business-pattern level. Independent and Balanced retain your exact row count after reanalysis. Use **Same as input** to copy the current input count. High match uses the current input count automatically.
 6. Confirm any relationships you want the generator to preserve.
 7. Generate, inspect the preview and quality report, then export.
 
@@ -216,6 +216,8 @@ Changing **Ignore known test identifiers** now invalidates the previous analysis
 
 Configuration export/import saves settings, schemas, relationships, and project
 definitions. It does not embed source rows.
+
+For a source table, saved field rules require matching column names in the same order. The app checks the current values again to decide each field’s type, risk and recommended action. Compatible choices you explicitly saved still apply. Review any high-risk field set to **Keep source values**. If the headers differ, a warning tells you which part of the configuration was skipped. **Start another** clears pending rules.
 
 For recovery in the current tab, Dummy Data Lab uses sessionStorage for a
 source-free draft containing general settings and fictional Scratch schemas.
