@@ -1,9 +1,9 @@
-# Dummy Data Lab V1.80 user guide
+# Dummy Data Lab V1.81 user guide
 
 ## Before you begin
 
-Download **Dummy-Data-Lab-v1.80.html** from the GitHub Release and verify its
-SHA-256 checksum before use. Open the file locally in a current Chrome or Edge
+Download [Dummy-Data-Lab-v1.81.html](https://github.com/timliu724/dummy-data-lab/releases/download/v1.81/Dummy-Data-Lab-v1.81.html) and verify it against the
+[SHA-256 checksum](https://github.com/timliu724/dummy-data-lab/releases/download/v1.81/SHA256SUMS.txt) before use. Open the file locally in a current Chrome or Edge
 browser. The application is self-contained and does not require a server,
 account, or runtime installation.
 
@@ -21,10 +21,10 @@ from scratch.
 Use this workflow when you already have CSV, TSV, TXT, or cells copied from a
 spreadsheet.
 
-1. Select a file, paste cells from Excel, or choose **Try sample data**.
+1. Select a file, paste cells from Excel, or choose **Try sample data** beside **Add your source table** in Quick.
 2. Leave delimiter and header detection on Auto unless the preview is wrong.
 3. Select **Analyse locally**.
-4. Review the detected columns and recommended actions.
+4. Review the detected columns and recommended actions. Quick counts the columns included in your output. Choose the optional checks filter to inspect flagged fields, or generate when ready. If a setting blocks generation, follow the message to correct it.
 5. Choose the output row count and business-pattern level. Independent and Balanced retain your exact row count after reanalysis. Use **Same as input** to copy the current input count. High match uses the current input count automatically.
 6. Confirm any relationships you want the generator to preserve.
 7. Generate, inspect the preview and quality report, then export.

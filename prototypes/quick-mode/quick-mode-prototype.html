@@ -426,6 +426,7 @@
 
     .workbench-heading h2 { margin: 0; font-size: 1.55rem; }
     .workbench-heading small { color: var(--muted); }
+    .source-heading { justify-content: flex-start; flex-wrap: wrap; gap: 8px 16px; }
 
     .input-split {
       display: grid;
@@ -709,20 +710,6 @@
       cursor: pointer;
     }
 
-    .review-summary {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      margin-bottom: 18px;
-      border-top: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
-    }
-
-    .review-summary div { padding: 14px 16px; }
-    .review-summary div + div { border-left: 1px solid var(--line); }
-    .review-summary strong { display: block; font-size: 1.25rem; }
-    .review-summary small { color: var(--muted); }
-    .review-summary .needs-review strong { color: var(--orange-dark); }
-
     .review-toolbar, .preview-toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -839,23 +826,11 @@
     .column-inline-preview__result { color: var(--teal-dark); }
     .column-inline-preview__arrow { color: var(--orange-dark); font-weight: 900; }
     .column-inline-preview.is-unavailable .column-inline-preview__result { color: var(--muted); font-weight: 650; }
-    .status {
-      display: inline-flex;
-      gap: 7px;
-      align-items: center;
-      font-weight: 850;
-    }
-    .status::before {
-      content: "";
-      width: 12px;
-      height: 12px;
-      border: 2px solid currentColor;
-      border-radius: 50%;
-    }
-    .status--ready { color: var(--teal-dark); }
-    .status--review { color: var(--orange-dark); }
+    .column-main .status { grid-column: -3 / -2; color: var(--muted); font-size: .86rem; }
+    .column-main .status--required { color: var(--orange-dark); font-weight: 800; }
 
     .chevron {
+      grid-column: -2 / -1;
       width: 10px;
       height: 10px;
       border-right: 2px solid var(--muted);
@@ -903,7 +878,7 @@
       z-index: 12;
       bottom: 0;
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       gap: 18px;
       align-items: center;
       margin: 26px -10px -18px;
@@ -912,10 +887,9 @@
       background: rgba(255,254,250,.97);
     }
 
-    .review-note { margin: 0; color: var(--muted); font-size: .88rem; line-height: 1.4; }
-
     .readiness {
-      padding: 18px;
+      margin-bottom: 18px;
+      padding: 14px 16px;
       border: 1px solid #85b9b4;
       border-radius: var(--radius);
       background: var(--teal-soft);
@@ -924,6 +898,11 @@
 
     .readiness strong { display: block; font-size: 1.15rem; }
     .readiness small { display: block; margin-top: 4px; }
+    .readiness[data-warning="true"], .readiness[data-blocked="true"] {
+      border-color: #e1a08c;
+      background: var(--orange-soft);
+      color: var(--orange-dark);
+    }
 
     .result-summary {
       display: flex;
@@ -1152,9 +1131,9 @@
       .file-drop, .paste-zone { min-height: 230px; }
       .column-main { grid-template-columns: 1fr auto; gap: 7px 12px; padding: 14px 6px; }
       .column-main .action-name { grid-column: 1; }
-      .column-main .status { grid-column: 2; grid-row: 1 / span 2; }
+      .column-main .status { grid-column: 2; grid-row: 2; }
       .column-main .column-inline-preview { grid-column: 1 / -1; }
-      .column-main .chevron { grid-column: 2; grid-row: 3; }
+      .column-main .chevron { grid-column: 2; grid-row: 1; justify-self: end; }
       .column-details { grid-template-columns: 1fr; }
       .custom-column-row { grid-template-columns: 1fr; }
       .review-action { align-items: stretch; flex-direction: column; }
@@ -1172,8 +1151,6 @@
       .task-card { grid-template-columns: 1fr; }
       .task-icon { width: 48px; height: 48px; }
       .task-icon svg { width: 46px; height: 46px; }
-      .review-summary { grid-template-columns: 1fr; }
-      .review-summary div + div { border-top: 1px solid var(--line); border-left: 0; }
       .action-row { align-items: stretch; flex-direction: column-reverse; }
       .action-row .button { width: 100%; }
       .prototype-note { display: none; }
@@ -1236,7 +1213,10 @@
         </div>
 
         <section id="transform-workbench" class="workbench">
-          <div class="workbench-heading"><h2>Add your source table</h2><small>Choose your own data or start safely with a fictional sample.</small></div>
+          <div class="workbench-heading source-heading">
+            <h2>Add your source table</h2>
+            <button id="sample-data-button" class="button button--small button--sample" type="button">Try sample data</button>
+          </div>
           <div class="input-split">
             <label id="file-drop" class="file-drop">
               <input id="source-file" name="source_file" type="file" aria-label="Choose a CSV, TSV, or TXT file" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values,text/plain">
@@ -1260,7 +1240,6 @@
           </div>
           <div class="action-row">
             <span id="source-status" class="source-status" role="status" aria-live="polite" hidden></span>
-            <button id="sample-data-button" class="button button--sample" type="button">Try sample data</button>
             <button id="analyse-button" class="button button--primary" type="button">Analyse locally</button>
           </div>
         </section>
@@ -1284,16 +1263,12 @@
       </section>
 
       <section id="step-review" data-step-panel="review" hidden>
-        <div class="review-summary" role="status" aria-label="Analysis summary">
-          <div><strong id="review-total">28</strong><small>columns found</small></div>
-          <div><strong id="review-ready">25</strong><small>ready</small></div>
-          <div class="needs-review"><strong id="review-needed">3</strong><small>suggested review</small></div>
-        </div>
+        <div id="readiness" class="readiness" role="status" aria-live="polite"><strong></strong><small hidden></small></div>
         <div class="review-toolbar">
           <label class="search-control"><input id="column-search" name="column_search" type="search" autocomplete="off" aria-label="Search columns" placeholder="Find a column…"></label>
           <div class="segmented-control" role="group" aria-label="Column status filter">
             <button type="button" data-filter="all" aria-pressed="true">All 28</button>
-            <button type="button" data-filter="review" aria-pressed="false">Suggested review 3</button>
+            <button type="button" data-filter="review" aria-pressed="false">3 optional checks</button>
           </div>
         </div>
         <div id="column-list" class="column-list" aria-live="polite"></div>
@@ -1305,7 +1280,6 @@
           </div>
         </div>
         <div class="review-action">
-          <p id="review-confirmation-line" class="review-note"><span id="review-confirmation-label">Suggested reviews are highlighted. Generation is ready.</span></p>
           <button id="generate-button" class="button button--primary" type="button" disabled>Generate test data</button>
         </div>
       </section>
@@ -1355,12 +1329,10 @@
           <h2>Quick settings</h2>
           <dl class="setting-list">
             <div class="setting-row"><dt>Rows</dt><dd><select id="quick-row-count" name="output_rows" aria-label="Output rows"><option value="50">50</option><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option><option value="1000">1,000</option></select></dd></div>
-            <div class="setting-row"><dt>Columns</dt><dd id="quick-review-column-count">After analysis</dd></div>
             <div class="setting-row"><dt>Export</dt><dd>CSV</dd></div>
           </dl>
           <div class="trust-message"><span class="assurance-mark" aria-hidden="true"></span><span>Recommended protection is active.</span></div>
         </section>
-        <section class="sidebar-section"><div id="readiness" class="readiness" role="status" aria-live="polite"><strong>Ready to generate</strong><small>3 suggested reviews are highlighted.</small></div></section>
       </div>
 
       <div id="sidebar-download" hidden>
@@ -1510,8 +1482,22 @@
       droppedColumns: new Set()
     };
 
-    function activeReviewCount() {
-      return activeDefinitions.filter(function(definition) { return definition[3] === 'review'; }).length;
+    function updateReviewReadiness() {
+      const included = outputColumnIndexes();
+      const optionalCount = included.filter(function(index) { return activeDefinitions[index][3] === 'review'; }).length;
+      if (!optionalCount) state.filter = 'all';
+      document.querySelectorAll('[data-filter]').forEach(function(button) {
+        const isAll = button.dataset.filter === 'all';
+        button.setAttribute('aria-pressed', String(button.dataset.filter === state.filter));
+        button.hidden = !isAll && !optionalCount;
+        button.textContent = isAll ? 'All ' + activeDefinitions.length : optionalCount + ' optional check' + (optionalCount === 1 ? '' : 's');
+      });
+      const readiness = document.querySelector('#readiness');
+      const blocked = included.length === 0;
+      readiness.dataset.blocked = String(blocked);
+      readiness.querySelector('strong').textContent = blocked ? 'Keep at least one column'
+        : included.length + (included.length === 1 ? ' column' : ' columns') + ' ready to generate';
+      document.querySelector('#generate-button').disabled = blocked;
     }
 
     function prepareActiveData() {
@@ -1523,42 +1509,18 @@
         activePreviewRows = previewRows;
       }
 
-      const reviewCount = activeReviewCount();
-      const readyCount = activeDefinitions.length - reviewCount;
-      const firstReview = activeDefinitions.findIndex(function(definition) { return definition[3] === 'review'; });
       state.page = 0;
       state.filter = 'all';
       state.search = '';
-      state.openColumn = firstReview;
+      state.openColumn = -1;
       state.hiddenColumns.clear();
       state.columnActions.clear();
       state.droppedColumns.clear();
 
       document.querySelector('#column-search').value = '';
-      document.querySelectorAll('[data-filter]').forEach(function(button) {
-        const isAll = button.dataset.filter === 'all';
-        button.setAttribute('aria-pressed', String(isAll));
-        button.textContent = isAll ? 'All ' + activeDefinitions.length : 'Suggested review ' + reviewCount;
-      });
-      document.querySelector('#review-total').textContent = String(activeDefinitions.length);
-      document.querySelector('#quick-review-column-count').textContent = String(activeDefinitions.length);
-      document.querySelector('#review-ready').textContent = String(readyCount);
-      document.querySelector('#review-needed').textContent = String(reviewCount);
+      updateReviewReadiness();
       document.querySelector('#result-column-count').textContent = String(activeDefinitions.length);
       document.querySelector('#quick-row-count').value = String(state.outputRows);
-
-      const confirmationLine = document.querySelector('#review-confirmation-line');
-      confirmationLine.hidden = reviewCount === 0;
-      document.querySelector('#generate-button').disabled = false;
-      document.querySelector('#review-confirmation-label').textContent = reviewCount === 1
-        ? '1 suggested review is highlighted. Generation is ready.'
-        : reviewCount + ' suggested reviews are highlighted. Generation is ready.';
-
-      const readiness = document.querySelector('#readiness');
-      readiness.querySelector('strong').textContent = 'Ready to generate';
-      readiness.querySelector('small').textContent = reviewCount
-        ? reviewCount + ' suggested review' + (reviewCount === 1 ? ' is' : 's are') + ' highlighted.'
-        : 'All six template fields have clear defaults.';
 
       const reviewItem = document.querySelector('#quality-review-item');
       const reviewDefinitions = activeDefinitions.filter(function(definition) { return definition[3] === 'review'; });
@@ -1777,7 +1739,7 @@
 
     function filteredColumns() {
       return activeDefinitions.map(function(item, index) { return { item: item, index: index }; }).filter(function(entry) {
-        const matchesFilter = state.filter === 'all' || entry.item[3] === 'review';
+        const matchesFilter = state.filter === 'all' || (entry.item[3] === 'review' && !state.droppedColumns.has(entry.index));
         const haystack = entry.item.join(' ').toLowerCase();
         return matchesFilter && haystack.includes(state.search.toLowerCase());
       });
@@ -1806,7 +1768,7 @@
         button.innerHTML =
           '<span class="column-name"><strong>' + data[0] + '</strong><small>' + data[1] + '</small></span>' +
           '<span class="action-name">' + currentAction + '</span>' +
-          '<span class="status status--' + data[3] + '">' + (data[3] === 'review' ? 'Review' : 'Ready') + '</span>' +
+          (data[3] === 'review' && !state.droppedColumns.has(entry.index) ? '<span class="status">Optional check</span>' : '') +
           '<span class="chevron" aria-hidden="true"></span>';
         button.addEventListener('click', function() {
           state.openColumn = state.openColumn === entry.index ? -1 : entry.index;
@@ -1819,11 +1781,8 @@
         if (state.openColumn === entry.index) {
           const details = document.createElement('div');
           details.className = 'column-details';
-          const reviewCopy = data[3] === 'review'
-            ? 'Quick found a pattern that deserves a human check before generation.'
-            : 'The recommended action is ready. Change it only if your test needs differ.';
           details.innerHTML =
-            '<p><strong>' + (data[3] === 'review' ? 'Review this recommendation' : 'Recommendation ready') + '</strong><small>' + reviewCopy + '</small></p>';
+            '<p><strong>Recommended action</strong><small>' + data[2] + '</small></p>';
           const actionLabel = document.createElement('label');
           const actionSelect = document.createElement('select');
           actionSelect.setAttribute('aria-label', 'Action for ' + data[0]);
@@ -1838,6 +1797,7 @@
           actionSelect.addEventListener('change', function() {
             state.columnActions.set(entry.index, actionSelect.value);
             if (actionSelect.value === 'Drop') state.droppedColumns.add(entry.index); else state.droppedColumns.delete(entry.index);
+            updateReviewReadiness();
             document.querySelector('#result-column-count').textContent = String(outputColumnIndexes().length);
             renderColumnList();
             const restoredSelect = document.querySelector('.column-details select[data-column-index="' + entry.index + '"]');

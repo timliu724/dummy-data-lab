@@ -1,14 +1,14 @@
-# V1.80 offline security audit
+# V1.81 offline security audit
 
 ## Artifact
 
 | Property | Value |
 | --- | --- |
-| Public filename | `Dummy-Data-Lab-v1.80.html` |
-| Size | `1,032,596 bytes` |
-| SHA-256 | `bdc8a58b94f40bef1cc094b9e5c4ec5b451e49c8e559ee8f5b99ef24bf0101cb` |
+| Public filename | `Dummy-Data-Lab-v1.81.html` |
+| Size | `1,030,403 bytes` |
+| SHA-256 | `393727aaf0a2f4be66c747bd78c5f0626bfb02312c6613de9ea36f81e7e53f6a` |
 
-The root application and release asset are byte-for-byte copies of the verified V1.80 build.
+All 18 packaging checks passed on the standalone HTML identified above.
 
 ## Static checks
 

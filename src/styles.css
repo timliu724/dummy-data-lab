@@ -1991,6 +1991,27 @@ body[data-interface-mode="ADVANCED"] .dataset-workspace {
   background: var(--advanced-surface-muted);
 }
 
+body[data-interface-mode="ADVANCED"][data-workflow-kind="SCRATCH"] .field-library__search label,
+body[data-interface-mode="ADVANCED"][data-workflow-kind="SCRATCH"] .generator-chip { font-size: .875rem; }
+body[data-interface-mode="ADVANCED"][data-workflow-kind="SCRATCH"] .generator-chip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  align-content: center;
+  justify-content: center;
+  column-gap: 4px;
+  max-width: 100%;
+  min-height: 32px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+body[data-interface-mode="ADVANCED"][data-workflow-kind="SCRATCH"] .generator-chip small { margin-left: 0; font-size: .75rem; }
+body[data-interface-mode="ADVANCED"][data-workflow-kind="SCRATCH"] .template-card small {
+  overflow: visible;
+  font-size: .75rem;
+  white-space: normal;
+}
+
 body[data-interface-mode="ADVANCED"] .generated-column-group,
 body[data-interface-mode="ADVANCED"] .policy-card,
 body[data-interface-mode="ADVANCED"] .relationship-card {

@@ -2516,9 +2516,11 @@ function quickBlockers() {
     for (const entry of currentUnconfiguredShifts()) {
       const ambiguousDate = entry.detectedType === 'AMBIGUOUS_DATE';
       blockers.push(Object.freeze(ambiguousDate ? {
+        columnIndex: entry.columnIndex,
         title: 'Confirm the date order for ' + entry.columnName,
         recovery: 'Open ' + entry.columnName + ' and choose DD/MM/YYYY or MM/DD/YYYY.',
       } : {
+        columnIndex: entry.columnIndex,
         title: 'Set an offset for ' + entry.columnName,
         recovery: 'Open ' + entry.columnName + ' and enter one explicit non-zero offset.',
       }));
@@ -2591,15 +2593,18 @@ function quickReviewPreview(task) {
 
 function quickSurfaceSnapshot() {
   const task = state.workflowKind === 'SCRATCH' ? 'scratch' : 'transform';
+  const blockers = quickBlockers();
+  const requiredColumns = new Set(blockers.map((blocker) => blocker.columnIndex).filter(Number.isInteger));
   const columns = task === 'transform'
-    ? state.policies.map((policy) => Object.freeze({
+    ? state.policies.map((policy, index) => Object.freeze({
         task,
         name: policy.columnName,
         detectedType: String(policy.detectedType ?? 'UNKNOWN').replaceAll('_', ' '),
         detectedTypeKey: String(policy.detectedType ?? 'UNKNOWN'),
         selectedAction: policy.selectedAction,
         recommendedAction: policy.recommendedAction,
-        reviewRequired: Boolean(policy.reviewRequired),
+        needsInput: requiredColumns.has(index),
+        optionalCheck: policy.reviewRequired && policy.selectedAction !== 'DROP' && !requiredColumns.has(index),
         reason: policy.reason ?? '',
         actionParams: Object.freeze({ ...(policy.actionParams ?? {}) }),
         shiftKind: policy.actionParams?.shiftKind ?? null,
@@ -2612,7 +2617,8 @@ function quickSurfaceSnapshot() {
         detectedTypeKey: String(column.generatorType ?? 'GENERATED_FIELD').toUpperCase().replaceAll('-', '_'),
         selectedAction: column.enabled === false ? 'DROP' : 'GENERATE',
         recommendedAction: 'GENERATE',
-        reviewRequired: false,
+        needsInput: false,
+        optionalCheck: false,
         reason: 'Generated from the ' + (column.blockLabel ?? 'selected') + ' production template.',
         actionParams: Object.freeze({}),
         shiftKind: null,
@@ -2634,7 +2640,7 @@ function quickSurfaceSnapshot() {
     sourceDraft: { file: elements.fileInput.files?.[0] ?? null, pastedText: elements.pasteInput.value, sourcePreference: state.inputSourcePreference },
     scratchColumns: task === 'scratch' ? state.generatedColumns : null,
     variation: generationVariationModel(columns),
-    blockers: quickBlockers(),
+    blockers,
     inputNotice: task === 'transform' ? parseIssueNotice(state.analysis?.parseResult) : null,
     reviewPreview: quickReviewPreview(task),
     requestedRowCount: state.requestedRowCount,

@@ -1,8 +1,8 @@
-# Dummy Data Lab V1.80
+# Dummy Data Lab V1.81
 
-- Loading a saved configuration now reviews each field against the current table. If a field that used to contain yes/no values now contains email addresses, the app recommends replacing them. An explicit choice to keep the addresses carries over with a high-risk notice.
-- **Start another** clears field rules waiting for a matching table, including a configuration file still being read.
-- When column names or their order differ, the app tells you it skipped the saved field rules. Other settings still load.
-- **Independent** and **Balanced** keep your exact output row count after you change the identifier exception list and analyse again. **High match** follows the current input row count, including when you load a saved configuration.
+- Quick shows how many output columns are ready to generate. Use the optional checks filter to inspect individual fields. If a setting blocks generation, Quick explains how to fix it.
+- **Try sample data** now appears beside **Add your source table**. You can inspect the sample before choosing **Analyse locally**.
+- On the homepage, **Try it online** opens the standalone tool when the browser is 820 CSS pixels wide or narrower. Wider windows open the embedded tool.
+- In Advanced, quick-add field names, categories and template descriptions are easier to read. The field buttons wrap to fit narrow screens.
 
-[Download the offline HTML](https://github.com/timliu724/dummy-data-lab/releases/download/v1.80/Dummy-Data-Lab-v1.80.html) · [Download the SHA-256 checksum](https://github.com/timliu724/dummy-data-lab/releases/download/v1.80/SHA256SUMS.txt)
+[Download the offline HTML](https://github.com/timliu724/dummy-data-lab/releases/download/v1.81/Dummy-Data-Lab-v1.81.html) · [Download the SHA-256 checksum](https://github.com/timliu724/dummy-data-lab/releases/download/v1.81/SHA256SUMS.txt)

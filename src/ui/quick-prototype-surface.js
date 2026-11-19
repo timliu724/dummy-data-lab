@@ -44,14 +44,13 @@ const EXTRA_CSS = [
   '.action-chooser summary { cursor: pointer; color: var(--teal-dark); font-weight: 800; text-align: right; }',
   '.action-chooser select { width: 100%; margin-top: 9px; }',
   '.journey-header h1[tabindex="-1"]:focus { outline: none; }',
-  '.readiness[data-blocked="true"] { border-color: #e1a08c; background: var(--orange-soft); color: var(--orange-dark); }',
   '.quick-root [aria-busy="true"] { cursor: wait; }',
   '.quick-root button[aria-busy="true"]::after { content: ""; display: inline-block; width: .78em; height: .78em; margin-left: .6em; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; vertical-align: -.08em; animation: quick-busy-spin .7s linear infinite; }',
   '@keyframes quick-busy-spin { to { transform: rotate(360deg); } }',
   '.generation-variation { margin: 12px 0 0; color: var(--muted); font-size: .82rem; line-height: 1.45; }',
   '.generation-variation[data-kind="repeatable"] { color: var(--orange-dark); }',
   '.setting-list, .setting-row, .setting-row select { font-family: var(--font-ui); }',
-  '.column-inline-preview__source, .column-inline-preview__result, .preview-table th, .preview-table td, .review-summary strong, .result-summary strong, .setting-row dd, .step-number, .preview-caption { font-family: var(--font-numeric); font-variant-numeric: lining-nums tabular-nums; font-feature-settings: "onum" 0, "lnum" 1, "tnum" 1; }',
+  '.column-inline-preview__source, .column-inline-preview__result, .preview-table th, .preview-table td, .readiness strong, .result-summary strong, .setting-row dd, .step-number, .preview-caption { font-family: var(--font-numeric); font-variant-numeric: lining-nums tabular-nums; font-feature-settings: "onum" 0, "lnum" 1, "tnum" 1; }',
   '.result-summary strong { font: 800 2rem/1 var(--font-ui); }',
   '.preview-cell-value, .preview-heading-value { display: block; min-width: 0; overflow: hidden; white-space: nowrap; }',
   '.preview-cell-value.is-truncated, .preview-heading-value.is-truncated { cursor: help; }',
@@ -113,7 +112,6 @@ export function mountQuickPrototypeSurface(host, handlers) {
   skipLink.href = '#quick-main';
   root.prepend(skipLink);
   query('.app-shell')?.setAttribute('id', 'quick-main');
-  query('.workbench-heading small').textContent = 'Analysed locally in this browser.';
   query('#file-help').textContent = 'Choose a local file. Its contents are never uploaded.';
   pasteInput.placeholder = 'Paste cells from Excel or another spreadsheet…';
   query('#download-button').textContent = 'Download CSV';
@@ -124,7 +122,7 @@ export function mountQuickPrototypeSurface(host, handlers) {
   query('.result-secondary-actions').prepend(regenerateButton);
   const reviewVariation = textElement(documentRef, 'p', '', 'generation-variation');
   reviewVariation.id = 'review-variation';
-  query('#readiness').after(reviewVariation);
+  query('#sidebar-review .trust-message').after(reviewVariation);
   const resultVariation = textElement(documentRef, 'p', '', 'generation-variation');
   resultVariation.id = 'result-variation';
   query('#sidebar-download .boundary-note').before(resultVariation);
@@ -416,40 +414,30 @@ export function mountQuickPrototypeSurface(host, handlers) {
       button.disabled = false;
     }
   }
-  function filteredColumns() {
-    const columns = view.snapshot?.columns ?? [];
+  function filteredColumns(columns = view.snapshot?.columns ?? []) {
     const needle = view.search.trim().toLocaleLowerCase();
     return columns.map((column, index) => ({ column, index })).filter(({ column }) => {
-      const matchesFilter = view.filter === 'all' || column.reviewRequired;
+      const matchesFilter = view.filter === 'all' || column.optionalCheck;
       const matchesSearch = !needle || [column.name, column.detectedType, column.selectedAction, column.reason]
         .some((value) => String(value ?? '').toLocaleLowerCase().includes(needle));
       return matchesFilter && matchesSearch;
     });
   }
-  function reviewCount() {
-    return (view.snapshot?.columns ?? []).filter((column) => column.reviewRequired).length;
-  }
-  function updateReadiness() {
-    const count = reviewCount();
+  function updateReadiness(columns) {
     const blocker = view.snapshot?.blockers?.[0] ?? null;
+    const inputNotice = view.snapshot?.inputNotice;
     const generateButton = query('#generate-button');
     const readiness = query('#readiness');
     generateButton.disabled = Boolean(blocker);
     readiness.dataset.blocked = String(Boolean(blocker));
-    if (blocker) {
-      readiness.querySelector('strong').textContent = blocker.title;
-      readiness.querySelector('small').textContent = blocker.recovery;
-    } else if (view.snapshot?.inputNotice) {
-      readiness.querySelector('strong').textContent = view.snapshot.inputNotice.title;
-      readiness.querySelector('small').textContent = view.snapshot.inputNotice.recovery;
-    } else if (count > 0) {
-      readiness.querySelector('strong').textContent = 'Ready to generate';
-      readiness.querySelector('small').textContent = count + ' suggested review' + (count === 1 ? ' is' : 's are')
-        + ' highlighted. Generation is ready.';
-    } else {
-      readiness.querySelector('strong').textContent = 'Ready to generate';
-      readiness.querySelector('small').textContent = 'Your Quick choices are complete.';
-    }
+    readiness.dataset.warning = String(Boolean(inputNotice));
+    const outputCount = columns.filter((column) => column.selectedAction !== 'DROP').length;
+    readiness.querySelector('strong').textContent = blocker?.title
+      ?? (outputCount + (outputCount === 1 ? ' column' : ' columns') + ' ready to generate');
+    const detail = readiness.querySelector('small');
+    detail.textContent = [blocker?.recovery, inputNotice?.recovery]
+      .filter((message, index, messages) => message && messages.indexOf(message) === index).join(' ');
+    detail.hidden = !detail.textContent;
     const variation = view.snapshot?.variation;
     reviewVariation.hidden = !variation?.text;
     reviewVariation.dataset.kind = variation?.kind ?? '';
@@ -457,25 +445,20 @@ export function mountQuickPrototypeSurface(host, handlers) {
   }
   function renderReviewSummary(resetView = false) {
     const columns = view.snapshot?.columns ?? [];
-    const count = reviewCount();
+    const count = columns.filter((column) => column.optionalCheck).length;
     if (resetView) {
       view.page = 0; view.filter = 'all'; view.search = '';
-      view.openColumn = columns.findIndex((column) => column.reviewRequired);
+      view.openColumn = columns.findIndex((column) => column.needsInput);
+      if (view.openColumn >= 0) view.page = Math.floor(view.openColumn / view.pageSize);
       query('#column-search').value = '';
     }
-    query('#review-total').textContent = String(columns.length);
-    query('#quick-review-column-count').textContent = String(columns.length);
-    query('#review-ready').textContent = String(columns.length - count);
-    query('#review-needed').textContent = String(count);
+    if (!count) view.filter = 'all';
     queryAll('[data-filter]').forEach((button) => {
       const all = button.dataset.filter === 'all';
       button.setAttribute('aria-pressed', String(button.dataset.filter === view.filter));
-      button.textContent = all ? 'All ' + columns.length : 'Suggested review ' + count;
+      button.hidden = !all && !count;
+      button.textContent = all ? 'All ' + columns.length : count + (count === 1 ? ' optional check' : ' optional checks');
     });
-    query('#review-confirmation-line').hidden = count === 0 || Boolean(view.snapshot?.blockers?.length);
-    query('#review-confirmation-label').textContent = count === 1
-      ? '1 suggested review is highlighted. Generation is ready.'
-      : count + ' suggested reviews are highlighted. Generation is ready.';
     const rowCount = String(view.snapshot?.requestedRowCount ?? 200);
     const rowSelect = query('#quick-row-count');
     rowSelect.querySelector('[data-current-row-count]')?.remove();
@@ -489,7 +472,25 @@ export function mountQuickPrototypeSurface(host, handlers) {
     rowSelect.disabled = view.snapshot?.rowCountLocked === true;
     rowSelect.title = rowSelect.disabled ? 'High match uses the source row count.' : '';
     updateStepAvailability();
-    updateReadiness();
+    updateReadiness(columns);
+  }
+  function applyEditedColumn(snapshot, index, controlSelector) {
+    if (!snapshot) return;
+    const reveal = view.filter === 'review' && view.openColumn === index && snapshot.columns[index]?.needsInput;
+    if (reveal) {
+      view.filter = 'all';
+      let position = filteredColumns(snapshot.columns).findIndex((entry) => entry.index === index);
+      if (position < 0) {
+        view.search = '';
+        query('#column-search').value = '';
+        position = index;
+      }
+      view.page = Math.floor(position / view.pageSize);
+    }
+    applySnapshot(snapshot);
+    if (reveal || controlSelector === '.column-main') {
+      query('.column-row.is-open ' + controlSelector)?.focus();
+    }
   }
   function addShiftControls(details, column, index) {
     if (column.selectedAction !== 'SHIFT') return;
@@ -515,7 +516,7 @@ export function mountQuickPrototypeSurface(host, handlers) {
     input.setAttribute('aria-label', 'Fixed offset for ' + column.name);
     input.addEventListener('change', async () => {
       const next = await handlers.changeColumnParams?.(index, { offsetMode: 'FIXED', offsetValue: input.value });
-      if (next) { view.snapshot = next; renderReview(false); }
+      applyEditedColumn(next, index, '.column-parameter input');
     });
     parameter.append(copy, input);
     details.append(parameter);
@@ -536,7 +537,7 @@ export function mountQuickPrototypeSurface(host, handlers) {
       });
       orientation.addEventListener('change', async () => {
         const next = await handlers.changeColumnParams?.(index, { dateOrientation: orientation.value || null });
-        if (next) { view.snapshot = next; renderReview(false); }
+        applyEditedColumn(next, index, '.column-parameter select');
       });
       orientationLabel.append(orientationCopy, orientation);
       details.append(orientationLabel);
@@ -584,9 +585,10 @@ export function mountQuickPrototypeSurface(host, handlers) {
         name,
         textElement(documentRef, 'span', labelForAction(column.selectedAction), 'action-name'),
         inlinePreview,
-        textElement(documentRef, 'span', column.reviewRequired ? 'Review' : 'Ready', 'status status--' + (column.reviewRequired ? 'review' : 'ready')),
-        textElement(documentRef, 'span', '', 'chevron'),
       );
+      if (column.needsInput) button.append(textElement(documentRef, 'span', 'Needs input', 'status status--required'));
+      else if (column.optionalCheck) button.append(textElement(documentRef, 'span', 'Optional check', 'status'));
+      button.append(textElement(documentRef, 'span', '', 'chevron'));
       button.lastElementChild.setAttribute('aria-hidden', 'true');
       button.addEventListener('click', () => {
         view.openColumn = view.openColumn === index ? -1 : index;
@@ -599,10 +601,8 @@ export function mountQuickPrototypeSurface(host, handlers) {
         details.className = 'column-details';
         const copy = documentRef.createElement('p');
         copy.append(
-          textElement(documentRef, 'strong', column.reviewRequired ? 'Review this recommendation' : 'Recommendation ready'),
-          textElement(documentRef, 'small', column.reason || (column.reviewRequired
-            ? 'Quick found a pattern that deserves a human check before generation.'
-            : 'The production recommendation is ready. Change it only when your test needs differ.')),
+          textElement(documentRef, 'strong', 'Recommended action'),
+          textElement(documentRef, 'small', column.reason || labelForAction(column.recommendedAction)),
         );
         const actionChooser = documentRef.createElement('details');
         actionChooser.className = 'action-chooser';
@@ -618,11 +618,7 @@ export function mountQuickPrototypeSurface(host, handlers) {
         });
         select.addEventListener('change', async () => {
           const next = await handlers.changeColumnAction?.(index, select.value);
-          if (next) {
-            applySnapshot(next); view.openColumn = index;
-            renderReview(false);
-            query('.column-main[data-column-index="' + index + '"]')?.focus();
-          }
+          applyEditedColumn(next, index, '.column-main');
         });
         actionChooser.append(select);
         details.append(copy, actionChooser);
@@ -934,9 +930,6 @@ export function mountQuickPrototypeSurface(host, handlers) {
     view.hiddenColumns.clear();
     applySnapshot(snapshot, true);
     setStep('review');
-    if (snapshot.blockers?.length) showNotice(snapshot.blockers[0].recovery, 'error');
-    else if (snapshot.inputNotice) showNotice(snapshot.inputNotice.recovery);
-    else showNotice('Analysis complete. Check the highlighted columns.', 'success');
   });
   query('#scratch-review-button').addEventListener('click', async (event) => {
     const snapshot = await runBusy(
@@ -948,7 +941,6 @@ export function mountQuickPrototypeSurface(host, handlers) {
     view.hiddenColumns.clear();
     applySnapshot(snapshot, true);
     setStep('review');
-    showNotice('The production template is ready to generate.', 'success');
   });
   query('#column-search').addEventListener('input', (event) => {
     view.search = event.target.value; view.page = 0; renderColumnList();

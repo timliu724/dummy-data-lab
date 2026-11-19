@@ -2,7 +2,7 @@
 
 **Turn existing CSV, TSV, or delimited TXT data into controlled dummy datasets—or generate new test data—in one offline HTML file.**
 
-[**Use Dummy Data Lab online**](https://timliu724.github.io/dummy-data-lab/) · [**Download Dummy Data Lab V1.80**](https://github.com/timliu724/dummy-data-lab/releases/download/v1.80/Dummy-Data-Lab-v1.80.html)
+[**Use Dummy Data Lab online**](https://timliu724.github.io/dummy-data-lab/) · [**Download Dummy Data Lab V1.81**](https://github.com/timliu724/dummy-data-lab/releases/download/v1.81/Dummy-Data-Lab-v1.81.html) · [SHA-256 checksum](https://github.com/timliu724/dummy-data-lab/releases/download/v1.81/SHA256SUMS.txt)
 
 **No installation · No data upload · Runs locally in current Chrome or Edge**
 
@@ -12,13 +12,13 @@ The online version is served by GitHub Pages; source data is still processed loc
 
 ![Dummy Data Lab Quick mode demo: load fictional sample data, analyse it locally, and generate downloadable test data](docs/assets/dummy-data-lab-demo-v1.74-focused.gif)
 
-## V1.80 update
+## V1.81 update
 
-Saved field rules now use the current table’s types and risk notices. You’ll see when rules are skipped, and starting a new task clears pending rules. Independent and Balanced keep your chosen row count after reanalysis. [Read the release notes](docs/RELEASE_NOTES.md).
+Quick shows how many columns are ready to generate and lets you filter optional checks. Find **Try sample data** beside **Add your source table**. On narrow screens, **Try it online** opens the tool full-page. Advanced uses larger labels for quick-add fields and templates. [Read the release notes](docs/RELEASE_NOTES.md).
 
 ## Quick start
 
-1. Open the [online version](https://timliu724.github.io/dummy-data-lab/), or download `Dummy-Data-Lab-v1.80.html` for offline use.
+1. Open the [online version](https://timliu724.github.io/dummy-data-lab/), or download `Dummy-Data-Lab-v1.81.html` for offline use.
 2. If downloaded, open the HTML file in Chrome or Edge.
 3. Choose **Quick** for an existing table or a new single table, or **Advanced** for detailed controls and related tables.
 4. Upload or paste data, or select **Try sample data**, then choose **Analyse locally**.
@@ -81,7 +81,7 @@ Sample files are available in [`demo/`](demo/).
 - [Security and Privacy](docs/SECURITY_PRIVACY.md)
 - [Known Limitations](docs/KNOWN_LIMITATIONS.md)
 - [Release Notes](docs/RELEASE_NOTES.md)
-- [V1.80 Release Verification](docs/V1.80_RELEASE_VERIFICATION.md)
+- [V1.81 Release Verification](docs/V1.81_RELEASE_VERIFICATION.md)
 - [Offline Security Audit](docs/OFFLINE_SECURITY_AUDIT.md)
 - [Changelog](CHANGELOG.md)
 - [Third-party Licenses](docs/THIRD_PARTY_LICENSES.md)

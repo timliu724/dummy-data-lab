@@ -2,6 +2,13 @@
 
 This is a user-facing summary of product evolution.
 
+## V1.81
+
+- Quick shows how many output columns are ready to generate. Use the optional checks filter to inspect individual fields. If a setting blocks generation, Quick explains how to fix it.
+- **Try sample data** now appears beside **Add your source table**. You can inspect the sample before choosing **Analyse locally**.
+- On the homepage, **Try it online** opens the standalone tool when the browser is 820 CSS pixels wide or narrower. Wider windows open the embedded tool.
+- In Advanced, quick-add field names, categories and template descriptions are easier to read. The field buttons wrap to fit narrow screens.
+
 ## V1.80
 
 - Loading a saved configuration now reviews each field against the current table. If a field that used to contain yes/no values now contains email addresses, the app recommends replacing them. An explicit choice to keep the addresses carries over with a high-risk notice.

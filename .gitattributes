@@ -1,2 +1,7 @@
 /Dummy-Data-Lab-v*.html binary
 /release/Dummy-Data-Lab-v*.html binary
+
+# The standalone build embeds these files verbatim.
+/src/index.html text eol=lf
+/prototypes/quick-mode/quick-mode-prototype.html text eol=lf
+/src/styles.css -text
